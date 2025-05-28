@@ -1,0 +1,17 @@
+# render.yaml
+services:
+  - type: web
+    name: multiplayer-card-game
+    env: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: multiplayer-db
+          property: connectionString
+      - key: REDIS_URL
+        fromDatabase:
+          name: multiplayer-redis
+          property: connectionString
