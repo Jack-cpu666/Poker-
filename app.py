@@ -934,75 +934,27 @@ class AdvancedPokerGame:
                      pass # Covered by player.current_bet check mostly
 
 
+# ... previous code in advance_game_flow ...
         if action_is_closed:
-            # Check if everyone who needed to act on the current_bet_to_match has acted.
-            # This requires knowing who made the last raise. Action goes around to them.
-            # This part is complex. For now, if action_is_closed is true, assume round is over.
-            # A more robust check: if all active players (not folded, not all-in) have EITHER
-            # (player.current_bet == room.current_bet_to_match) OR (player.last_action was the one setting current_bet_to_match)
-            # No, this is simpler: if all active players have acted and their current_bet matches the room's current_bet_to_match (or they are all-in)
+            # ... (content of if action_is_closed is true) ...
+            num_can_still_act = 0
+            num_bets_not_matching = 0
+            for p_id_chk in room._player_order_for_hand:
+                p_chk = room.players[p_id_chk]
+                if p_chk.status == PlayerStatus.ACTIVE and not p_chk.is_all_in_for_hand():
+                    num_can_still_act += 1
+                    if p_chk.current_bet < room.current_bet_to_match:
+                        num_bets_not_matching +=1
             
-            # A simple check: iterate players. If a player can act and their bet is less than current_bet_to_match, round is not over.
-            found_player_to_act = False
-            potential_next_player_id = room.get_player_acting_next(room.current_player_id)
-            
-            if potential_next_player_id:
-                 next_player_obj = room.players[potential_next_player_id]
-                 # If the next player to act has already matched the current bet (or is the one who made it),
-                 # and everyone else has also matched or folded/all-in, the round is over.
-                 # This is true if next_player_obj.current_bet == room.current_bet_to_match
-                 #  AND (next_player_obj.last_action is not None or it's BB preflop who can check)
-                 # This indicates action has gone around.
-                 
-                 # More simply: if ALL active (non-folded, non-all-in) players have current_bet == room.current_bet_to_match
-                 # then the round is over.
-                 all_bets_matched = True
-                 for p_id_check in room._player_order_for_hand:
-                     p_check = room.players[p_id_check]
-                     if p_check.status == PlayerStatus.ACTIVE and not p_check.is_all_in_for_hand():
-                         if p_check.current_bet < room.current_bet_to_match:
-                             all_bets_matched = False
-                             break
-                 
-                 if all_bets_matched:
-                     # Check if the player who is "due" to act (potential_next_player_id) has already acted on this bet level.
-                     # This is tricky. The original aggressor concept is better.
-                     # If the potential_next_player_id is the one who made the last raise (player.current_bet == room.current_bet_to_match implies this if they are next)
-                     # then round is over.
-                     # If player.last_action established room.current_bet_to_match and it's their turn again, round ends.
-                     
-                     # Let's use a simpler rule: if all active (non-folded/all-in) players have current_bet matching room.current_bet_to_match
-                     # *AND* the current player (who just acted) was the one who established this bet (or called it),
-                     # *AND* the next player up also has matched this bet (or is the one who established it), it must have gone around.
-                     # This is still too complex for here.
-
-                     # Simplest robust rule: Round ends if (number of players who have acted this round >= number of active players in hand) AND (all bets are matched or players are all-in/folded)
-                     # This is also not quite right.
-                     # Standard rule: betting is over when (1) all players have folded except one, or (2) all remaining players have contributed an equal amount to the pot for the round (unless a player is all-in).
-                     # And action has completed for all players. (i.e. highest bet has been called by all players not all-in/folded)
-
-                     num_can_still_act = 0
-                     num_bets_not_matching = 0
-                     for p_id_chk in room._player_order_for_hand:
-                         p_chk = room.players[p_id_chk]
-                         if p_chk.status == PlayerStatus.ACTIVE and not p_chk.is_all_in_for_hand():
-                             num_can_still_act += 1
-                             if p_chk.current_bet < room.current_bet_to_match:
-                                 num_bets_not_matching +=1
-                     
-                     if num_bets_not_matching == 0: # All active players have matched or exceeded current bet. Round over.
-                         logger.info(f"Room {room.code}: Betting round complete. Advancing phase.")
-                         self.advance_phase(room_code)
-                         return
-                     else: # Bets not matched, find next player
-                         room.current_player_id = potential_next_player_id
-                         logger.info(f"Room {room.code}: Next player is {room.current_player_id}")
-             else: # No one can act (e.g. all but one folded, or all remaining are all-in)
-                 logger.info(f"Room {room.code}: No more players can act. Betting round complete by default.")
-                 self.advance_phase(room_code) # This should also handle all-in situations by fast-forwarding phases.
-                 return
-
-        else: # Round not complete, find next player
+            if num_bets_not_matching == 0: # All active players have matched or exceeded current bet. Round over.
+                logger.info(f"Room {room.code}: Betting round complete. Advancing phase.")
+                self.advance_phase(room_code)
+                return
+            else: # Bets not matched, find next player (This branch has a potential UnboundLocalError for potential_next_player_id)
+                room.current_player_id = potential_next_player_id # This variable may not be defined here
+                logger.info(f"Room {room.code}: Next player is {room.current_player_id}")
+        # Corrected indentation for the 'else' corresponding to 'if action_is_closed:'
+        else: # Round not complete (action_is_closed is False), find next player
             next_player_id = room.get_player_acting_next(room.current_player_id)
             if next_player_id:
                 room.current_player_id = next_player_id
