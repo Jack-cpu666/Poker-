@@ -20,12 +20,7 @@
             --shadow: rgba(0, 0, 0, 0.3);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Roboto', sans-serif;
             background: radial-gradient(ellipse at center, #0a2a1f 0%, #051a11 100%);
@@ -33,746 +28,261 @@
             overflow: hidden;
             user-select: none;
         }
+        #gameContainer { position: relative; width: 100vw; height: 100vh; }
+        #canvas { display: block; cursor: grab; }
+        #canvas:active { cursor: grabbing; }
 
-        #gameContainer {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-        }
-
-        #canvas {
-            display: block;
-            cursor: grab;
-        }
-
-        #canvas:active {
-            cursor: grabbing;
-        }
-
-        /* Loading Screen */
         #loadingScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #0a2a1f, #051a11);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: opacity 1s ease-out;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10000; transition: opacity 1s ease-out;
         }
-
         .loading-logo {
-            font-family: 'Orbitron', monospace;
-            font-size: 3.5rem; /* Slightly smaller for balance */
-            font-weight: 900;
-            color: var(--primary-gold);
-            text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
-            margin-bottom: 30px;
-            animation: pulse 2s infinite;
+            font-family: 'Orbitron', monospace; font-size: 3.5rem; font-weight: 900;
+            color: var(--primary-gold); text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            margin-bottom: 30px; animation: pulse 2s infinite;
         }
-
         .loading-spinner {
-            width: 80px;
-            height: 80px;
-            border: 4px solid rgba(255, 215, 0, 0.3);
-            border-top: 4px solid var(--primary-gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            width: 80px; height: 80px; border: 4px solid rgba(255, 215, 0, 0.3);
+            border-top: 4px solid var(--primary-gold); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
         }
+        .loading-text { font-size: 1.2rem; color: var(--text-light); opacity: 0.8; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .loading-text {
-            font-size: 1.2rem;
-            color: var(--text-light);
-            opacity: 0.8;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* UI Overlay */
-        .ui-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 100;
-        }
-
+        .ui-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
         .ui-panel {
-            position: absolute;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(26, 93, 58, 0.8));
-            border-radius: 15px;
-            padding: 20px;
-            color: var(--text-light);
-            pointer-events: auto;
-            border: 2px solid var(--primary-gold);
-            box-shadow: 0 10px 30px var(--shadow);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+            position: absolute; background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(26, 93, 58, 0.8));
+            border-radius: 15px; padding: 20px; color: var(--text-light); pointer-events: auto;
+            border: 2px solid var(--primary-gold); box-shadow: 0 10px 30px var(--shadow);
+            backdrop-filter: blur(10px); transition: all 0.3s ease;
         }
-
-        .ui-panel:hover {
-            /* Removed transform: translateY to prevent movement bug with mouse controls */
-            box-shadow: 0 15px 40px var(--shadow);
-        }
-
-        /* Main Menu */
         .menu-panel {
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: left; /* Changed for better section layout */
-            min-width: 450px; /* Increased width */
-            max-width: 90vw;
+            top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: left;
+            min-width: 450px; max-width: 90vw;
         }
-
         .menu-title {
-            font-family: 'Orbitron', monospace;
-            font-size: 2.5rem; /* Adjusted size */
-            font-weight: 900;
-            color: var(--primary-gold);
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
-            margin-bottom: 25px; /* Adjusted margin */
-            animation: glow 2s ease-in-out infinite alternate;
-            text-align: center; /* Centered title */
+            font-family: 'Orbitron', monospace; font-size: 2.5rem; font-weight: 900;
+            color: var(--primary-gold); text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            margin-bottom: 25px; animation: glow 2s ease-in-out infinite alternate; text-align: center;
         }
-        
-        .menu-title .slot-icon { /* For slot machine icons in title */
-             font-size: 2rem; /* Adjust if needed */
-             vertical-align: middle;
-        }
-
-
-        @keyframes glow {
-            from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
-            to { text-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 0 40px rgba(255, 215, 0, 0.8); }
-        }
-
+        .menu-title .slot-icon { font-size: 2rem; vertical-align: middle; }
+        @keyframes glow { from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); } to { text-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 0 40px rgba(255, 215, 0, 0.8); } }
         .menu-section {
-            margin-bottom: 20px; /* Adjusted margin */
-            padding: 15px; /* Adjusted padding */
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            border: 1px solid rgba(255, 215, 0, 0.3);
+            margin-bottom: 20px; padding: 15px; background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px; border: 1px solid rgba(255, 215, 0, 0.3);
         }
-
         .menu-section h3 {
-            color: var(--secondary-gold);
-            margin-bottom: 12px; /* Adjusted margin */
-            font-size: 1.1rem; /* Adjusted size */
-            border-bottom: 1px solid rgba(255,215,0,0.2);
-            padding-bottom: 8px;
+            color: var(--secondary-gold); margin-bottom: 12px; font-size: 1.1rem;
+            border-bottom: 1px solid rgba(255,215,0,0.2); padding-bottom: 8px;
         }
-        
-        .menu-section label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.8);
-        }
-        .menu-section input[type="text"],
-        .menu-section input[type="number"],
-        .menu-section input[type="password"],
-        .menu-section select {
-            width: 100%;
-            margin-bottom: 10px; /* Space below each input */
-        }
+        .menu-section label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: rgba(255,255,255,0.8); }
+        .menu-section input[type="text"], .menu-section input[type="number"],
+        .menu-section input[type="password"], .menu-section select { width: 100%; margin-bottom: 10px; }
 
-
-        /* Game HUD */
-        .game-hud {
-            top: 20px;
-            left: 20px;
-            max-width: 350px;
-        }
-
+        .game-hud { top: 20px; left: 20px; max-width: 350px; }
         .hud-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+            padding: 8px 12px; background: rgba(255, 255, 255, 0.1); border-radius: 8px;
             border-left: 4px solid var(--primary-gold);
         }
+        .hud-label { font-weight: 500; color: var(--secondary-gold); }
+        .hud-value { font-weight: 700; color: var(--text-light); }
+        .game-hud .action-button { padding: 10px 15px; font-size: 0.9rem; }
 
-        .hud-label {
-            font-weight: 500;
-            color: var(--secondary-gold);
-        }
-
-        .hud-value {
-            font-weight: 700;
-            color: var(--text-light);
-        }
-        
-        .game-hud .action-button { /* Style for buttons in HUD */
-            padding: 10px 15px;
-            font-size: 0.9rem;
-        }
-
-
-        /* Pot Display */
         .pot-display {
-            position: absolute;
-            top: 15%;
-            left: 50%;
-            transform: translateX(-50%);
+            position: absolute; top: 15%; left: 50%; transform: translateX(-50%);
             background: radial-gradient(circle, rgba(255, 215, 0, 0.9), rgba(255, 237, 78, 0.7));
-            color: var(--text-dark);
-            padding: 25px;
-            border-radius: 50%;
-            border: 4px solid var(--primary-gold);
-            font-family: 'Orbitron', monospace;
-            font-size: 1.8rem;
-            font-weight: 900;
-            text-align: center;
-            min-width: 150px;
-            min-height: 150px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+            color: var(--text-dark); padding: 25px; border-radius: 50%; border: 4px solid var(--primary-gold);
+            font-family: 'Orbitron', monospace; font-size: 1.8rem; font-weight: 900; text-align: center;
+            min-width: 150px; min-height: 150px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
             animation: potGlow 3s ease-in-out infinite;
         }
+        @keyframes potGlow { 0%, 100% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6); } 50% { box-shadow: 0 0 60px rgba(255, 215, 0, 0.9); } }
 
-        @keyframes potGlow {
-            0%, 100% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6); }
-            50% { box-shadow: 0 0 60px rgba(255, 215, 0, 0.9); }
-        }
-
-        /* Action Buttons */
         .actions-panel {
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 90vw;
+            bottom: 30px; left: 50%; transform: translateX(-50%); display: flex;
+            gap: 15px; flex-wrap: wrap; justify-content: center; max-width: 90vw;
         }
-
         .action-button {
             background: linear-gradient(135deg, var(--primary-gold), var(--secondary-gold));
-            border: none;
-            border-radius: 12px;
-            padding: 15px 25px;
-            color: var(--text-dark);
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-            text-align: center; /* Ensure text is centered */
+            border: none; border-radius: 12px; padding: 15px 25px; color: var(--text-dark);
+            font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3); position: relative; overflow: hidden; text-align: center;
         }
-
-        .action-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
-        }
-
-        .action-button:active {
-            transform: translateY(-1px);
-        }
-
+        .action-button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5); }
+        .action-button:active { transform: translateY(-1px); }
         .action-button:disabled {
-            background: linear-gradient(135deg, #666, #888);
-            cursor: not-allowed;
-            transform: none;
-            opacity: 0.5;
+            background: linear-gradient(135deg, #666, #888); cursor: not-allowed;
+            transform: none; opacity: 0.5;
         }
-        
-        /* Specific button colors - ensure high contrast for text */
         .action-button.fold { background: linear-gradient(135deg, var(--casino-red), #ff6b6b); color: var(--text-light); }
         .action-button.call { background: linear-gradient(135deg, #28a745, #20c997); color: var(--text-light); }
         .action-button.raise { background: linear-gradient(135deg, var(--casino-blue), #6c5ce7); color: var(--text-light); }
         .action-button.all-in { background: linear-gradient(135deg, #ff4757, #ff3742); color: var(--text-light); animation: allInPulse 1s infinite; }
+        @keyframes allInPulse { 0%, 100% { box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); } 50% { box-shadow: 0 5px 25px rgba(255, 71, 87, 0.6); } }
 
-
-        @keyframes allInPulse {
-            0%, 100% { box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); }
-            50% { box-shadow: 0 5px 25px rgba(255, 71, 87, 0.6); }
-        }
-
-        /* Raise Controls */
-        .raise-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px;
-            border-radius: 8px;
-        }
-
+        .raise-controls { display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 8px;}
         .raise-slider {
-            flex: 1;
-            -webkit-appearance: none;
-            appearance: none;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            outline: none;
+            flex: 1; -webkit-appearance: none; appearance: none; height: 8px;
+            background: rgba(255, 255, 255, 0.3); border-radius: 4px; outline: none;
         }
-
         .raise-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            background: var(--primary-gold);
-            border-radius: 50%;
-            cursor: pointer;
+            -webkit-appearance: none; appearance: none; width: 20px; height: 20px;
+            background: var(--primary-gold); border-radius: 50%; cursor: pointer;
         }
-
-        /* Chat Panel */
         .chat-panel {
-            top: 20px;
-            right: 20px;
-            width: 320px; /* Fixed width */
-            max-height: 40vh; /* Max height relative to viewport */
-            min-height: 200px; /* Min height */
-            display: flex;
-            flex-direction: column;
+            top: 20px; right: 20px; width: 320px; max-height: 40vh; min-height: 200px;
+            display: flex; flex-direction: column;
         }
-
         .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px; /* Reduced margin */
-            padding-bottom: 8px; /* Reduced padding */
-            border-bottom: 2px solid var(--primary-gold);
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--primary-gold);
         }
-
-        .chat-title {
-            font-family: 'Orbitron', monospace;
-            font-weight: 700;
-            color: var(--primary-gold);
-        }
-
+        .chat-title { font-family: 'Orbitron', monospace; font-weight: 700; color: var(--primary-gold); }
         .chat-toggle {
-            background: none;
-            border: 2px solid var(--primary-gold);
-            color: var(--primary-gold);
-            border-radius: 6px;
-            padding: 5px 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            background: none; border: 2px solid var(--primary-gold); color: var(--primary-gold);
+            border-radius: 6px; padding: 5px 10px; cursor: pointer; transition: all 0.3s ease;
         }
-
-        .chat-toggle:hover {
-            background: var(--primary-gold);
-            color: var(--text-dark);
-        }
-
+        .chat-toggle:hover { background: var(--primary-gold); color: var(--text-dark); }
         #chatMessages {
-            flex: 1; /* Allows this to grow and shrink */
-            overflow-y: auto;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 10px; /* Reduced padding */
-            margin-bottom: 10px; /* Reduced margin */
-            border: 1px solid rgba(255, 215, 0, 0.2);
+            flex: 1; overflow-y: auto; background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px; padding: 10px; margin-bottom: 10px; border: 1px solid rgba(255, 215, 0, 0.2);
         }
-
         .chat-message {
-            margin-bottom: 8px; /* Reduced margin */
-            padding: 6px 10px; /* Reduced padding */
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-left: 3px solid;
-            animation: slideInChat 0.3s ease-out;
-            word-wrap: break-word; /* Ensure long messages wrap */
+            margin-bottom: 8px; padding: 6px 10px; border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1); border-left: 3px solid;
+            animation: slideInChat 0.3s ease-out; word-wrap: break-word;
         }
+        @keyframes slideInChat { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .chat-player-name { font-weight: 700; margin-right: 8px; }
+        .chat-timestamp { font-size: 0.8rem; opacity: 0.6; float: right; }
+        .chat-input-container { display: flex; gap: 10px; margin-top: auto; }
+        .chat-input-container input { padding: 10px 12px; }
+        .chat-input-container button { padding: 10px 15px; }
 
-        @keyframes slideInChat {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .chat-player-name {
-            font-weight: 700;
-            margin-right: 8px;
-        }
-
-        .chat-timestamp {
-            font-size: 0.8rem;
-            opacity: 0.6;
-            float: right;
-        }
-
-        .chat-input-container {
-            display: flex;
-            gap: 10px;
-            margin-top: auto; /* Pushes to bottom if chatMessages doesn't fill space */
-        }
-        .chat-input-container input {
-            padding: 10px 12px; /* Adjusted padding */
-        }
-        .chat-input-container button {
-            padding: 10px 15px; /* Adjusted padding */
-        }
-
-
-        /* Player Info Cards */
         .player-cards {
-            position: absolute;
-            bottom: 120px; /* Increased space from bottom */
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px; /* Adjusted gap */
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 90vw;
+            position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; max-width: 90vw;
         }
-
         .player-card {
             background: linear-gradient(135deg, rgba(26, 93, 58, 0.9), rgba(10, 42, 31, 0.9));
-            border: 2px solid var(--primary-gold);
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-            min-width: 160px; /* Slightly wider */
-            position: relative;
-            transition: all 0.3s ease;
+            border: 2px solid var(--primary-gold); border-radius: 15px; padding: 15px;
+            text-align: center; min-width: 160px; position: relative; transition: all 0.3s ease;
             backdrop-filter: blur(10px);
         }
-
         .player-card.current-player {
-            border-color: var(--casino-red);
-            box-shadow: 0 0 30px rgba(220, 20, 60, 0.6);
+            border-color: var(--casino-red); box-shadow: 0 0 30px rgba(220, 20, 60, 0.6);
             animation: currentPlayerGlow 2s ease-in-out infinite;
         }
-
-        @keyframes currentPlayerGlow {
-            0%, 100% { box-shadow: 0 0 30px rgba(220, 20, 60, 0.6); }
-            50% { box-shadow: 0 0 40px rgba(220, 20, 60, 0.9); }
-        }
-
-        .player-card.folded {
-            opacity: 0.4;
-            filter: grayscale(80%);
-        }
-
-        .player-card.all-in {
-            border-color: var(--casino-red);
-            animation: allInGlow 1s ease-in-out infinite;
-        }
-
-        @keyframes allInGlow {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 71, 87, 0.4); }
-            50% { box-shadow: 0 0 30px rgba(255, 71, 87, 0.7); }
-        }
-
+        @keyframes currentPlayerGlow { 0%, 100% { box-shadow: 0 0 30px rgba(220, 20, 60, 0.6); } 50% { box-shadow: 0 0 40px rgba(220, 20, 60, 0.9); } }
+        .player-card.folded { opacity: 0.4; filter: grayscale(80%); }
+        .player-card.all-in { border-color: var(--casino-red); animation: allInGlow 1s ease-in-out infinite; }
+        @keyframes allInGlow { 0%, 100% { box-shadow: 0 0 20px rgba(255, 71, 87, 0.4); } 50% { box-shadow: 0 0 30px rgba(255, 71, 87, 0.7); } }
         .player-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--primary-gold);
-            margin: 0 auto 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            overflow: hidden; /* For text if too long */
+            width: 50px; height: 50px; border-radius: 50%; background: var(--primary-gold);
+            margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 700; color: var(--text-dark); overflow: hidden;
         }
-
         .player-name {
-            font-weight: 700;
-            color: var(--text-light);
-            margin-bottom: 5px;
-            font-size: 0.95rem; /* Slightly smaller for long names */
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 130px; /* Prevent overflow */
+            font-weight: 700; color: var(--text-light); margin-bottom: 5px; font-size: 0.95rem;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;
         }
-        .player-name .ai-badge {
-            font-size: 0.7rem;
-            color: var(--secondary-gold);
-            font-weight: normal;
-        }
-
-        .player-money {
-            color: var(--primary-gold);
-            font-weight: 700;
-            font-family: 'Orbitron', monospace;
-        }
-
+        .player-name .ai-badge { font-size: 0.7rem; color: var(--secondary-gold); font-weight: normal; }
+        .player-money { color: var(--primary-gold); font-weight: 700; font-family: 'Orbitron', monospace; }
         .player-action {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: var(--casino-red);
-            color: var(--text-light);
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            animation: actionPop 0.5s ease-out;
+            position: absolute; top: -10px; right: -10px; background: var(--casino-red);
+            color: var(--text-light); padding: 4px 8px; border-radius: 12px;
+            font-size: 0.8rem; font-weight: 700; animation: actionPop 0.5s ease-out;
         }
+        @keyframes actionPop { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
-        @keyframes actionPop {
-            0% { transform: scale(0); }
-            80% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+        input, select {
+            padding: 12px 15px; border: 2px solid var(--primary-gold); border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1); color: var(--text-light); font-size: 1rem;
+            transition: all 0.3s ease; backdrop-filter: blur(10px); font-family: 'Roboto', sans-serif;
         }
+        select option { background: var(--dark-green); color: var(--text-light); }
+        input:focus, select:focus { outline: none; border-color: var(--secondary-gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+        input::placeholder { color: rgba(255, 255, 255, 0.6); }
 
-        /* Input Styles */
-        input, select { /* Apply to select as well */
-            padding: 12px 15px;
-            border: 2px solid var(--primary-gold);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-light);
-            font-size: 1rem;
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-gold); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--secondary-gold); }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.5s ease-out; } .fade-out { animation: fadeOut 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        .slide-up { animation: slideUp 0.5s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .tournament-info {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(25, 25, 112, 0.9), rgba(138, 43, 226, 0.8));
+            border: 2px solid var(--primary-gold); border-radius: 10px; padding: 15px 25px;
+            text-align: center; backdrop-filter: blur(10px); z-index: 101;
+        }
+        .tournament-level { font-family: 'Orbitron', monospace; font-size: 1.2rem; font-weight: 700; color: var(--primary-gold); margin-bottom: 5px; }
+        .tournament-timer { color: var(--text-light); font-size: 0.9rem; }
+
+        .notification-container {
+            position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex;
+            flex-direction: column; gap: 10px; align-items: flex-end;
+        }
+        .notification {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.9), rgba(32, 201, 151, 0.9));
+            color: var(--text-light); padding: 15px 20px; border-radius: 8px;
+            border-left: 4px solid var(--primary-gold); box-shadow: 0 5px 15px var(--shadow);
+            animation: slideInNotification 0.5s ease-out; min-width: 250px; max-width: 350px;
+        }
+        .notification.error { background: linear-gradient(135deg, rgba(220, 20, 60, 0.9), rgba(255, 107, 107, 0.9)); }
+        .notification.warning { background: linear-gradient(135deg, rgba(255, 193, 7, 0.9), rgba(255, 235, 59, 0.9)); color: var(--text-dark); }
+        .notification.info { background: linear-gradient(135deg, rgba(25, 25, 112, 0.9), rgba(108, 92, 231, 0.9)); }
+        @keyframes slideInNotification { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8);
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, rgba(10, 42, 31, 0.95), rgba(26, 93, 58, 0.95));
+            border: 2px solid var(--primary-gold); border-radius: 15px; padding: 30px;
+            max-width: 80vw; max-height: 80vh; overflow-y: auto; backdrop-filter: blur(15px);
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--primary-gold);
+        }
+        .modal-title { font-family: 'Orbitron', monospace; font-size: 1.5rem; font-weight: 700; color: var(--primary-gold); }
+        .modal-close {
+            background: none; border: 2px solid var(--casino-red); color: var(--casino-red);
+            border-radius: 6px; padding: 8px 15px; cursor: pointer; font-weight: 700;
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            font-family: 'Roboto', sans-serif; /* Ensure font consistency */
         }
-        select option {
-            background: var(--dark-green);
-            color: var(--text-light);
-        }
+        .modal-close:hover { background: var(--casino-red); color: var(--text-light); }
 
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--secondary-gold);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-        }
-
-        input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        /* Scrollbar Styles */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary-gold);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--secondary-gold);
-        }
-
-        /* Responsive Design */
         @media (max-width: 768px) {
-            .menu-panel {
-                min-width: 90vw; /* Full width on small screens */
-                padding: 15px;
-            }
-
-            .menu-title {
-                font-size: 2rem;
-            }
-            .menu-title .slot-icon { font-size: 1.5rem; }
-
-
-            .chat-panel {
-                width: 90vw; /* Full width on small screens */
-                max-height: 30vh; /* Shorter on small screens */
-                top: auto; /* Allow it to be pushed by other elements */
-                bottom: 20px; /* Example: place at bottom */
-                left: 5vw;
-                right: 5vw;
-            }
-
-            .actions-panel {
-                bottom: 20px;
-                gap: 10px;
-            }
-
-            .action-button {
-                padding: 12px 18px;
-                font-size: 0.9rem;
-            }
-
-            .player-cards {
-                bottom: 180px; /* Adjust if chat panel is at bottom */
-                gap: 8px;
-            }
-
-            .player-card {
-                min-width: 120px;
-                padding: 10px;
-            }
-            .player-name { max-width: 100px; }
+            .menu-panel { min-width: 90vw; padding: 15px; }
+            .menu-title { font-size: 2rem; } .menu-title .slot-icon { font-size: 1.5rem; }
+            .chat-panel { width: 90vw; max-height: 30vh; top: auto; bottom: 20px; left: 5vw; right: 5vw; }
+            .actions-panel { bottom: 20px; gap: 10px; }
+            .action-button { padding: 12px 18px; font-size: 0.9rem; }
+            .player-cards { bottom: 180px; gap: 8px; }
+            .player-card { min-width: 120px; padding: 10px; } .player-name { max-width: 100px; }
         }
         @media (max-width: 480px) {
-            .menu-title { font-size: 1.8rem; }
-            .menu-title .slot-icon { font-size: 1.3rem; }
+            .menu-title { font-size: 1.8rem; } .menu-title .slot-icon { font-size: 1.3rem; }
             .action-button { padding: 10px 15px; font-size: 0.8rem; }
             .raise-controls { flex-direction: column; }
             .raise-controls input[type="number"] { width: 100% !important; }
         }
-
-
-        /* Utility Classes */
-        .hidden {
-            display: none !important;
-        }
-
-        .fade-in { animation: fadeIn 0.5s ease-out; }
-        .fade-out { animation: fadeOut 0.5s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-
-        .slide-up { animation: slideUp 0.5s ease-out; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        /* Tournament Display */
-        .tournament-info {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, rgba(25, 25, 112, 0.9), rgba(138, 43, 226, 0.8));
-            border: 2px solid var(--primary-gold);
-            border-radius: 10px;
-            padding: 15px 25px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            z-index: 101; /* Above UI panels but below modals */
-        }
-
-        .tournament-level {
-            font-family: 'Orbitron', monospace;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--primary-gold);
-            margin-bottom: 5px;
-        }
-
-        .tournament-timer {
-            color: var(--text-light);
-            font-size: 0.9rem;
-        }
-
-        /* Notification System */
-        .notification-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000; /* Above everything */
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: flex-end;
-        }
-        .notification {
-            background: linear-gradient(135deg, rgba(40, 167, 69, 0.9), rgba(32, 201, 151, 0.9));
-            color: var(--text-light);
-            padding: 15px 20px;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary-gold);
-            box-shadow: 0 5px 15px var(--shadow);
-            animation: slideInNotification 0.5s ease-out;
-            min-width: 250px;
-            max-width: 350px;
-        }
-
-        .notification.error { background: linear-gradient(135deg, rgba(220, 20, 60, 0.9), rgba(255, 107, 107, 0.9)); }
-        .notification.warning { background: linear-gradient(135deg, rgba(255, 193, 7, 0.9), rgba(255, 235, 59, 0.9)); color: var(--text-dark); }
-        .notification.info { background: linear-gradient(135deg, rgba(25, 25, 112, 0.9), rgba(108, 92, 231, 0.9)); }
-
-
-        @keyframes slideInNotification {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* Hand History Modal */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, rgba(10, 42, 31, 0.95), rgba(26, 93, 58, 0.95));
-            border: 2px solid var(--primary-gold);
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 80vw;
-            max-height: 80vh;
-            overflow-y: auto;
-            backdrop-filter: blur(15px);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--primary-gold);
-        }
-
-        .modal-title {
-            font-family: 'Orbitron', monospace;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-gold);
-        }
-
-        .modal-close {
-            background: none;
-            border: 2px solid var(--casino-red);
-            color: var(--casino-red);
-            border-radius: 6px;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-weight: 700;
-            transition: all 0.3s ease;
-        }
-
-        .modal-close:hover {
-            background: var(--casino-red);
-            color: var(--text-light);
-        }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
     <div id="loadingScreen">
         <div class="loading-logo"><span class="slot-icon">🎰</span> ROYAL POKER 3D <span class="slot-icon">🎰</span></div>
         <div class="loading-spinner"></div>
@@ -781,140 +291,65 @@
 
     <div id="gameContainer">
         <canvas id="canvas"></canvas>
-        
         <div class="ui-overlay">
-            <!-- Main Menu (Restructured) -->
             <div id="menuPanel" class="ui-panel menu-panel hidden">
                 <h1 class="menu-title"><span class="slot-icon">🎰</span> ROYAL POKER 3D <span class="slot-icon">🎰</span></h1>
-                
                 <div class="menu-section">
                     <h3>Player Setup</h3>
                     <label for="playerName">Player Name:</label>
                     <input type="text" id="playerName" placeholder="Enter your name" value="Player">
                 </div>
-                
                 <div class="menu-section">
                     <h3>Quick Play</h3>
                     <button class="action-button" onclick="createQuickRoom()" style="width: 100%; margin-bottom: 10px;">🎯 Create Quick Room</button>
                     <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                        <input type="text" id="roomCode" placeholder="Room Code" style="flex: 1; margin-bottom: 0;">
-                        <button class="action-button" onclick="joinRoom()">🚪 Join</button>
+                        <input type="text" id="roomCodeInput" placeholder="Room Code" style="flex: 1; margin-bottom: 0;">
+                        <button class="action-button" onclick="joinRoomFromInput()">🚪 Join</button>
                     </div>
-                    <button class="action-button" onclick="spectateRoom()" style="width: 100%;">👁️ Spectate Room</button>
+                    <button class="action-button" onclick="spectateRoomFromInput()" style="width: 100%;">👁️ Spectate Room</button>
                 </div>
-                
                 <div class="menu-section">
                     <h3>Custom Game</h3>
                     <label for="roomName">Room Name (Optional):</label>
                     <input type="text" id="roomName" placeholder="My Awesome Poker Room">
-                    
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top:10px;">
-                        <div>
-                            <label for="gameMode">Game Mode:</label>
-                            <select id="gameMode">
-                                <option value="cash_game">Cash Game</option>
-                                <option value="tournament">Tournament</option>
-                                <option value="sit_and_go" disabled>Sit & Go (Soon)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="maxPlayers">Max Players:</label>
-                            <input type="number" id="maxPlayers" min="2" max="10" value="8">
-                        </div>
-                        <div>
-                            <label for="smallBlind">Small Blind:</label>
-                            <input type="number" id="smallBlind" min="1" value="25">
-                        </div>
-                        <div>
-                            <label for="bigBlind">Big Blind:</label>
-                            <input type="number" id="bigBlind" min="2" value="50">
-                        </div>
-                        <div>
-                            <label for="buyIn">Buy-in:</label>
-                            <input type="number" id="buyIn" min="0" value="1000" step="50">
-                        </div>
-                        <div>
-                            <label for="aiPlayers">AI Players:</label>
-                            <input type="number" id="aiPlayers" min="0" max="9" value="0">
-                        </div>
+                        <div><label for="gameMode">Game Mode:</label><select id="gameMode"><option value="cash_game">Cash Game</option><option value="tournament">Tournament</option><option value="sit_and_go" disabled>Sit & Go (Soon)</option></select></div>
+                        <div><label for="maxPlayers">Max Players:</label><input type="number" id="maxPlayers" min="2" max="10" value="8"></div>
+                        <div><label for="smallBlind">Small Blind:</label><input type="number" id="smallBlind" min="1" value="25"></div>
+                        <div><label for="bigBlind">Big Blind:</label><input type="number" id="bigBlind" min="2" value="50"></div>
+                        <div><label for="buyIn">Buy-in:</label><input type="number" id="buyIn" min="0" value="1000" step="50"></div>
+                        <div><label for="aiPlayers">AI Players:</label><input type="number" id="aiPlayers" min="0" max="9" value="0"></div>
                     </div>
-                     <label for="roomPassword" style="margin-top:10px;">Password (Optional):</label>
+                    <label for="roomPassword" style="margin-top:10px;">Password (Optional):</label>
                     <input type="password" id="roomPassword" placeholder="Leave empty for public">
                     <button class="action-button" onclick="createCustomRoom()" style="width: 100%; margin-top: 15px;">🎪 Create Custom Room</button>
                 </div>
-                
-                <div class="menu-section">
-                    <h3>Browse Rooms</h3>
-                    <button class="action-button" onclick="showRoomList()" style="width: 100%;">🏛️ Browse Public Rooms</button>
-                </div>
+                <div class="menu-section"><h3>Browse Rooms</h3><button class="action-button" onclick="showRoomList()" style="width: 100%;">🏛️ Browse Public Rooms</button></div>
             </div>
 
-            <!-- Room List Modal -->
-            <div id="roomListModal" class="modal hidden">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title">🏛️ Public Rooms</h2>
-                        <button class="modal-close" onclick="hideRoomList()">✕</button>
-                    </div>
-                    <div id="roomList" style="max-height: 60vh; overflow-y: auto;">
-                        <div style="text-align: center; color: #ccc; padding: 20px;">Loading rooms...</div>
-                    </div>
-                    <div style="margin-top: 20px; text-align: center;">
-                        <button class="action-button" onclick="refreshRoomList()">🔄 Refresh</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Game HUD -->
+            <div id="roomListModal" class="modal hidden"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">🏛️ Public Rooms</h2><button class="modal-close" onclick="hideRoomList()">✕</button></div><div id="roomList" style="max-height: 60vh; overflow-y: auto;"><div style="text-align: center; color: #ccc; padding: 20px;">Loading rooms...</div></div><div style="margin-top: 20px; text-align: center;"><button class="action-button" onclick="refreshRoomList()">🔄 Refresh</button></div></div></div>
             <div id="gameHUD" class="ui-panel game-hud hidden">
-                <div class="hud-item">
-                    <span class="hud-label">🏠 Room:</span>
-                    <span class="hud-value" id="currentRoom">-</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">🎮 Phase:</span>
-                    <span class="hud-value" id="phaseText">Waiting</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">💰 My Money:</span>
-                    <span class="hud-value">$<span id="moneyAmount">0</span></span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">🎯 To Call:</span>
-                    <span class="hud-value">$<span id="betToMatch">0</span></span>
-                </div>
-                 <div class="hud-item">
-                    <span class="hud-label">✋ Hand:</span>
-                    <span class="hud-value" id="handNumber">0</span>
-                </div>
+                <div class="hud-item"><span class="hud-label">🏠 Room:</span><span class="hud-value" id="currentRoomCodeDisplay">-</span></div>
+                <div class="hud-item"><span class="hud-label">🎮 Phase:</span><span class="hud-value" id="phaseText">Waiting</span></div>
+                <div class="hud-item"><span class="hud-label">💰 My Money:</span><span class="hud-value">$<span id="moneyAmount">0</span></span></div>
+                <div class="hud-item"><span class="hud-label">🎯 To Call:</span><span class="hud-value">$<span id="betToMatch">0</span></span></div>
+                <div class="hud-item"><span class="hud-label">✋ Hand #:</span><span class="hud-value" id="handNumber">0</span></div>
                 <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
                     <button class="action-button" onclick="startGame()" id="startGameBtn" style="width: 100%;">🚀 Start Game</button>
-                    <button class="action-button" onclick="showHandHistory()" style="width: 100%;">📊 Hand History</button>
-                    <button class="action-button" onclick="pauseGame()" id="pauseGameBtn" style="width: 100%;">⏸️ Pause Game</button>
-                    <button class="action-button fold" onclick="leaveRoom()" style="width: 100%;">🚪 Leave Room</button>
+                    <button class="action-button" onclick="showHandHistory()" id="handHistoryBtn" style="width: 100%;">📊 Hand History</button>
+                    <button class="action-button" onclick="leaveRoom()" style="width: 100%;">🚪 Leave Room</button>
                 </div>
             </div>
-
-            <!-- Tournament Info -->
             <div id="tournamentInfo" class="tournament-info hidden">
                 <div class="tournament-level">🏆 Level <span id="tournamentLevel">1</span></div>
-                <div class="tournament-timer">Next: <span id="tournamentTimer">10:00</span></div>
-                <div style="margin-top: 5px; font-size: 0.8rem;">Blinds: $<span id="tournamentBlinds">25/50</span></div>
+                <div class="tournament-timer">Next: <span id="tournamentTimerValue">10:00</span></div>
+                <div style="margin-top: 5px; font-size: 0.8rem;">Blinds: $<span id="tournamentBlinds">25/50</span> Ante: $<span id="tournamentAnte">0</span></div>
             </div>
-
-            <!-- Pot Display -->
-            <div id="potDisplay" class="pot-display hidden">
-                <div style="font-size: 1rem; margin-bottom: 5px;">💰 POT</div>
-                <div>$<span id="potAmount">0</span></div>
-                <div id="sidePotsDisplay" style="font-size: 0.8rem; margin-top: 5px; color: rgba(0,0,0,0.7);"></div>
+            <div id="potDisplay" class="pot-display hidden"><div style="font-size: 1rem; margin-bottom: 5px;">💰 POT</div><div>$<span id="potAmount">0</span></div><div id="sidePotsDisplay" style="font-size: 0.8rem; margin-top: 5px; color: rgba(0,0,0,0.7);"></div></div>
+            <div id="actionTimer" class="hidden" style="position: absolute; top: 25%; left: 50%; transform: translateX(-50%); background: rgba(220, 20, 60, 0.9); color: white; padding: 10px 20px; border-radius: 25px; font-family: 'Orbitron', monospace; font-weight: 700; font-size: 1.2rem; animation: timerPulse 1s infinite; z-index:101;">⏰ <span id="timerSeconds">30</span>s</div>
+             <div id="pauseOverlay" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 9990; color: white; font-size: 2rem; text-align: center;">
+                <div id="pauseReasonText" style="padding: 20px; background: rgba(0,0,0,0.5); border-radius: 10px;">Game Paused</div>
             </div>
-
-            <!-- Action Timer -->
-            <div id="actionTimer" class="hidden" style="position: absolute; top: 25%; left: 50%; transform: translateX(-50%); background: rgba(220, 20, 60, 0.9); color: white; padding: 10px 20px; border-radius: 25px; font-family: 'Orbitron', monospace; font-weight: 700; font-size: 1.2rem; animation: timerPulse 1s infinite; z-index:101;">
-                ⏰ <span id="timerSeconds">30</span>s
-            </div>
-
-            <!-- Action Buttons -->
             <div id="actionsPanel" class="actions-panel hidden">
                 <button class="action-button fold" onclick="playerAction('fold')" id="foldBtn">🚫 Fold</button>
                 <button class="action-button" onclick="playerAction('check')" id="checkBtn">✅ Check</button>
@@ -927,138 +362,114 @@
                 </div>
                 <button class="action-button all-in" onclick="playerAction('all_in')" id="allInBtn">🔥 ALL IN</button>
             </div>
-
-            <!-- Chat Panel -->
-            <div id="chatPanel" class="chat-panel hidden">
-                <div class="chat-header">
-                    <h3 class="chat-title">💬 Chat</h3>
-                    <button class="chat-toggle" onclick="toggleChat()" id="chatToggle">−</button>
-                </div>
-                <div id="chatMessages"></div>
-                <div class="chat-input-container">
-                    <input type="text" id="chatInput" placeholder="Type message..." style="flex: 1;" onkeypress="if(event.key==='Enter') sendChat()" maxlength="200">
-                    <button class="action-button" onclick="sendChat()">Send</button>
-                </div>
-            </div>
-
-            <!-- Player Cards UI -->
+            <div id="chatPanel" class="chat-panel hidden"><div class="chat-header"><h3 class="chat-title">💬 Chat</h3><button class="chat-toggle" onclick="toggleChat()" id="chatToggle">−</button></div><div id="chatMessages"></div><div class="chat-input-container"><input type="text" id="chatInput" placeholder="Type message..." style="flex: 1;" onkeypress="if(event.key==='Enter') sendChat()" maxlength="200"><button class="action-button" onclick="sendChat()">Send</button></div></div>
             <div id="playerCardsDisplay" class="player-cards hidden"></div>
-
-            <!-- Hand History Modal -->
-            <div id="handHistoryModal" class="modal hidden">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title">📊 Hand History</h2>
-                        <button class="modal-close" onclick="hideHandHistory()">✕</button>
-                    </div>
-                    <div id="handHistoryContent" style="max-height: 60vh; overflow-y: auto;">
-                        <div style="text-align: center; color: #ccc; padding: 20px;">No hands played yet or history not loaded.</div>
-                    </div>
-                </div>
-            </div>
+            <div id="handHistoryModal" class="modal hidden"><div class="modal-content"><div class="modal-header"><h2 class="modal-title">📊 Hand History</h2><button class="modal-close" onclick="hideHandHistory()">✕</button></div><div id="handHistoryContent" style="max-height: 60vh; overflow-y: auto;"><div style="text-align: center; color: #ccc; padding: 20px;">No hands played yet or history not loaded.</div></div></div></div>
         </div>
     </div>
     <div id="notificationContainer" class="notification-container"></div>
 
-
     <script>
         // Advanced Game State Management
         let ws = null;
-        let scene, camera, renderer; // Removed controls, using custom mouse interaction
+        let scene, camera, renderer;
         let pokerTable, tableGroup;
-        // let cards = [], chips = [], playerPositions = []; // playerPositions is still used
         let playerPositions = [];
         let cardMaterials = {}, chipMaterials = {};
-        let currentGameState = null; // Renamed from gameState to avoid conflict
+        let currentGameState = null;
         let isConnected = false;
-        let isPlayerInGame = false; // True if current client is a player in the room
-        let myPlayerId = null; // Assigned by server on connect
+        let isPlayerInGame = false;
+        let myPlayerId = null; // Assigned by server on connect (this is the WebSocket connection ID initially)
         let currentRoomCode = null;
-        // let animationQueue = []; // GSAP handles animations directly now
-        // let soundEnabled = true; // Placeholder for sound features
         let cameraAnimating = false;
-        let isLoadingOrReconnecting = false; // For managing loading/reconnect notifications
+        let isLoadingOrReconnecting = false;
         
-        // 3D Scene objects
         let communityCardObjects = [];
-        let playerCardObjects3D = {}; // Stores 3D card objects for each player { playerId: [cardMesh1, cardMesh2] }
-        let chipStackObjects = {}; // { "pot": potChipMesh, "player_bet_playerId": playerBetChipMesh }
-        let dealerButtonMesh; //, blindButtonMeshes = [];
+        let playerCardObjects3D = {}; // { playerId: [cardMesh1, cardMesh2, ...] }
+        let chipStackObjects = {}; // { "pot_main": potChipMesh, "player_bet_playerId": playerBetChipMesh }
+        let dealerButtonMesh;
         let particleSystem;
         
-        // UI State
         let chatCollapsed = false;
-        // let notificationQueue = []; // Notifications shown directly
-        
-        // Initialize Three.js scene with advanced graphics
-        function initThreeJS() {
-            // ... (Three.js setup as before, ensure no major changes unless specified) ...
-            // Make sure createPlayerPositions() is called.
-            const canvas = document.getElementById('canvas');
-            scene = new THREE.Scene();
-            scene.fog = new THREE.Fog(0x051a11, 15, 50);
-            setupLighting();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 12, 15); // Default camera position for table view
-            camera.lookAt(0, 0, 0);
-            renderer = new THREE.WebGLRenderer({ 
-                canvas: canvas, 
-                antialias: true,
-                alpha: true,
-                powerPreference: "high-performance"
-            });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.2;
-            // renderer.outputEncoding = THREE.sRGBEncoding; // Removed, caused issues with some materials if not handled consistently
+        let actionTimerInterval = null;
+        let tournamentNextBlindIncreaseInterval = null;
 
-            createCasinoEnvironment();
-            createPokerTable(); // This calls createPlayerPositions
-            createCardMaterials();
-            createChipMaterials();
-            addMouseControls();
-            createParticleSystem();
-            animate();
+        // --- Logging ---
+        function consoleLog(message, ...optionalParams) {
+            console.log(`[PokerClient] ${new Date().toLocaleTimeString()} - ${message}`, ...optionalParams);
+        }
+        function consoleError(message, ...optionalParams) {
+            console.error(`[PokerClient ERROR] ${new Date().toLocaleTimeString()} - ${message}`, ...optionalParams);
+        }
+
+        // --- Three.js Initialization ---
+        function initThreeJS() {
+            consoleLog("initThreeJS START");
+            try {
+                const canvas = document.getElementById('canvas');
+                if (!canvas) { consoleError("FATAL: Canvas element not found!"); return; }
+                scene = new THREE.Scene();
+                scene.fog = new THREE.Fog(0x051a11, 15, 50); // Dark green fog
+                setupLighting();
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.set(0, 12, 15); // Default camera position
+                camera.lookAt(0, 0, 0);
+                camera.userData = { targetRotationY: 0, targetDistance: 15 }; // For mouse controls
+
+                renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimize for high DPI screens
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Softer shadows
+                renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                renderer.toneMappingExposure = 1.2;
+
+                createCasinoEnvironment();
+                createPokerTable(); // Includes player positions
+                createCardMaterials(); // Re-uses your existing functions
+                createChipMaterials(); // Re-uses your existing functions
+                addMouseControls();
+                createParticleSystem();
+                animate();
+                consoleLog("initThreeJS COMPLETE");
+            } catch (e) {
+                consoleError("Error during initThreeJS:", e);
+                showNotification("Critical 3D Engine Error. Please refresh.", "error", 10000);
+                 const loadingTextElement = document.getElementById('loadingScreen').querySelector('.loading-text');
+                if(loadingTextElement) loadingTextElement.textContent = "3D Engine Failed. Try refreshing.";
+            }
         }
         
-        function setupLighting() { /* ... As before ... */ 
-            const ambientLight = new THREE.AmbientLight(0x404040, 0.5); // Slightly brighter ambient
+        function setupLighting() { /* ... (same as your previous corrected version) ... */ 
+            const ambientLight = new THREE.AmbientLight(0x606060, 1.0); // Slightly brighter ambient
             scene.add(ambientLight);
-            const mainLight = new THREE.DirectionalLight(0xffffff, 1.0); // Brighter main
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1.2); // Brighter main
             mainLight.position.set(10, 20, 10);
             mainLight.castShadow = true;
-            mainLight.shadow.mapSize.width = 2048; mainLight.shadow.mapSize.height = 2048; // Adjusted for performance
+            mainLight.shadow.mapSize.width = 1024; mainLight.shadow.mapSize.height = 1024; 
             mainLight.shadow.camera.near = 0.5; mainLight.shadow.camera.far = 50;
             mainLight.shadow.camera.left = -20; mainLight.shadow.camera.right = 20;
             mainLight.shadow.camera.top = 20; mainLight.shadow.camera.bottom = -20;
             scene.add(mainLight);
-            const tableLight1 = new THREE.SpotLight(0xffd700, 1.0, 30, Math.PI / 4, 0.3, 1); // Adjusted intensity/penumbra
+            const tableLight1 = new THREE.SpotLight(0xffd700, 1.5, 30, Math.PI / 4, 0.3, 1.5); 
             tableLight1.position.set(0, 10, 0);
             tableLight1.target.position.set(0, 0, 0);
             tableLight1.castShadow = true;
             scene.add(tableLight1);
             scene.add(tableLight1.target);
         }
-        function createCasinoEnvironment() { /* ... As before ... */ 
+        function createCasinoEnvironment() { /* ... (same as your previous corrected version) ... */ 
             const floorGeometry = new THREE.PlaneGeometry(100, 100);
             const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x2a0a0a, transparent: true, opacity: 0.8 });
             const floor = new THREE.Mesh(floorGeometry, floorMaterial);
             floor.rotation.x = -Math.PI / 2; floor.position.y = -2; floor.receiveShadow = true;
             scene.add(floor);
-             // Simpler background: A large sphere an image or gradient
             const backgroundSphere = new THREE.SphereGeometry(100, 32, 32);
-            const backgroundMaterial = new THREE.MeshBasicMaterial({
-                color: 0x030f0a, // Dark green/blue
-                side: THREE.BackSide,
-                fog: false // No fog on the skybox itself
-            });
+            const backgroundMaterial = new THREE.MeshBasicMaterial({ color: 0x030f0a, side: THREE.BackSide, fog: false });
             const skybox = new THREE.Mesh(backgroundSphere, backgroundMaterial);
             scene.add(skybox);
         }
-        function createPokerTable() { /* ... As before, ensure createPlayerPositions is called ... */ 
+        function createPokerTable() { /* ... (same as your previous corrected version, ensure createPlayerPositions is called) ... */
             tableGroup = new THREE.Group();
             const tableGeometry = new THREE.CylinderGeometry(7, 7, 0.4, 64);
             const tableMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513, shininess: 30, specular: 0x222222 });
@@ -1068,195 +479,116 @@
             const edgeGeometry = new THREE.TorusGeometry(7, 0.3, 16, 64);
             const edgeMaterial = new THREE.MeshPhongMaterial({ color: 0x654321, shininess: 50 });
             const tableEdge = new THREE.Mesh(edgeGeometry, edgeMaterial);
-            tableEdge.rotation.x = Math.PI / 2; // Correct orientation for torus as edge
-            tableEdge.position.y = -0.05; // Adjusted position
-            tableEdge.castShadow = true;
+            tableEdge.rotation.x = Math.PI / 2; tableEdge.position.y = -0.05; tableEdge.castShadow = true;
             tableGroup.add(tableEdge);
             const feltGeometry = new THREE.CylinderGeometry(6.5, 6.5, 0.05, 64);
             const feltMaterial = new THREE.MeshLambertMaterial({ color: 0x0d4d2a });
             const tableFelt = new THREE.Mesh(feltGeometry, feltMaterial);
-            tableFelt.position.y = 0.025; // On top of table base
-            tableFelt.receiveShadow = true;
+            tableFelt.position.y = 0.025; tableFelt.receiveShadow = true;
             tableGroup.add(tableFelt);
             createTableMarkings();
             scene.add(tableGroup);
-            createPlayerPositions(); // Ensure this is defined and called
-        }
-        function createTableMarkings() { /* ... As before ... */ 
-             // Community card area outline
-            const cardAreaGeometry = new THREE.RingGeometry(1.5, 1.55, 32); // Slightly thicker
+            createPlayerPositions();
+         }
+        function createTableMarkings() { /* ... (same as your previous corrected version) ... */
+            const cardAreaGeometry = new THREE.RingGeometry(1.5, 1.55, 32); 
             const cardAreaMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
             const cardArea = new THREE.Mesh(cardAreaGeometry, cardAreaMaterial);
-            cardArea.rotation.x = -Math.PI / 2; cardArea.position.y = 0.03; // Slightly above felt
+            cardArea.rotation.x = -Math.PI / 2; cardArea.position.y = 0.03; 
             tableGroup.add(cardArea);
         }
-        function createPlayerPositions() { /* ... As before ... */ 
-            playerPositions = []; // Max 10 players
-            const radius = 5; // Radius from center for player card positions
+        function createPlayerPositions() { /* ... (same as your previous corrected version) ... */ 
+            playerPositions = [];
+            const radius = 5; 
             for (let i = 0; i < 10; i++) {
-                const angle = (i / 10) * Math.PI * 2 + Math.PI / 10; // Offset so player 0 is not straight down
+                const angle = (i / 10) * Math.PI * 2 + Math.PI / 10; 
                 playerPositions.push({
-                    angle: angle,
-                    x: Math.cos(angle) * radius,
-                    z: Math.sin(angle) * radius,
-                    cardXOffset: -0.25, // For first card
-                    cardSpacing: 0.5, // Between two cards
-                    chipX: Math.cos(angle) * (radius - 1.0), // Chips closer to center
-                    chipZ: Math.sin(angle) * (radius - 1.0),
+                    angle: angle, x: Math.cos(angle) * radius, z: Math.sin(angle) * radius,
+                    cardXOffset: -0.25, cardSpacing: 0.5,
+                    chipX: Math.cos(angle) * (radius - 1.0), chipZ: Math.sin(angle) * (radius - 1.0),
                 });
             }
         }
-        function createCardMaterials() { /* ... As before ... */ 
-             cardMaterials.back = new THREE.MeshPhongMaterial({ color: 0x2E4BC6, shininess: 30, map: createCardTexture("?", "?", true) }); // Card back texture
+        function createCardMaterials() { /* Ensure cardMaterials.back is defined if createCardTexture is complex */ 
+            cardMaterials.back = new THREE.MeshPhongMaterial({ map: createCardTexture("?", "?", true), shininess: 30 });
             ['hearts', 'diamonds', 'clubs', 'spades'].forEach(suit => {
-                // For simplicity, reuse logic or create individual textures per rank/suit
-                // This example will use a generic white front face, details added via other meshes or textures
-                cardMaterials[suit] = new THREE.MeshPhongMaterial({ color: 0xfefefe, shininess: 10 });
+                cardMaterials[suit] = new THREE.MeshPhongMaterial({ color: 0xfefefe, shininess: 10 }); // Generic front, texture applied per card
             });
         }
-
-        function createCardTexture(rank, suitName, isBack = false) {
+        function createCardTexture(rank, suitName, isBack = false) { /* ... (same as your previous corrected version) ... */ 
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 180; // Card dimensions ratio approx 2.5:3.5
-            canvas.height = 260;
-
-            // Card background
+            canvas.width = 180; canvas.height = 260;
             ctx.fillStyle = isBack ? '#2E4BC6' : '#FFFFFF';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Border
             ctx.strokeStyle = isBack ? '#FFFFFF' : '#AAAAAA';
             ctx.lineWidth = 8;
             ctx.strokeRect(0,0, canvas.width, canvas.height);
-
-
             if (!isBack) {
-                // Suit symbol and rank text
                 const suitSymbols = { 'hearts': '♥', 'diamonds': '♦', 'clubs': '♣', 'spades': '♠' };
                 const suitColor = (suitName === 'hearts' || suitName === 'diamonds') ? '#DD0000' : '#000000';
-                
-                ctx.fillStyle = suitColor;
-                ctx.font = 'bold 48px Arial';
-                ctx.textAlign = 'center';
-                
-                // Rank Top-Left
-                ctx.fillText(rank, 30, 50);
-                // Suit Top-Left
-                ctx.fillText(suitSymbols[suitName] || '', 30, 100);
-
-                // Rank Bottom-Right (rotated)
-                ctx.save();
-                ctx.translate(canvas.width - 30, canvas.height - 50);
-                ctx.rotate(Math.PI);
-                ctx.fillText(rank, 0, 0);
-                ctx.restore();
-                
-                // Suit Bottom-Right (rotated)
-                ctx.save();
-                ctx.translate(canvas.width - 30, canvas.height - 100);
-                ctx.rotate(Math.PI);
-                ctx.fillText(suitSymbols[suitName] || '', 0, 0);
-                ctx.restore();
-
-                // Large central suit symbol (optional)
-                ctx.font = 'bold 96px Arial';
-                ctx.fillText(suitSymbols[suitName] || '', canvas.width / 2, canvas.height / 2 + 20);
-
-            } else { // Back design
-                ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                ctx.beginPath();
-                ctx.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.font = 'bold 20px Orbitron';
-                ctx.fillStyle = '#FFFFFF';
-                ctx.textAlign = 'center';
-                ctx.fillText('ROYAL', canvas.width/2, canvas.height/2 - 10);
-                ctx.fillText('POKER', canvas.width/2, canvas.height/2 + 20);
+                ctx.fillStyle = suitColor; ctx.font = 'bold 48px Arial'; ctx.textAlign = 'center';
+                ctx.fillText(rank, 30, 50); ctx.fillText(suitSymbols[suitName] || '', 30, 100);
+                ctx.save(); ctx.translate(canvas.width - 30, canvas.height - 50); ctx.rotate(Math.PI); ctx.fillText(rank, 0, 0); ctx.restore();
+                ctx.save(); ctx.translate(canvas.width - 30, canvas.height - 100); ctx.rotate(Math.PI); ctx.fillText(suitSymbols[suitName] || '', 0, 0); ctx.restore();
+                ctx.font = 'bold 96px Arial'; ctx.fillText(suitSymbols[suitName] || '', canvas.width / 2, canvas.height / 2 + 20);
+            } else {
+                ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2); ctx.fill();
+                ctx.font = 'bold 20px Orbitron'; ctx.fillStyle = '#FFFFFF'; ctx.textAlign = 'center';
+                ctx.fillText('ROYAL', canvas.width/2, canvas.height/2 - 10); ctx.fillText('POKER', canvas.width/2, canvas.height/2 + 20);
             }
-
             const texture = new THREE.CanvasTexture(canvas);
             texture.needsUpdate = true;
             return texture;
         }
-
-
-        function createChipMaterials() { /* ... As before ... */ 
-            chipMaterials = {
-                1: new THREE.MeshPhongMaterial({ color: 0xFFFFFF, shininess: 50 }),    // White
-                5: new THREE.MeshPhongMaterial({ color: 0xFF0000, shininess: 50 }),    // Red  
-                25: new THREE.MeshPhongMaterial({ color: 0x00AA00, shininess: 50 }),   // Green
-                100: new THREE.MeshPhongMaterial({ color: 0x000000, shininess: 50 }),  // Black
-                500: new THREE.MeshPhongMaterial({ color: 0x800080, shininess: 50 }),  // Purple
-                1000: new THREE.MeshPhongMaterial({ color: 0xFFD700, shininess: 50 }), // Gold
-                // Add more denominations as needed
-                'default': new THREE.MeshPhongMaterial({ color: 0xFFAA00, shininess: 50 }), // Orange for other values
+        function createChipMaterials() { /* ... (same as your previous corrected version) ... */ 
+             chipMaterials = {
+                1: new THREE.MeshPhongMaterial({ color: 0xFFFFFF, shininess: 50 }), 5: new THREE.MeshPhongMaterial({ color: 0xFF0000, shininess: 50 }),
+                25: new THREE.MeshPhongMaterial({ color: 0x00AA00, shininess: 50 }), 100: new THREE.MeshPhongMaterial({ color: 0x000000, shininess: 50 }),
+                500: new THREE.MeshPhongMaterial({ color: 0x800080, shininess: 50 }), 1000: new THREE.MeshPhongMaterial({ color: 0xFFD700, shininess: 50 }),
+                'default': new THREE.MeshPhongMaterial({ color: 0xFFAA00, shininess: 50 }),
             };
         }
-        function createCard3D(cardData, position, rotationY = 0, faceUp = true) {
-            // cardData: { suit, rank, id } from server, or { suit: 'back', rank: 'back' }
+        function createCard3D(cardData, position, rotationY = 0, faceUp = true) { /* ... (same as your previous corrected version) ... */
             const cardGroup = new THREE.Group();
-            const cardWidth = 0.9;
-            const cardHeight = 1.3;
-            const cardDepth = 0.02;
+            const cardWidth = 0.9, cardHeight = 1.3, cardDepth = 0.02;
             const cardGeometry = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
-            
             const frontTexture = faceUp ? createCardTexture(cardData.rank, cardData.suit) : createCardTexture("?", "?", true);
-            const backTexture = createCardTexture("?", "?", true);
+            const backTexture = createCardTexture("?", "?", true); // Always generate back texture
             const sideMaterial = new THREE.MeshPhongMaterial({color: 0xcccccc, shininess:5});
-
             const materials = [
-                sideMaterial, // right
-                sideMaterial, // left
-                sideMaterial, // top
-                sideMaterial, // bottom
+                sideMaterial, sideMaterial, sideMaterial, sideMaterial, // right, left, top, bottom
                 new THREE.MeshPhongMaterial({ map: frontTexture, shininess: faceUp ? 10 : 30 }), // front
                 new THREE.MeshPhongMaterial({ map: backTexture, shininess: 30  })  // back
             ];
-            
             const cardMesh = new THREE.Mesh(cardGeometry, materials);
-            cardMesh.castShadow = true;
-            cardMesh.receiveShadow = true;
-            
-            cardGroup.add(cardMesh);
-            cardGroup.position.copy(position);
-            cardGroup.rotation.y = rotationY; // Rotation around Y axis (for player positions)
-            cardGroup.userData = { id: cardData.id, suit: cardData.suit, rank: cardData.rank, faceUp: faceUp }; // Store card info
-
+            cardMesh.castShadow = true; cardMesh.receiveShadow = true;
+            cardGroup.add(cardMesh); cardGroup.position.copy(position); cardGroup.rotation.y = rotationY;
+            cardGroup.userData = { id: cardData.id, suit: cardData.suit, rank: cardData.rank, faceUp: faceUp, isDealtThisHand: false }; // Added isDealtThisHand
             return cardGroup;
-        }
-        function createChip3D(value, position, stackCount = 1) { /* ... As before ... */ 
+         }
+        function createChip3D(value, position, stackCount = 1) { /* ... (same as your previous corrected version) ... */ 
             const chipGroup = new THREE.Group();
-            const chipRadius = 0.20; // Smaller chips
-            const chipHeight = 0.05;
-
-            const denomination = getChipDenomination(value); // Determine best chip color
+            const chipRadius = 0.20, chipHeight = 0.05;
+            const denomination = getChipDenomination(value);
             const chipMaterial = chipMaterials[denomination] || chipMaterials['default'];
-            
             for (let i = 0; i < stackCount; i++) {
-                const chipGeometry = new THREE.CylinderGeometry(chipRadius, chipRadius, chipHeight, 16);
-                const chip = new THREE.Mesh(chipGeometry, chipMaterial);
-                chip.position.y = i * (chipHeight + 0.005) + chipHeight/2; // Stacked with slight gap
-                chip.castShadow = true;
-                chip.receiveShadow = true;
+                const chip = new THREE.Mesh(new THREE.CylinderGeometry(chipRadius, chipRadius, chipHeight, 16), chipMaterial);
+                chip.position.y = i * (chipHeight + 0.005) + chipHeight/2; 
+                chip.castShadow = true; chip.receiveShadow = true;
                 chipGroup.add(chip);
             }
             chipGroup.position.copy(position);
             chipGroup.userData = { value: value, count: stackCount };
             return chipGroup;
         }
-        
-        function getChipDenomination(totalAmount) { // Simplified logic to pick a chip color
-            if (totalAmount >= 1000) return 1000;
-            if (totalAmount >= 500) return 500;
-            if (totalAmount >= 100) return 100;
-            if (totalAmount >= 25) return 25;
-            if (totalAmount >= 5) return 5;
-            return 1;
+        function getChipDenomination(totalAmount) { /* ... (same as your previous corrected version) ... */ 
+            if (totalAmount >= 1000) return 1000; if (totalAmount >= 500) return 500;
+            if (totalAmount >= 100) return 100; if (totalAmount >= 25) return 25;
+            if (totalAmount >= 5) return 5; return 1;
         }
-
-        function createParticleSystem() { /* ... As before ... */ 
-            const particleCount = 200; // More particles
+        function createParticleSystem() { /* ... (same as your previous corrected version) ... */
+            const particleCount = 200; 
             const particles = new THREE.BufferGeometry();
             const particlePositions = new Float32Array(particleCount * 3);
             for (let i = 0; i < particleCount * 3; i += 3) {
@@ -1270,375 +602,347 @@
             });
             particleSystem = new THREE.Points(particles, particleMaterial);
             scene.add(particleSystem);
-        }
-
-        function addMouseControls() {
-            let mouseDown = false;
-            let lastMouseX = 0, lastMouseY = 0;
-            let targetCameraRotationY = 0; // For horizontal rotation around table
-            let targetCameraDistance = 15; // For zoom
-            
+         }
+        function addMouseControls() { /* Uses camera.userData for targets */
+            let mouseDown = false, lastMouseX = 0;
             const menuPanel = document.getElementById('menuPanel');
+            const canvasEl = document.getElementById('canvas');
 
-            canvas.addEventListener('mousedown', (event) => {
-                if (menuPanel.classList.contains('hidden')) { // Only control if menu is hidden
-                    mouseDown = true;
-                    lastMouseX = event.clientX;
-                    lastMouseY = event.clientY; // Not used for Y rotation, but good to have
-                }
-            });
-            
-            document.addEventListener('mouseup', () => { // Listen on document to catch mouseup outside canvas
-                mouseDown = false;
-            });
-            
-            document.addEventListener('mousemove', (event) => { // Listen on document
-                if (mouseDown && menuPanel.classList.contains('hidden') && !cameraAnimating) {
-                    const deltaX = event.clientX - lastMouseX;
-                    targetCameraRotationY -= deltaX * 0.005; // Adjust sensitivity
-                    lastMouseX = event.clientX;
-                    lastMouseY = event.clientY;
-                }
-            });
-            
-            canvas.addEventListener('wheel', (event) => {
-                if (menuPanel.classList.contains('hidden') && !cameraAnimating) {
-                    event.preventDefault(); // Prevent page scroll
-                    targetCameraDistance += event.deltaY * 0.01;
-                    targetCameraDistance = Math.max(8, Math.min(25, targetCameraDistance)); // Clamp zoom
-                }
-            });
-            
-            // Smooth camera movement in animate loop
+            canvasEl.addEventListener('mousedown', (event) => { if (menuPanel.classList.contains('hidden')) { mouseDown = true; lastMouseX = event.clientX; } });
+            document.addEventListener('mouseup', () => { mouseDown = false; });
+            document.addEventListener('mousemove', (event) => { if (mouseDown && menuPanel.classList.contains('hidden') && !cameraAnimating) { camera.userData.targetRotationY -= (event.clientX - lastMouseX) * 0.005; lastMouseX = event.clientX; } });
+            canvasEl.addEventListener('wheel', (event) => { if (menuPanel.classList.contains('hidden') && !cameraAnimating) { event.preventDefault(); camera.userData.targetDistance += event.deltaY * 0.01; camera.userData.targetDistance = Math.max(8, Math.min(25, camera.userData.targetDistance)); } });
         }
-
         function animate() {
             requestAnimationFrame(animate);
-            
-            // Smooth camera update if not animating via GSAP
-            if (!cameraAnimating) {
-                const currentRotationY = camera.rotation.y; // This is not how orbit works
-                // Need to calculate position based on targetCameraRotationY and targetCameraDistance
-                camera.position.x = Math.sin(targetCameraRotationY) * targetCameraDistance;
-                camera.position.z = Math.cos(targetCameraRotationY) * targetCameraDistance;
-                camera.position.y = THREE.MathUtils.lerp(camera.position.y, 12, 0.1); // Smooth Y adjustment if needed
-                camera.lookAt(0, 0, 0);
+            if (!cameraAnimating) { // Smooth camera movement for mouse controls
+                camera.position.x = THREE.MathUtils.lerp(camera.position.x, Math.sin(camera.userData.targetRotationY) * camera.userData.targetDistance, 0.1);
+                camera.position.z = THREE.MathUtils.lerp(camera.position.z, Math.cos(camera.userData.targetRotationY) * camera.userData.targetDistance, 0.1);
+                camera.position.y = THREE.MathUtils.lerp(camera.position.y, 12 + (camera.userData.targetDistance - 15) * 0.2, 0.1);
+                camera.lookAt(0,0,0);
             }
-
-
-            if (tableGroup) tableGroup.rotation.y += 0.0003; // Slower rotation
+            if (tableGroup) tableGroup.rotation.y += 0.0003;
             if (particleSystem) particleSystem.rotation.y += 0.0005;
-            
-            // Animate community cards slightly
-            communityCardObjects.forEach((cardMesh, index) => {
-                if (cardMesh) {
-                    // cardMesh.rotation.y = Math.sin(Date.now() * 0.0005 + index) * 0.05;
-                    cardMesh.position.y = 0.05 + Math.sin(Date.now() * 0.001 + index * 0.5) * 0.02;
-                }
-            });
-            
+            communityCardObjects.forEach((cardMesh, index) => { if (cardMesh) { cardMesh.position.y = 0.05 + Math.sin(Date.now() * 0.001 + index * 0.5) * 0.02; } });
             renderer.render(scene, camera);
         }
 
-        // function animateCardDeal(...) // Replaced by direct GSAP animations in updateTableVisuals
-        // function animateChipStack(...) // Replaced by direct GSAP animations in updateTableVisuals
-
+        // --- 3D Object Management ---
         function updateTableVisuals() {
-            clearTable3DObjects(); // Clear old 3D objects
+            consoleLog("updateTableVisuals START");
+            if (!currentGameState) { consoleLog("updateTableVisuals: No currentGameState."); return; }
             
-            if (!currentGameState) return;
-            
-            const cardBaseY = 0.05; // Y position for cards on felt
+            const cardBaseY = 0.05;
 
-            // Community cards
+            // Soft clear: remove objects not present in new state OR explicitly marked for removal
+            // Community Cards
+            const currentCommunityCardIds = new Set(currentGameState.community_cards.map(c => c.id));
+            communityCardObjects = communityCardObjects.filter(obj => {
+                if (!currentCommunityCardIds.has(obj.userData.id)) {
+                    scene.remove(obj); return false;
+                }
+                return true;
+            });
             currentGameState.community_cards.forEach((cardData, index) => {
-                const position = new THREE.Vector3(-2 + index * 1, cardBaseY, 0);
-                const cardObj = createCard3D(cardData, position, 0, true);
-                scene.add(cardObj);
-                communityCardObjects.push(cardObj);
+                if (!communityCardObjects.find(obj => obj.userData.id === cardData.id)) {
+                    const position = new THREE.Vector3(-2 + index * 1, cardBaseY, 0);
+                    const cardObj = createCard3D(cardData, position, 0, true);
+                    scene.add(cardObj); communityCardObjects.push(cardObj);
+                    gsap.from(cardObj.scale, { duration: 0.5, x: 0, y:0, z:0, ease: "back.out(1.7)", delay: index * 0.1 });
+                    gsap.from(cardObj.position, {duration: 0.5, y: cardBaseY + 2, ease: "power2.out", delay: index * 0.1});
+                }
+            });
+
+            // Player Cards - More careful update/creation/removal
+            const activePlayerIdsInState = new Set(Object.keys(currentGameState.players));
+            for (const playerId in playerCardObjects3D) { // Remove cards for players no longer in state
+                if (!activePlayerIdsInState.has(playerId)) {
+                    playerCardObjects3D[playerId].forEach(obj => scene.remove(obj));
+                    delete playerCardObjects3D[playerId];
+                }
+            }
+
+            Object.values(currentGameState.players).forEach((player, pIndex) => {
+                if (pIndex >= playerPositions.length) return; // Should not happen if max_players respected
+                const pos3D = playerPositions[pIndex];
+                if (!playerCardObjects3D[player.id]) playerCardObjects3D[player.id] = [];
                 
-                gsap.from(cardObj.scale, { duration: 0.5, x: 0, y: 0, z: 0, ease: "back.out(1.7)", delay: index * 0.15 });
-                gsap.from(cardObj.position, {duration: 0.5, y: cardBaseY + 2, ease: "power2.out", delay: index * 0.15});
-            });
-            
-            // Player cards and bets
-            const playersArray = Object.values(currentGameState.players);
-            playersArray.forEach((player, pIndex) => {
-                if (pIndex < playerPositions.length) { // Ensure we have a predefined 3D position
-                    const pos3D = playerPositions[pIndex];
-                    
-                    // Player cards
-                    if (player.cards && player.cards.length > 0) {
-                        playerCardObjects3D[player.id] = [];
-                        player.cards.forEach((cardData, cardIndex) => {
-                            const cardPosition = new THREE.Vector3(
-                                pos3D.x + (cardData.suit === 'back' ? 0 : pos3D.cardXOffset + cardIndex * pos3D.cardSpacing), // Center back cards, spread revealed
-                                cardBaseY,
-                                pos3D.z
-                            );
-                            // Rotate cards to face center slightly, or align with player position
-                            const cardRotationY = pos3D.angle + Math.PI/2; // Align with player position radius
+                const currentPlayerCard3DObjects = playerCardObjects3D[player.id];
+                const newPlayerCardData = player.cards || [];
 
-                            const cardObj = createCard3D(cardData, cardPosition, cardRotationY, cardData.suit !== 'back');
-                            scene.add(cardObj);
-                            playerCardObjects3D[player.id].push(cardObj);
-
-                            // Animation for dealing cards
-                            if (cardObj.userData.suit === 'back' || !cardObj.userData.isDealt) { // Only animate if new or back
-                                cardObj.userData.isDealt = true; // Mark as dealt to avoid re-animating same cards
-                                const dealDelay = pIndex * 0.1 + cardIndex * 0.05;
-                                gsap.from(cardObj.position, { duration: 0.6, x:0, y: cardBaseY + 3, z:0, ease: "circ.out", delay: dealDelay });
-                                gsap.from(cardObj.rotation, { duration: 0.6, y: cardRotationY + Math.PI, z: Math.PI, ease: "circ.out", delay: dealDelay });
-                            }
-                        });
-                    }
-                    
-                    // Player chip bets (total_bet_this_hand indicates chips pushed forward)
-                    if (player.total_bet_this_hand > 0) {
-                        const chipPosition = new THREE.Vector3(pos3D.chipX, 0, pos3D.chipZ); // Y is 0, chip height handled by createChip3D
-                        const stackCount = Math.min(Math.ceil(player.total_bet_this_hand / getChipDenomination(player.total_bet_this_hand)), 10); // Max 10 chips visual
-                        const chipStack = createChip3D(player.total_bet_this_hand, chipPosition, stackCount);
-                        scene.add(chipStack);
-                        chipStackObjects[`player_bet_${player.id}`] = chipStack;
-                        gsap.from(chipStack.scale, {duration: 0.4, x:0, y:0, z:0, ease: "elastic.out(1, 0.5)"});
+                // Remove 3D cards that are no longer in the player's hand data
+                for (let i = currentPlayerCard3DObjects.length - 1; i >= 0; i--) {
+                    const obj3D = currentPlayerCard3DObjects[i];
+                    if (!newPlayerCardData.find(pd => pd.id === obj3D.userData.id && obj3D.userData.id !== undefined) && 
+                        !newPlayerCardData.find((pd, idx) => pd.suit === "back" && obj3D.userData.suit === "back" && idx === i ) ) { // Check for back cards by index match
+                        scene.remove(obj3D);
+                        currentPlayerCard3DObjects.splice(i, 1);
+                         consoleLog(`Removed card 3D obj for player ${player.name}`);
                     }
                 }
+
+                newPlayerCardData.forEach((cardData, cardIndex) => {
+                    let cardObj = currentPlayerCard3DObjects.find(obj => obj.userData.id === cardData.id && cardData.id !== undefined);
+                    if (!cardObj && cardData.suit === "back" && currentPlayerCard3DObjects[cardIndex]?.userData.suit === "back") {
+                        cardObj = currentPlayerCard3DObjects[cardIndex]; // Re-use back card at same index
+                    }
+
+                    if (cardObj) { // Existing card object
+                        if (cardData.suit !== 'back' && !cardObj.userData.faceUp) { // Flip it
+                            consoleLog(`Flipping card ${cardData.rank}${cardData.suit} for ${player.name}`);
+                            const frontTexture = createCardTexture(cardData.rank, cardData.suit);
+                            cardObj.children[0].material[4].map = frontTexture;
+                            cardObj.children[0].material[4].needsUpdate = true;
+                            cardObj.userData.faceUp = true;
+                            cardObj.userData.suit = cardData.suit; cardObj.userData.rank = cardData.rank;
+                            gsap.to(cardObj.rotation, { duration: 0.5, y: cardObj.rotation.y + Math.PI, ease: "power2.inOut" });
+                        }
+                    } else { // New card to deal
+                        consoleLog(`Dealing new card (${cardData.rank}${cardData.suit}) to ${player.name}`);
+                        const cardPosition = new THREE.Vector3(pos3D.x + pos3D.cardXOffset + cardIndex * pos3D.cardSpacing, cardBaseY, pos3D.z);
+                        const cardRotationY = pos3D.angle + Math.PI/2;
+                        const newCardObj = createCard3D(cardData, cardPosition, cardRotationY, cardData.suit !== 'back');
+                        scene.add(newCardObj);
+                        playerCardObjects3D[player.id][cardIndex] = newCardObj; // Assign to specific index
+                        const dealDelay = pIndex * 0.1 + cardIndex * 0.05;
+                        gsap.from(newCardObj.position, { duration: 0.6, x:0, y: cardBaseY + 3, z:0, ease: "circ.out", delay: dealDelay });
+                        gsap.from(newCardObj.rotation, { duration: 0.6, y: cardRotationY + Math.PI, z: Math.PI, ease: "circ.out", delay: dealDelay });
+                    }
+                });
             });
-            
-            // Main pot chips
-            if (currentGameState.pot > 0) { // This pot is sum of all side_pots + main for display
-                const potDisplayAmount = currentGameState.side_pots.reduce((sum, sp) => sum + sp.amount, 0);
-                if(potDisplayAmount > 0) {
-                    const potPosition = new THREE.Vector3(0, 0, 1.5); // Central pot area
-                    const stackCount = Math.min(Math.ceil(potDisplayAmount / getChipDenomination(potDisplayAmount)), 20);
-                    const potChips = createChip3D(potDisplayAmount, potPosition, stackCount);
-                    scene.add(potChips);
-                    chipStackObjects["main_pot"] = potChips;
-                    gsap.from(potChips.scale, {duration: 0.5, x:0, y:0, z:0, ease: "elastic.out(1, 0.3)"});
-                }
-            }
-            // Dealer button
-            if(currentGameState.dealer_player_id && currentGameState.players[currentGameState.dealer_player_id]){
-                const dealerPlayerIndex = playersArray.findIndex(p => p.id === currentGameState.dealer_player_id);
-                if(dealerPlayerIndex !== -1 && dealerPlayerIndex < playerPositions.length){
-                    const dealerPos3D = playerPositions[dealerPlayerIndex];
-                    // Position button slightly in front of player's cards
-                    const buttonPos = new THREE.Vector3(
-                        dealerPos3D.x + Math.cos(dealerPos3D.angle) * 0.7, 
-                        cardBaseY, 
-                        dealerPos3D.z + Math.sin(dealerPos3D.angle) * 0.7
-                    );
-                    if(dealerButtonMesh) scene.remove(dealerButtonMesh);
-                    dealerButtonMesh = new THREE.Mesh(
-                        new THREE.CylinderGeometry(0.2, 0.2, 0.05, 16),
-                        new THREE.MeshPhongMaterial({color: 0xffffff, emissive: 0x333333})
-                    );
-                    dealerButtonMesh.position.copy(buttonPos);
-                    // Add 'D' text on button
-                    scene.add(dealerButtonMesh);
-                }
-            }
 
-        }
-
-        function clearTable3DObjects() {
-            communityCardObjects.forEach(obj => scene.remove(obj));
-            communityCardObjects = [];
-            
-            Object.values(playerCardObjects3D).forEach(cardsList => cardsList.forEach(obj => scene.remove(obj)));
-            playerCardObjects3D = {};
-            
+            // Chip Stacks (Pot and Player Bets) - Simple remove and recreate for now
             Object.values(chipStackObjects).forEach(obj => scene.remove(obj));
             chipStackObjects = {};
 
-            if(dealerButtonMesh) scene.remove(dealerButtonMesh);
-            dealerButtonMesh = null;
+            // Main Pot
+            const totalPotForDisplay = currentGameState.side_pots.reduce((sum, sp) => sum + sp.amount, 0) + currentGameState.pot; // Server's room.pot is main pot before side pot distribution
+             if (currentGameState.pot > 0) { // Use room.pot which is current total before distribution
+                const potPosition = new THREE.Vector3(0, 0, 1.5);
+                const stackCount = Math.min(Math.ceil(currentGameState.pot / getChipDenomination(currentGameState.pot)), 20);
+                const potChips = createChip3D(currentGameState.pot, potPosition, stackCount);
+                scene.add(potChips); chipStackObjects["main_pot"] = potChips;
+                gsap.from(potChips.scale, {duration: 0.5, x:0, y:0, z:0, ease: "elastic.out(1, 0.3)"});
+            }
+
+
+            // Player Bets
+            Object.values(currentGameState.players).forEach((player, pIndex) => {
+                if (pIndex < playerPositions.length && player.current_bet > 0) { // current_bet for this round's chips
+                    const pos3D = playerPositions[pIndex];
+                    const chipPosition = new THREE.Vector3(pos3D.chipX, 0, pos3D.chipZ);
+                    const stackCount = Math.min(Math.ceil(player.current_bet / getChipDenomination(player.current_bet)), 10);
+                    const chipStack = createChip3D(player.current_bet, chipPosition, stackCount);
+                    scene.add(chipStack); chipStackObjects[`player_bet_${player.id}`] = chipStack;
+                    gsap.from(chipStack.scale, {duration: 0.4, x:0, y:0, z:0, ease: "elastic.out(1, 0.5)"});
+                }
+            });
+            
+            // Dealer Button
+            if(dealerButtonMesh) scene.remove(dealerButtonMesh); dealerButtonMesh = null;
+            if(currentGameState.dealer_player_id && currentGameState.players[currentGameState.dealer_player_id]){
+                const dealerPlayer = currentGameState.players[currentGameState.dealer_player_id];
+                // Find player's index in the playerPositions array for consistent 3D placement
+                const dealerPlayerIndex = Object.values(currentGameState.players).findIndex(p => p.id === dealerPlayer.id);
+
+                if(dealerPlayerIndex !== -1 && dealerPlayerIndex < playerPositions.length){
+                    const dealerPos3D = playerPositions[dealerPlayerIndex];
+                    const buttonPos = new THREE.Vector3(
+                        dealerPos3D.x + Math.cos(dealerPos3D.angle + Math.PI/2) * 0.6, // Offset slightly along card line
+                        cardBaseY + 0.01, 
+                        dealerPos3D.z + Math.sin(dealerPos3D.angle + Math.PI/2) * 0.6
+                    );
+                    dealerButtonMesh = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.25, 0.25, 0.05, 16), // Slightly larger
+                        new THREE.MeshPhongMaterial({color: 0xffffff, emissive: 0x111111}) // White, slightly emissive
+                    );
+                    // TODO: Add "D" text texture to button
+                    dealerButtonMesh.position.copy(buttonPos);
+                    dealerButtonMesh.rotation.x = -Math.PI / 2; // Lay flat
+                    scene.add(dealerButtonMesh);
+                }
+            }
+            consoleLog("updateTableVisuals COMPLETE");
         }
 
-        // WebSocket Connection Management
+        function clearAll3DObjects() { // Full clear, e.g., on leaving room
+            consoleLog("clearAll3DObjects: Clearing all 3D game elements.");
+            communityCardObjects.forEach(obj => scene.remove(obj)); communityCardObjects = [];
+            Object.values(playerCardObjects3D).forEach(list => list.forEach(obj => scene.remove(obj))); playerCardObjects3D = {};
+            Object.values(chipStackObjects).forEach(obj => scene.remove(obj)); chipStackObjects = {};
+            if(dealerButtonMesh) scene.remove(dealerButtonMesh); dealerButtonMesh = null;
+        }
+
+        // --- WebSocket Connection ---
         function connectWebSocket() {
-            if (isLoadingOrReconnecting) return; // Prevent multiple connection attempts overlaying notifications
+            consoleLog("connectWebSocket START");
+            if (isLoadingOrReconnecting && ws && ws.readyState === WebSocket.CONNECTING) {
+                consoleLog("connectWebSocket: Already connecting, aborting new attempt.");
+                return;
+            }
             isLoadingOrReconnecting = true;
             showLoadingScreen('Connecting to Royal Poker 3D...');
 
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/ws`;
+            consoleLog("WebSocket URL:", wsUrl);
             
+            if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+                consoleLog("connectWebSocket: Closing existing WebSocket connection before reconnecting.");
+                ws.close(); // Ensure old one is closed before creating new
+            }
+
             ws = new WebSocket(wsUrl);
             
             ws.onopen = function() {
-                console.log('Connected to advanced poker server');
+                consoleLog('WebSocket ONOPEN: Connection established.');
                 isConnected = true;
                 isLoadingOrReconnecting = false;
-                hideLoadingScreen();
-                showMainMenu(); // Show menu after initial connect
-                // Welcome notification sent by server
+                hideLoadingScreen(); // Hide loading screen *after* 'connected' message from server potentially
+                // Server will send 'connected' message with player_id
             };
             
             ws.onmessage = function(event) {
-                const message = JSON.parse(event.data);
-                handleServerMessage(message);
+                try {
+                    const message = JSON.parse(event.data);
+                    consoleLog('WebSocket ONMESSAGE:', message.type, message.data);
+                    handleServerMessage(message);
+                } catch (e) {
+                    consoleError("Error parsing server message or in handleServerMessage:", e, event.data);
+                }
             };
             
-            ws.onclose = function() {
-                console.log('Disconnected from server');
+            ws.onclose = function(event) { // event has code, reason, wasClean
+                consoleLog(`WebSocket ONCLOSE: Disconnected. Code: ${event.code}, Reason: '${event.reason}', Clean: ${event.wasClean}`);
                 isConnected = false;
-                clearTable3DObjects(); // Clear table on disconnect
-                if (!isLoadingOrReconnecting) { // Only show reconnecting message if not already trying
-                    showLoadingScreen('Connection lost. Reconnecting...');
+                clearAll3DObjects();
+                showMainMenu(); // Go to main menu on disconnect
+                animateCameraToMenu();
+
+                if (!isLoadingOrReconnecting) { 
+                    showLoadingScreen('Connection lost. Reconnecting in 5s...');
                     showNotification('Connection lost. Attempting to reconnect...', 'error');
                 }
                 isLoadingOrReconnecting = true; 
                 
-                // Attempt to reconnect after a delay
                 setTimeout(() => {
-                    isLoadingOrReconnecting = false; // Allow next attempt to show notification if needed
-                    connectWebSocket();
-                }, 5000); // Increased reconnect delay
+                    if (!isConnected) { // Only attempt if not already reconnected by another means
+                        consoleLog("Attempting to reconnect WebSocket...");
+                        isLoadingOrReconnecting = false; // Allow next attempt to show its own loading/messages
+                        connectWebSocket(); // Recursive call to reconnect
+                    } else {
+                        isLoadingOrReconnecting = false; // Was reconnected in the meantime
+                        hideLoadingScreen();
+                    }
+                }, 5000);
             };
             
             ws.onerror = function(error) {
-                console.error('WebSocket error:', error);
-                if (!isLoadingOrReconnecting) { // Avoid duplicate error messages if already trying to reconnect
-                    showNotification('Connection error. Check console.', 'error');
-                    // Potentially trigger reconnect logic similar to onclose if appropriate
-                }
-                 isLoadingOrReconnecting = false; // Allow trying again
+                consoleError('WebSocket ONERROR:', error);
+                // isLoadingOrReconnecting = false; // Allow reconnect attempt via onclose
+                // showNotification('WebSocket connection error. See console.', 'error');
+                // onclose will typically be called after onerror
             };
+            consoleLog("connectWebSocket END (WebSocket object created, events attached)");
         }
 
         function sendMessage(action, payload = {}) {
             if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ action, payload }));
+                const message = { action, payload };
+                consoleLog('WebSocket SEND:', message);
+                ws.send(JSON.stringify(message));
             } else {
-                showNotification('Not connected to server. Please wait.', 'error');
+                consoleError('sendMessage: WebSocket not open. State:', ws ? ws.readyState : 'null');
+                showNotification('Not connected. Please wait or refresh.', 'error');
             }
         }
 
+        // --- Server Message Handling ---
         function handleServerMessage(message) {
-            console.log('Received:', message);
-            
             switch (message.type) {
                 case 'connected':
-                    myPlayerId = message.data.player_id; // Store my player ID
-                    showNotification(`Welcome to Royal Poker 3D! Your ID: ${myPlayerId.substring(0,6)}`, 'success');
+                    myPlayerId = message.data.player_id;
+                    consoleLog(`Connection successful. My Player ID: ${myPlayerId}`);
+                    hideLoadingScreen(); // Now safe to hide loading
+                    showMainMenu(); // Show menu after initial connection
+                    showNotification(`Welcome to Royal Poker 3D!`, 'success');
                     break;
-                    
-                case 'room_created': // Server sends this after successful create + join
+                case 'room_created':
                 case 'room_joined':
                     currentRoomCode = message.data.room_code;
-                    isPlayerInGame = true; // Assumes joining means playing, spectate is separate
+                    isPlayerInGame = true;
                     showGameInterface();
                     showNotification(`Joined room: ${currentRoomCode}`, 'success');
                     animateCameraToTable();
+                    document.getElementById('currentRoomCodeDisplay').textContent = currentRoomCode;
                     break;
-                    
                 case 'spectating':
                     currentRoomCode = message.data.room_code;
-                    isPlayerInGame = false;
-                    showGameInterface();
+                    isPlayerInGame = false; // Spectator is not a player
+                    showGameInterface(); // Show game UI but disable actions
                     showNotification(`Spectating room: ${currentRoomCode}`, 'info');
                     animateCameraToTable();
+                    document.getElementById('currentRoomCodeDisplay').textContent = currentRoomCode;
                     break;
-                    
                 case 'room_left':
                     showMainMenu();
                     showNotification('You have left the room.', 'info');
                     animateCameraToMenu();
-                    currentRoomCode = null;
-                    currentGameState = null;
-                    isPlayerInGame = false;
-                    clearTable3DObjects();
+                    currentRoomCode = null; currentGameState = null; isPlayerInGame = false;
+                    clearAll3DObjects();
+                    document.getElementById('currentRoomCodeDisplay').textContent = '-';
                     break;
-                    
                 case 'game_state':
                     currentGameState = message.data;
-                    updateGameInterface(); // This will call updateTableVisuals internally
+                    updateGameInterface(); // This updates UI and 3D
                     break;
-                    
-                case 'game_started':
-                    showNotification('Game started! Good luck!', 'success');
-                    // Game state update will handle visuals
-                    break;
-                
-                case 'action_accepted': // Optional: server can send this for quick feedback
-                    // showNotification('Action accepted!', 'info', 1000); // Short duration
-                    break;
-                    
                 case 'room_list':
                     updateRoomList(message.data.rooms);
                     break;
-                    
                 case 'hand_history':
                     updateHandHistory(message.data.history);
                     break;
-                    
                 case 'error':
+                    consoleError('Server error message:', message.message);
                     showNotification('Error: ' + message.message, 'error');
                     break;
-                
-                case 'game_paused':
-                    showNotification('Game paused by owner.', 'warning');
-                    break;
-                case 'game_resumed':
-                    showNotification('Game resumed.', 'info');
-                    break;
-                case 'player_kicked':
-                    showNotification('A player was kicked by the owner.', 'info');
-                    // If *I* was kicked, server should send a room_left or specific "kicked" message.
-                    // For now, rely on game_state removing the player.
-                    break;
-
                 default:
-                    console.warn('Unknown message type from server:', message.type);
+                    consoleLog('Unknown message type from server:', message.type);
             }
         }
-
-        // Camera Animation Functions
+        
+        // --- Camera Animations ---
         function animateCameraToTable() {
+            consoleLog("Animating camera to table view");
             cameraAnimating = true;
-            targetCameraRotationY = 0; // Reset rotation for default table view
-            targetCameraDistance = 15;
-            gsap.to(camera.position, {
-                duration: 1.5, // Faster animation
-                x: 0, y: 12, z: 15,
-                ease: "power2.inOut",
-                onUpdate: () => camera.lookAt(0,0,0),
-                onComplete: () => cameraAnimating = false
-            });
+            camera.userData.targetRotationY = 0; camera.userData.targetDistance = 15;
+            gsap.to(camera.position, { duration: 1.2, x: 0, y: 12, z: 15, ease: "power2.inOut", onUpdate: () => camera.lookAt(0,0,0), onComplete: () => cameraAnimating = false });
         }
-
         function animateCameraToMenu() {
+            consoleLog("Animating camera to menu view");
             cameraAnimating = true;
-            targetCameraRotationY = Math.PI / 8; // Slight angle for menu
-            targetCameraDistance = 20;
-            gsap.to(camera.position, {
-                duration: 1.5,
-                x: 5, y: 15, z: 20, // Example menu camera position
-                ease: "power2.inOut",
-                onUpdate: () => camera.lookAt(0,0,0),
-                onComplete: () => cameraAnimating = false
-            });
+            camera.userData.targetRotationY = Math.PI / 8; camera.userData.targetDistance = 20;
+            gsap.to(camera.position, { duration: 1.2, x: 5, y: 15, z: 20, ease: "power2.inOut", onUpdate: () => camera.lookAt(0,0,0), onComplete: () => cameraAnimating = false });
         }
 
-        // UI Management Functions
+        // --- UI Management ---
         function hideLoadingScreen() {
+            consoleLog("hideLoadingScreen called");
             const loadingScreen = document.getElementById('loadingScreen');
-            gsap.to(loadingScreen, {
-                duration: 0.5, // Faster fade
-                opacity: 0,
-                onComplete: () => loadingScreen.style.display = 'none'
-            });
+            if (loadingScreen.style.display !== 'none') {
+                 gsap.to(loadingScreen, { duration: 0.5, opacity: 0, onComplete: () => { loadingScreen.style.display = 'none'; consoleLog("Loading screen hidden."); }});
+            }
         }
-
         function showLoadingScreen(text = 'Loading casino experience...') {
+            consoleLog("showLoadingScreen called with text:", text);
             const loadingScreen = document.getElementById('loadingScreen');
-            loadingScreen.querySelector('.loading-text').textContent = text;
+            const textElement = loadingScreen.querySelector('.loading-text');
+            if(textElement) textElement.textContent = text;
             loadingScreen.style.display = 'flex';
             gsap.to(loadingScreen, { duration: 0.3, opacity: 1 });
         }
-
         function showMainMenu() {
+            consoleLog("showMainMenu called");
             document.getElementById('menuPanel').classList.remove('hidden');
             document.getElementById('gameHUD').classList.add('hidden');
             document.getElementById('potDisplay').classList.add('hidden');
@@ -1647,306 +951,334 @@
             document.getElementById('playerCardsDisplay').classList.add('hidden');
             document.getElementById('tournamentInfo').classList.add('hidden');
             document.getElementById('actionTimer').classList.add('hidden');
-            
-            currentRoomCode = null;
-            currentGameState = null;
-            isPlayerInGame = false;
-            clearTable3DObjects();
+            document.getElementById('pauseOverlay').classList.add('hidden');
+            clearAll3DObjects(); // Clear 3D scene when going to menu
         }
-
         function showGameInterface() {
+            consoleLog("showGameInterface called");
             document.getElementById('menuPanel').classList.add('hidden');
             document.getElementById('gameHUD').classList.remove('hidden');
             document.getElementById('chatPanel').classList.remove('hidden');
             document.getElementById('playerCardsDisplay').classList.remove('hidden');
-            
-            if (currentRoomCode) {
-                document.getElementById('currentRoom').textContent = currentRoomCode;
-            }
-            // Pot, actions, etc., shown based on game state
+            // Pot, actions, tournament info, timer visibility will be handled by updateGameInterface based on state
         }
 
         function updateGameInterface() {
-            if (!currentGameState) return;
+            if (!currentGameState) { consoleLog("updateGameInterface: No currentGameState."); return; }
+            consoleLog("updateGameInterface: Updating UI for phase:", currentGameState.phase);
 
+            document.getElementById('currentRoomCodeDisplay').textContent = currentGameState.room_code || '-';
             document.getElementById('phaseText').textContent = currentGameState.phase.replace(/_/g, ' ').toUpperCase();
-            document.getElementById('handNumber').textContent = currentGameState.hand_number;
-            document.getElementById('betToMatch').textContent = currentGameState.current_bet_to_match.toLocaleString();
+            document.getElementById('handNumber').textContent = currentGameState.hand_number || '0';
+            document.getElementById('betToMatch').textContent = (currentGameState.current_bet_to_match || 0).toLocaleString();
+            
+            const myPlayerState = currentGameState.players[myPlayerId];
+            document.getElementById('moneyAmount').textContent = myPlayerState ? myPlayerState.money.toLocaleString() : 'N/A';
 
+            // Pot Display
             const potDisplayEl = document.getElementById('potDisplay');
-            const totalPotForDisplay = currentGameState.side_pots.reduce((sum, sp) => sum + sp.amount, 0);
+            // Server's room.pot IS the current main pot, side_pots are separate.
+            // For display, sum up everything that will be distributed.
+            const totalPotValue = currentGameState.pot + currentGameState.side_pots.reduce((sum, sp) => sum + sp.amount, 0);
 
-            if (totalPotForDisplay > 0) {
+            if (totalPotValue > 0) {
                 potDisplayEl.classList.remove('hidden');
-                document.getElementById('potAmount').textContent = totalPotForDisplay.toLocaleString();
-                
-                const sidePotsDisplayEl = document.getElementById('sidePotsDisplay');
-                if (currentGameState.side_pots && currentGameState.side_pots.length > 1) { // Show only if actual side pots exist
-                    sidePotsDisplayEl.innerHTML = currentGameState.side_pots
-                        .map((sp, i) => `Side ${i+1}: ${sp.amount.toLocaleString()} (${sp.winning_hand || 'Pending'})`)
-                        .join('<br>');
-                } else {
-                    sidePotsDisplayEl.innerHTML = '';
-                }
+                document.getElementById('potAmount').textContent = totalPotValue.toLocaleString();
+                const sidePotsHtml = currentGameState.side_pots
+                    .map((sp, i) => `Side ${i+1}: ${sp.amount.toLocaleString()} ${sp.winning_hand ? `(${sp.winning_hand})` : ''}`)
+                    .join('<br>');
+                document.getElementById('sidePotsDisplay').innerHTML = sidePotsHtml;
             } else {
                 potDisplayEl.classList.add('hidden');
             }
 
-            const myPlayerData = currentGameState.players[myPlayerId];
-            if (myPlayerData) {
-                document.getElementById('moneyAmount').textContent = myPlayerData.money.toLocaleString();
+            // Tournament Info
+            const tInfo = currentGameState.tournament_info;
+            const tInfoEl = document.getElementById('tournamentInfo');
+            if (tInfo) {
+                tInfoEl.classList.remove('hidden');
+                document.getElementById('tournamentLevel').textContent = tInfo.level;
+                document.getElementById('tournamentBlinds').textContent = `${currentGameState.settings.small_blind}/${currentGameState.settings.big_blind}`;
+                document.getElementById('tournamentAnte').textContent = currentGameState.settings.ante;
+                updateTournamentTimer(tInfo.next_blind_increase_time);
             } else {
-                 document.getElementById('moneyAmount').textContent = 'N/A'; // Spectator or not found
+                tInfoEl.classList.add('hidden');
+                if(tournamentNextBlindIncreaseInterval) clearInterval(tournamentNextBlindIncreaseInterval);
+            }
+            
+            // Action Timer
+            const timerEl = document.getElementById('actionTimer');
+            if (currentGameState.can_act && currentGameState.time_left_for_action > 0 && !currentGameState.paused) {
+                timerEl.classList.remove('hidden');
+                updateActionTimerDisplay(Math.round(currentGameState.time_left_for_action));
+            } else {
+                timerEl.classList.add('hidden');
+                if (actionTimerInterval) clearInterval(actionTimerInterval);
             }
 
-
-            if (currentGameState.tournament_info) { /* ... As before ... */ } 
-            else { document.getElementById('tournamentInfo').classList.add('hidden'); }
-
-            if (currentGameState.can_act && currentGameState.time_left_for_action > 0) { /* ... As before ... */ } 
-            else { document.getElementById('actionTimer').classList.add('hidden'); }
-            
+            // Start Game Button
             const startBtn = document.getElementById('startGameBtn');
-            const canStart = currentGameState.phase === 'waiting' &&
-                             Object.values(currentGameState.players).filter(p => p.status !== 'eliminated' && p.status !== 'sitting_out').length >= (currentGameState.settings.min_players || 2) &&
-                             isPlayerInGame; // Only players can start
-            startBtn.style.display = canStart ? 'block' : 'none';
-            
-            const pauseBtn = document.getElementById('pauseGameBtn');
-             // Only room owner can pause/resume. Assuming owner_id is part of game_state or player object.
-             // For now, enable if player. For better UX, check if self is owner.
-            pauseBtn.style.display = isPlayerInGame ? 'block' : 'none';
-            pauseBtn.textContent = currentGameState.paused ? "▶️ Resume Game" : "⏸️ Pause Game";
+            const canStartGame = currentGameState.phase === 'waiting' &&
+                                 myPlayerState && // Must be a player
+                                 currentGameState.players[myPlayerId]?.id === currentGameState.owner_id && // Must be owner
+                                 Object.values(currentGameState.players).filter(p => p.status !== 'eliminated' && p.status !== 'sitting_out' && p.money > 0).length >= currentGameState.settings.min_players;
+            startBtn.style.display = canStartGame ? 'block' : 'none';
 
+            // Pause Overlay
+            const pauseOverlay = document.getElementById('pauseOverlay');
+            if (currentGameState.paused) {
+                pauseOverlay.classList.remove('hidden');
+                document.getElementById('pauseReasonText').textContent = currentGameState.pause_reason || "Game Paused";
+            } else {
+                pauseOverlay.classList.add('hidden');
+            }
 
-            if (currentGameState.can_act && currentGameState.available_actions && isPlayerInGame) {
+            // Action Buttons Panel
+            if (currentGameState.can_act && currentGameState.available_actions && !currentGameState.paused && isPlayerInGame) {
                 document.getElementById('actionsPanel').classList.remove('hidden');
                 updateActionButtons();
             } else {
                 document.getElementById('actionsPanel').classList.add('hidden');
             }
 
-            updatePlayerCardsUI(); // Renamed to avoid conflict
+            updatePlayerCardsUI();
             updateChat();
-            updateTableVisuals(); // Update 3D scene based on new state
-            
-            if (currentGameState.paused && currentGameState.pause_reason) {
-                showNotification(`Game paused: ${currentGameState.pause_reason}`, 'warning', 5000);
-            }
+            updateTableVisuals(); // Update 3D graphics
         }
-        
+
         function updateActionButtons() {
-            if (!currentGameState || !currentGameState.available_actions) return;
+            if (!currentGameState || !currentGameState.available_actions || !myPlayerId || !currentGameState.players[myPlayerId]) {
+                // Hide all if no data
+                ['foldBtn', 'checkBtn', 'callBtn', 'raiseBtn', 'allInBtn'].forEach(id => {
+                     const btn = document.getElementById(id); if(btn) { btn.style.display = 'none'; btn.disabled = true; }
+                });
+                document.querySelector('.raise-controls').style.display = 'none';
+                return;
+            }
             const actions = currentGameState.available_actions;
+            const myPlayer = currentGameState.players[myPlayerId];
             
             ['foldBtn', 'checkBtn', 'callBtn', 'raiseBtn', 'allInBtn'].forEach(id => {
-                const btn = document.getElementById(id);
-                if(btn) { btn.disabled = true; btn.style.display = 'none';}
+                const btn = document.getElementById(id); if(btn) {btn.style.display = 'none'; btn.disabled = true;}
             });
-            document.querySelector('.raise-controls').style.display = 'none'; // Hide raise slider group initially
+            document.querySelector('.raise-controls').style.display = 'none';
 
             actions.forEach(action => {
-                const btn = document.getElementById(action.action.toLowerCase() + 'Btn'); // e.g. foldBtn
+                const btnId = action.action.toLowerCase() + 'Btn'; // e.g., "fold" -> "foldBtn"
+                const btn = document.getElementById(btnId);
                 if (btn) {
-                    btn.disabled = false;
-                    btn.style.display = 'inline-block';
+                    btn.style.display = 'inline-block'; btn.disabled = false;
                     if (action.action === 'call') {
                         document.getElementById('callAmount').textContent = action.amount.toLocaleString();
                     } else if (action.action === 'all_in') {
-                        btn.innerHTML = `🔥 ALL IN ${action.amount.toLocaleString()}`;
+                        btn.innerHTML = `🔥 ALL IN $${action.amount.toLocaleString()}`; // amount is player's full stack
                     } else if (action.action === 'raise') {
-                        document.querySelector('.raise-controls').style.display = 'flex'; // Show raise group
+                        document.querySelector('.raise-controls').style.display = 'flex';
                         const raiseSlider = document.getElementById('raiseSlider');
                         const raiseAmountInput = document.getElementById('raiseAmountInput');
                         
-                        // Calculate total bet "Raise To" amount. Action.amount is the raise ON TOP of call.
-                        const callAmountForRaise = currentGameState.current_bet_to_match - (currentGameState.players[myPlayerId]?.current_bet || 0);
-                        const minTotalBet = currentGameState.current_bet_to_match + action.min_amount;
-                        const maxTotalBet = (currentGameState.players[myPlayerId]?.current_bet || 0) + callAmountForRaise + action.max_amount;
+                        // action.min_amount and action.max_amount are the raise ON TOP of call
+                        const callAmountForRaise = Math.max(0, currentGameState.current_bet_to_match - myPlayer.current_bet);
+                        const minTotalBetRaiseTo = myPlayer.current_bet + callAmountForRaise + action.min_amount;
+                        const maxTotalBetRaiseTo = myPlayer.current_bet + callAmountForRaise + action.max_amount;
 
-                        raiseSlider.min = minTotalBet;
-                        raiseSlider.max = maxTotalBet;
-                        raiseAmountInput.min = minTotalBet;
-                        raiseAmountInput.max = maxTotalBet;
+                        raiseSlider.min = minTotalBetRaiseTo;
+                        raiseSlider.max = maxTotalBetRaiseTo;
+                        raiseAmountInput.min = minTotalBetRaiseTo;
+                        raiseAmountInput.max = maxTotalBetRaiseTo;
                         
-                        // Set initial value to minimum valid raise if current input is too low or not set
-                        if (!raiseAmountInput.value || parseInt(raiseAmountInput.value) < minTotalBet) {
-                            raiseAmountInput.value = minTotalBet;
+                        let currentInputValue = parseInt(raiseAmountInput.value);
+                        if (isNaN(currentInputValue) || currentInputValue < minTotalBetRaiseTo) {
+                            raiseAmountInput.value = minTotalBetRaiseTo;
+                        } else if (currentInputValue > maxTotalBetRaiseTo) {
+                            raiseAmountInput.value = maxTotalBetRaiseTo;
                         }
-                        raiseSlider.value = raiseAmountInput.value;
+                        raiseSlider.value = raiseAmountInput.value; // Sync slider
+                        document.getElementById('raiseBtn').disabled = false; // Enable actual raise button
                     }
+                } else {
+                    consoleError(`Button with ID ${btnId} not found for action ${action.action}`);
                 }
             });
         }
 
-
-        function updatePlayerCardsUI() { // Renamed
+        function updatePlayerCardsUI() { /* ... (same as your previous corrected version) ... */ 
             const playerCardsContainer = document.getElementById('playerCardsDisplay');
             playerCardsContainer.innerHTML = '';
-            
             if (!currentGameState || !currentGameState.players) return;
-            
             Object.values(currentGameState.players).forEach(player => {
                 const playerCardDiv = document.createElement('div');
                 playerCardDiv.className = 'player-card';
                 if (player.is_current_player) playerCardDiv.classList.add('current-player');
                 if (player.status === 'folded') playerCardDiv.classList.add('folded');
                 if (player.status === 'all_in') playerCardDiv.classList.add('all-in');
-                if (player.id === myPlayerId) playerCardDiv.style.borderColor = 'cyan'; // Highlight self
+                if (player.id === myPlayerId) playerCardDiv.style.borderColor = 'cyan';
 
                 let nameDisplay = player.name;
                 if(player.is_ai) nameDisplay += ' <span class="ai-badge">(AI)</span>';
                 
                 playerCardDiv.innerHTML = `
-                    <div class="player-avatar" style="background-color: ${player.color}">${player.name.charAt(0).toUpperCase()}</div>
+                    <div class="player-avatar" style="background-color: ${player.color}; color: ${getContrastingTextColor(player.color)};">${player.name.charAt(0).toUpperCase()}</div>
                     <div class="player-name">${nameDisplay}</div>
                     <div class="player-money">$${player.money.toLocaleString()}</div>
                     ${player.current_bet > 0 ? `<div style="color: var(--primary-gold); font-size: 0.8rem;">Bet: $${player.current_bet.toLocaleString()}</div>` : ''}
-                    ${player.last_action ? `<div class="player-action">${player.last_action.toUpperCase()} ${player.last_action_amount > 0 ? '$'+player.last_action_amount : ''}</div>` : ''}
+                    ${player.last_action ? `<div class="player-action">${player.last_action.toUpperCase()} ${player.last_action_amount > 0 && player.last_action !== 'check' && player.last_action !== 'fold' ? '$'+player.last_action_amount.toLocaleString() : ''}</div>` : ''}
                     ${player.is_dealer ? '<div style="position: absolute; top: -8px; left: -8px; background: gold; color: black; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold; box-shadow: 0 0 5px black;">D</div>' : ''}
+                     ${player.is_small_blind ? '<div style="position: absolute; top: -8px; right: -8px; background: lightblue; color: black; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold;">SB</div>' : ''}
+                    ${player.is_big_blind ? '<div style="position: absolute; top: -8px; right: -8px; background: darkblue; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold;">BB</div>' : ''}
                 `;
                 playerCardsContainer.appendChild(playerCardDiv);
-                gsap.from(playerCardDiv, { duration: 0.3, opacity:0, y: 10, ease: "power2.out", delay: 0.1 }); // Subtle animation
             });
         }
+         function getContrastingTextColor(hexColor) { // Simple contrast function
+            if (!hexColor) return '#000000';
+            const r = parseInt(hexColor.slice(1, 3), 16);
+            const g = parseInt(hexColor.slice(3, 5), 16);
+            const b = parseInt(hexColor.slice(5, 7), 16);
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            return luminance > 0.5 ? '#000000' : '#FFFFFF';
+        }
 
-        function updateChat() { /* ... As before, but ensure scroll logic is robust ... */ 
+
+        function updateChat() { /* ... (same as your previous corrected version, ensure scroll to bottom) ... */ 
             if (!currentGameState || !currentGameState.chat_messages) return;
             const chatMessagesEl = document.getElementById('chatMessages');
-            const isScrolledToBottom = chatMessagesEl.scrollHeight - chatMessagesEl.clientHeight <= chatMessagesEl.scrollTop + 1;
+            const shouldScroll = chatMessagesEl.scrollHeight - chatMessagesEl.clientHeight <= chatMessagesEl.scrollTop + 10; // 10px tolerance
 
-            // Simple clear and redraw. For performance with many messages, consider incremental updates.
             chatMessagesEl.innerHTML = ''; 
             currentGameState.chat_messages.forEach(msg => {
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'chat-message';
                 msgDiv.style.borderLeftColor = msg.player_color || '#ffffff';
                 
-                // Sanitize message content before inserting as HTML to prevent XSS
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'chat-player-name';
-                nameSpan.style.color = msg.player_color || '#ffffff';
-                nameSpan.textContent = msg.player_name + ': ';
-
-                const messageSpan = document.createElement('span');
-                messageSpan.textContent = msg.message;
-
-                const timeSpan = document.createElement('span');
-                timeSpan.className = 'chat-timestamp';
-                timeSpan.textContent = msg.formatted_time;
+                const nameSpan = document.createElement('span'); nameSpan.className = 'chat-player-name';
+                nameSpan.style.color = msg.player_color || '#ffffff'; nameSpan.textContent = msg.player_name + ': ';
+                const messageSpan = document.createElement('span'); messageSpan.textContent = msg.message;
+                const timeSpan = document.createElement('span'); timeSpan.className = 'chat-timestamp'; timeSpan.textContent = msg.formatted_time;
                 
-                msgDiv.appendChild(nameSpan);
-                msgDiv.appendChild(messageSpan);
-                msgDiv.appendChild(timeSpan);
+                msgDiv.appendChild(nameSpan); msgDiv.appendChild(messageSpan); msgDiv.appendChild(timeSpan);
                 chatMessagesEl.appendChild(msgDiv);
             });
-            if (isScrolledToBottom) {
-                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-            }
+            if (shouldScroll) { chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight; }
         }
+        function updateTournamentTimer(nextLevelTimeStr) { /* ... (same as your previous corrected version, uses tournamentTimerValue) ... */
+            if (tournamentNextBlindIncreaseInterval) clearInterval(tournamentNextBlindIncreaseInterval);
+            const timerValueEl = document.getElementById('tournamentTimerValue');
+            if (!nextLevelTimeStr || !timerValueEl) return;
 
-        function updateTournamentTimer(nextLevelTimeStr) { /* ... As before ... */ }
+            const targetTime = new Date(nextLevelTimeStr).getTime();
+            tournamentNextBlindIncreaseInterval = setInterval(() => {
+                const now = new Date().getTime();
+                const diff = targetTime - now;
+                if (diff <= 0) {
+                    timerValueEl.textContent = "Level Up!";
+                    clearInterval(tournamentNextBlindIncreaseInterval);
+                } else {
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    timerValueEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
+            }, 1000);
+         }
+        function updateActionTimerDisplay(secondsLeft) { /* ... (same as your previous corrected version, uses timerSeconds) ... */
+            if (actionTimerInterval) clearInterval(actionTimerInterval);
+            const timerSecondsEl = document.getElementById('timerSeconds');
+            if (!timerSecondsEl) return;
+            
+            let remaining = Math.max(0, secondsLeft);
+            timerSecondsEl.textContent = remaining;
+            actionTimerInterval = setInterval(() => {
+                remaining--;
+                if (remaining < 0) {
+                    clearInterval(actionTimerInterval);
+                    timerSecondsEl.textContent = '0';
+                    document.getElementById('actionTimer').classList.add('hidden'); // Hide when done
+                } else {
+                    timerSecondsEl.textContent = remaining;
+                }
+            }, 1000);
+         }
 
-        // Game Action Functions
-        function createQuickRoom() {
-            const playerName = document.getElementById('playerName').value.trim() || 'Player';
-            sendMessage('create_room', { 
-                player_name: playerName,
-                game_mode: 'cash_game',
-                small_blind: 25, big_blind: 50, max_players: 8, ai_players: 1 // Default 1 AI for quick game
-            });
-        }
 
-        function createCustomRoom() {
-            const payload = {
-                player_name: document.getElementById('playerName').value.trim() || 'Player',
-                room_name: document.getElementById('roomName').value.trim() || null,
-                game_mode: document.getElementById('gameMode').value,
-                max_players: parseInt(document.getElementById('maxPlayers').value),
-                small_blind: parseInt(document.getElementById('smallBlind').value),
-                big_blind: parseInt(document.getElementById('bigBlind').value),
-                buy_in: parseInt(document.getElementById('buyIn').value),
-                password: document.getElementById('roomPassword').value.trim() || null,
-                ai_players: parseInt(document.getElementById('aiPlayers').value)
-            };
-            sendMessage('create_room', payload);
-        }
-
-        function joinRoom() { /* ... As before, ensure player_name is sent ... */ }
-        function spectateRoom() { /* ... As before ... */ }
-        function leaveRoom() { /* ... As before ... */ }
-        function startGame() { /* ... As before ... */ }
-        function pauseGame() { /* ... As before ... */ }
-
-        function playerAction(actionTypeStr) { // actionTypeStr is 'fold', 'check', etc.
+        // --- Game Actions (Menu) ---
+        function createQuickRoom() { sendMessage('create_room', { player_name: document.getElementById('playerName').value.trim() || 'Player', game_mode: 'cash_game', small_blind: 25, big_blind: 50, max_players: 8, ai_players: 1 }); }
+        function createCustomRoom() { sendMessage('create_room', { player_name: document.getElementById('playerName').value.trim() || 'Player', room_name: document.getElementById('roomName').value.trim() || null, game_mode: document.getElementById('gameMode').value, max_players: parseInt(document.getElementById('maxPlayers').value), small_blind: parseInt(document.getElementById('smallBlind').value), big_blind: parseInt(document.getElementById('bigBlind').value), buy_in: parseInt(document.getElementById('buyIn').value), password: document.getElementById('roomPassword').value.trim() || null, ai_players: parseInt(document.getElementById('aiPlayers').value) }); }
+        function joinRoomFromInput() { const code = document.getElementById('roomCodeInput').value.trim().toUpperCase(); if(code) sendMessage('join_room', { room_code: code, player_name: document.getElementById('playerName').value.trim() || 'Player', password: prompt("Enter room password (if any):") }); else showNotification("Please enter a room code.", "warning");}
+        function spectateRoomFromInput() { const code = document.getElementById('roomCodeInput').value.trim().toUpperCase(); if(code) sendMessage('spectate_room', { room_code: code }); else showNotification("Please enter a room code to spectate.", "warning");}
+        
+        // --- In-Game Actions ---
+        function leaveRoom() { if(confirm("Are you sure you want to leave the room?")) sendMessage('leave_room'); }
+        function startGame() { sendMessage('start_game'); }
+        function playerAction(actionTypeStr) {
             let payload = { action_type: actionTypeStr };
             if (actionTypeStr === 'raise') {
                 const raiseToAmount = parseInt(document.getElementById('raiseAmountInput').value);
-                // Server expects "amount" to be the raise ON TOP of a call.
-                // Client UI has "Raise To Amount". Calculate difference.
-                const currentMyBet = currentGameState.players[myPlayerId]?.current_bet || 0;
-                const callAmount = currentGameState.current_bet_to_match - currentMyBet;
-                const raiseAmountOnTopOfCall = raiseToAmount - (currentMyBet + callAmount);
+                if (isNaN(raiseToAmount) || !currentGameState || !myPlayerId || !currentGameState.players[myPlayerId]) {
+                    showNotification("Invalid raise amount or game state error.", "error"); return;
+                }
+                const myPlayer = currentGameState.players[myPlayerId];
+                const callAmountNeeded = Math.max(0, currentGameState.current_bet_to_match - myPlayer.current_bet);
+                const raiseAmountOnTopOfCall = raiseToAmount - (myPlayer.current_bet + callAmountNeeded);
 
-                if (raiseAmountOnTopOfCall < (currentGameState.min_raise_amount || 0) && (currentMyBet + callAmount + raiseAmountOnTopOfCall) < currentGameState.players[myPlayerId]?.money) {
-                     // If raise is less than min_raise_amount AND not an all-in
-                    showNotification(`Raise must be at least to $${currentMyBet + callAmount + (currentGameState.min_raise_amount || 0)} (or All-In)`, 'error');
+                if (raiseAmountOnTopOfCall < (currentGameState.min_raise_amount || 0) && 
+                    (myPlayer.current_bet + callAmountNeeded + raiseAmountOnTopOfCall) < myPlayer.money) {
+                     showNotification(`Raise must be at least $${currentGameState.min_raise_amount || 0} on top of call (total: $${myPlayer.current_bet + callAmountNeeded + (currentGameState.min_raise_amount || 0)}) or All-In`, 'error', 5000);
                     return;
                 }
-                payload.amount = Math.max(0, raiseAmountOnTopOfCall); // Ensure not negative
+                payload.amount = Math.max(0, raiseAmountOnTopOfCall);
             }
             sendMessage('player_action', payload);
         }
-
-
-        function sendChat() { /* ... As before ... */ }
-        function toggleChat() { /* ... As before ... */ }
-
-        function updateRaiseAmountInput() { // Slider moves, update input box
-            document.getElementById('raiseAmountInput').value = document.getElementById('raiseSlider').value;
-        }
-        function updateRaiseSliderFromInput() { // Input box changes, update slider
-            const inputVal = parseInt(document.getElementById('raiseAmountInput').value);
-            const slider = document.getElementById('raiseSlider');
-            if (inputVal >= parseInt(slider.min) && inputVal <= parseInt(slider.max)) {
-                slider.value = inputVal;
-            } else if (inputVal < parseInt(slider.min)) {
-                 slider.value = slider.min;
-                 document.getElementById('raiseAmountInput').value = slider.min;
-            } else if (inputVal > parseInt(slider.max)) {
-                slider.value = slider.max;
-                document.getElementById('raiseAmountInput').value = slider.max;
+        function sendChat() { const input = document.getElementById('chatInput'); if (input.value.trim()) { sendMessage('send_chat_message', { message: input.value.trim() }); input.value = ''; } }
+        function toggleChat() { chatCollapsed = !chatCollapsed; document.getElementById('chatMessages').style.display = chatCollapsed ? 'none' : 'block'; document.getElementById('chatToggle').textContent = chatCollapsed ? '+' : '−'; }
+        function updateRaiseAmountInput() { document.getElementById('raiseAmountInput').value = document.getElementById('raiseSlider').value; }
+        function updateRaiseSliderFromInput() {
+            const inputVal = parseInt(document.getElementById('raiseAmountInput').value); const slider = document.getElementById('raiseSlider');
+            const min = parseInt(slider.min); const max = parseInt(slider.max);
+            if (!isNaN(inputVal)) {
+                if (inputVal >= min && inputVal <= max) slider.value = inputVal;
+                else if (inputVal < min) { slider.value = min; document.getElementById('raiseAmountInput').value = min; }
+                else { slider.value = max; document.getElementById('raiseAmountInput').value = max; }
             }
         }
 
-        // Room List Functions
-        function showRoomList() { /* ... As before ... */ }
-        function hideRoomList() { /* ... As before ... */ }
-        function refreshRoomList() { /* ... As before ... */ }
-        function updateRoomList(rooms) { /* ... As before, maybe add AI count if available in room data ... */ }
-        function joinRoomByCode(roomCode) { /* ... As before ... */ }
-        function spectateRoomByCode(roomCode) { /* ... As before ... */ }
+        // --- Room List & Hand History Modals ---
+        function showRoomList() { document.getElementById('roomListModal').classList.remove('hidden'); refreshRoomList(); }
+        function hideRoomList() { document.getElementById('roomListModal').classList.add('hidden'); }
+        function refreshRoomList() { sendMessage('get_room_list'); document.getElementById('roomList').innerHTML = '<div style="text-align: center; color: #ccc; padding: 20px;">Fetching rooms...</div>'; }
+        function updateRoomList(rooms) {
+            const listEl = document.getElementById('roomList');
+            if (!rooms || rooms.length === 0) { listEl.innerHTML = '<div style="text-align: center; color: #ccc; padding: 20px;">No public rooms available.</div>'; return; }
+            listEl.innerHTML = rooms.map(room => `
+                <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${room.name || room.code}</strong> (${room.game_mode.replace('_',' ')})<br>
+                        <small>Players: ${room.players}/${room.max_players} (+${room.ai_players} AI) | Blinds: ${room.blinds}</small>
+                    </div>
+                    <div>
+                        <button class="action-button" onclick="joinRoomByCode('${room.code}')">Join</button>
+                        <button class="action-button" onclick="spectateRoomByCode('${room.code}')" style="margin-left: 5px;">Spectate</button>
+                    </div>
+                </div>`).join('');
+        }
+        function joinRoomByCode(roomCode) { hideRoomList(); sendMessage('join_room', { room_code: roomCode, player_name: document.getElementById('playerName').value.trim() || 'Player', password: prompt("Enter room password (if any):") });}
+        function spectateRoomByCode(roomCode) { hideRoomList(); sendMessage('spectate_room', { room_code: roomCode });}
 
-        // Hand History Functions
-        function showHandHistory() { /* ... As before ... */ }
-        function hideHandHistory() { /* ... As before ... */ }
-        function updateHandHistory(history) {
+        function showHandHistory() { document.getElementById('handHistoryModal').classList.remove('hidden'); sendMessage('get_hand_history'); document.getElementById('handHistoryContent').innerHTML = '<div style="text-align: center; color: #ccc; padding: 20px;">Fetching history...</div>';}
+        function hideHandHistory() { document.getElementById('handHistoryModal').classList.add('hidden'); }
+        function updateHandHistory(history) { /* ... (same as your previous corrected version) ... */ 
             const content = document.getElementById('handHistoryContent');
-            if (!history || history.length === 0) {
-                content.innerHTML = '<div style="text-align: center; color: #ccc; padding: 20px;">No hand history available.</div>';
-                return;
-            }
+            if (!history || history.length === 0) { content.innerHTML = '<div style="text-align: center; color: #ccc; padding: 20px;">No hand history available.</div>'; return; }
             content.innerHTML = history.map(hand => {
                 let playerActionsHtml = hand.players.map(p => {
-                    let actionsStr = p.actions.map(act => `${act.phase}: ${act.action} ${act.amount > 0 ? '$'+act.amount : ''}`).join(', ');
-                    return `<div><strong>${p.name}</strong> (Bet: $${p.total_bet_this_hand}): ${actionsStr || 'No actions'} ${p.amount_won > 0 ? `- Won $${p.amount_won}` : ''}</div>`;
+                    let actionsStr = p.actions.map(act => `${act.phase}: ${act.action} ${act.amount > 0 ? '$'+act.amount.toLocaleString() : ''}`).join(', ');
+                    return `<div><strong>${p.name}</strong> (Bet: $${p.total_bet_this_hand.toLocaleString()}) Cards: ${p.cards.map(c => c.rank+c.suit[0].toUpperCase()).join(' ') || 'N/A'}<br/>Actions: ${actionsStr || 'No actions'} ${p.amount_won_this_hand > 0 ? `- Won $${p.amount_won_this_hand.toLocaleString()}` : ''}</div>`;
                 }).join('');
 
-                let winnersHtml = Object.entries(hand.winners || {}).map(([pId, winInfo]) => {
+                let winnersHtml = Object.entries(hand.winners_summary || {}).map(([pId, winInfo]) => {
                      const winnerPlayer = hand.players.find(p => p.id === pId);
-                     return `<div>${winnerPlayer ? winnerPlayer.name : 'Unknown'} won $${winInfo.amount_won} (${winInfo.hand_description})</div>`;
+                     return `<div>${winnerPlayer ? winnerPlayer.name : 'Unknown'} won $${winInfo.amount_won.toLocaleString()} (${winInfo.hand_description})</div>`;
                 }).join('');
-
 
                 return `
                 <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 15px; margin-bottom: 10px; border: 1px solid var(--primary-gold);">
@@ -1955,48 +1287,73 @@
                         <span style="color: #ccc; font-size: 0.9rem;">${new Date(hand.timestamp).toLocaleTimeString()}</span>
                     </div>
                     <div><strong>Community:</strong> ${hand.community_cards.map(c => c.rank + c.suit[0].toUpperCase()).join(' ') || 'N/A'}</div>
-                    <div><strong>Total Pot:</strong> $${hand.total_pot_distributed.toLocaleString()}</div>
-                    <div style="margin-top: 5px;"><strong>Player Actions & Bets:</strong>${playerActionsHtml}</div>
+                    <div><strong>Total Pot Distributed:</strong> $${hand.total_pot_distributed.toLocaleString()}</div>
+                    <div style="margin-top: 5px;"><strong>Players:</strong>${playerActionsHtml}</div>
                      <div style="margin-top: 5px;"><strong>Winners:</strong>${winnersHtml || 'N/A'}</div>
                 </div>`;
             }).join('');
         }
 
-
-        // Notification System
-        function showNotification(message, type = 'info', duration = 4000) {
+        // --- Notifications ---
+        function showNotification(message, type = 'info', duration = 4000) { /* ... (same as your previous corrected version) ... */
             const container = document.getElementById('notificationContainer');
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
             notification.textContent = message;
-            
             container.appendChild(notification);
-            
             gsap.from(notification, {duration: 0.5, x: "100%", opacity: 0, ease: "power2.out"});
-
             setTimeout(() => {
-                gsap.to(notification, {
-                    duration: 0.5, x: "100%", opacity: 0, ease: "power2.in",
-                    onComplete: () => {
-                        if (notification.parentNode) notification.parentNode.removeChild(notification);
-                    }
-                });
+                gsap.to(notification, { duration: 0.5, x: "100%", opacity: 0, ease: "power2.in", onComplete: () => { if (notification.parentNode) notification.parentNode.removeChild(notification); } });
             }, duration);
-        }
+         }
 
-        // Handle window resize
-        window.addEventListener('resize', function() { /* ... As before ... */ });
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(event) { /* ... As before, ensure button IDs match ... */ });
-
-        // Initialize everything
-        window.addEventListener('load', function() {
-            initThreeJS(); // Setup 3D scene
-            connectWebSocket(); // Connect to server
-            // Loading screen is shown by connectWebSocket if needed
+        // --- Event Listeners ---
+        window.addEventListener('resize', function() { if(camera && renderer) { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); }});
+        document.addEventListener('keydown', function(event) {
+            if (document.activeElement.tagName === 'INPUT') return; // Don't trigger shortcuts if typing
+            if (!currentGameState || !currentGameState.can_act || currentGameState.paused) return;
+            const actions = currentGameState.available_actions.map(a => a.action);
+            if (event.key === 'f' && actions.includes('fold')) playerAction('fold');
+            else if (event.key === 'c' && actions.includes('check')) playerAction('check');
+            else if (event.key === 'x' && actions.includes('call')) playerAction('call'); // 'x' for call
+            else if (event.key === 'r' && actions.includes('raise')) { /* Focus raise input or trigger min raise? For now, no direct key for raise amount */ }
+            else if (event.key === 'a' && actions.includes('all_in')) playerAction('all_in');
         });
 
-        // Add CSS animations for timer (already in HTML <style>)
+        // --- Initial Load ---
+        window.addEventListener('load', function() {
+            consoleLog("Window 'load' event triggered.");
+            const loadingTextElement = document.getElementById('loadingScreen').querySelector('.loading-text');
+            
+            if (!loadingTextElement) { consoleError("FATAL: '.loading-text' element not found."); alert("Critical UI Error."); return; }
+            
+            loadingTextElement.textContent = "STEP 1: JavaScript Running.";
+            consoleLog("STEP 1: JavaScript Running.");
+
+            try {
+                if (typeof THREE === 'undefined' || typeof gsap === 'undefined') {
+                    throw new Error("Three.js or GSAP library not loaded. Check CDN links.");
+                }
+                initThreeJS(); // This is synchronous for setup
+                loadingTextElement.textContent = "STEP 2: 3D Scene Initialized.";
+                consoleLog("STEP 2: 3D Scene Initialized.");
+            } catch (e) {
+                consoleError("Error during initThreeJS or library load:", e);
+                loadingTextElement.textContent = "ERROR in 3D Setup: " + e.message.substring(0, 100);
+                showNotification("3D Engine failed to load. Try refreshing. " + e.message.substring(0,50), "error", 10000);
+                return;
+            }
+
+            try {
+                connectWebSocket(); // This is asynchronous
+                // showLoadingScreen inside connectWebSocket will update text to "Connecting..."
+                consoleLog("STEP 3: connectWebSocket() called.");
+            } catch (e) {
+                consoleError("Error calling connectWebSocket():", e);
+                loadingTextElement.textContent = "ERROR calling connectWebSocket: " + e.message.substring(0,100);
+                showNotification("WebSocket connection failed to initiate. " + e.message.substring(0,50), "error", 10000);
+            }
+        });
     </script>
 </body>
 </html>
