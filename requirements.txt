@@ -1,0 +1,5 @@
+# requirements.txt
+fastapi==0.95.2
+uvicorn[standard]==0.24.0
+redis==4.5.1
+python-dotenv==1.0.0
