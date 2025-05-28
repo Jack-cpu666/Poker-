@@ -1860,30 +1860,7 @@ if __name__ == "__main__":
     # The current uvicorn.run(app, ...) is fine if app is defined at the top level.
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
-```
 
-**`ADVANCED_HTML_TEMPLATE` (Inside `poker_server.py` or as a separate file loaded by an endpoint)**
-
-Key changes to JavaScript and HTML:
-1.  **Main Menu Restructure (HTML & CSS):**
-    *   HTML for `#menuPanel` changed to match the screenshot's layout (Player Setup, Quick Play, Custom Game with AI Players input).
-    *   CSS might need slight tweaks if the new structure breaks alignment, but I'll try to keep it minimal.
-2.  **Fix Main Menu Mouse Issue (JS):**
-    *   In `addMouseControls()`, camera mouse interactions (drag, wheel) will be disabled if the `#menuPanel` is visible.
-3.  **Fix Chat Input Overlap (CSS):**
-    *   Changed `.chat-panel` height to `max-height: 40vh;` and made `#chatMessages` `flex: 1;` to be more responsive.
-4.  **Fix Excessive Notifications (JS):**
-    *   A flag `isLoadingOrReconnecting` will prevent multiple "Loading..." or "Reconnecting..." notifications if one is already active.
-5.  **AI Player Integration (JS):**
-    *   `createCustomRoom()` now reads and sends `ai_players` count.
-    *   `updatePlayerCards()` displays an "(AI)" badge next to AI player names if `player.is_ai` is true in the game state.
-6.  **Loading Screen:**
-    *   The loading text on `showLoadingScreen` is now passed as an argument.
-7.  **General JS:**
-    *   `GAME_UPDATE_RATE` in JS matches the Python backend for consistency if needed (though JS animation is Three.js `requestAnimationFrame`).
-    *   Slight adjustment to player card animation timing.
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
