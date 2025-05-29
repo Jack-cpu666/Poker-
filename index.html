@@ -550,26 +550,29 @@
             font-family: 'Cinzel', serif;
         }
 
-        /* Enhanced Action Panels */
-        .actions-panel {
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 90vw;
+        /* Enhanced Action Buttons Side Panel */
+        .action-buttons-side-panel {
+            bottom: 200px; /* Vertically align with bet controls, adjust as needed */
+            right: 30px;   /* Position on the right side of the screen */
+            max-width: 240px; /* Adjust based on button text and desired panel width */
             z-index: 600;
+            display: flex;
+            flex-direction: column; /* Stack buttons vertically */
+            gap: 15px; /* Space between buttons */
         }
+
+        .action-buttons-side-panel .premium-button {
+            width: 100%; /* Make buttons take the full width of the panel's content area */
+            margin: 0;   /* Reset any conflicting margins */
+        }
+
 
         /* Enhanced Betting Controls Positioning */
         .bet-panel-custom-location {
-            bottom: 200px; /* Adjust this value for precise vertical alignment */
-                           /* Player hands are at bottom: 180px */
+            bottom: 200px;
             left: 30px;
-            max-width: 380px; /* Similar to Game HUD or Chat Panel width */
-            z-index: 600;     /* Ensures it's above player hands (400) and chat (500) */
+            max-width: 380px;
+            z-index: 600;
         }
 
         /* Enhanced Betting Controls */
@@ -577,14 +580,9 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            /* background: var(--glass-bg); */ /* REMOVED */
-            /* padding: 20px; */             /* REMOVED */
-            /* border-radius: 15px; */       /* REMOVED */
-            /* margin-bottom: 20px; */       /* REMOVED */
             flex-wrap: wrap;
             justify-content: center;
-            /* border: 1px solid rgba(255, 215, 0, 0.3); */ /* REMOVED */
-            width: 100%; /* ADDED */
+            width: 100%;
         }
 
 
@@ -1095,16 +1093,28 @@
                 width: 95vw;
                 max-height: 45vh;
                 top: auto;
-                bottom: 200px;
+                bottom: 280px; /* Adjusted to make space for action buttons */
                 left: 2.5vw;
                 right: 2.5vw;
             }
 
-            .actions-panel {
+            .action-buttons-side-panel {
                 bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                right: auto;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
                 gap: 12px;
-                padding: 0 15px;
+                max-width: 90vw;
+                padding: 15px; /* Override ui-panel padding if needed for mobile */
             }
+
+            .action-buttons-side-panel .premium-button {
+                 width: auto;
+            }
+
 
             .premium-button {
                 padding: 12px 20px;
@@ -1113,7 +1123,7 @@
             }
 
             .player-hands {
-                bottom: 220px;
+                bottom: 220px; /* May need adjustment if actions panel below is too tall */
                 gap: 15px;
                 padding: 0 15px;
             }
@@ -1134,11 +1144,11 @@
             }
 
             .bet-panel-custom-location {
-                bottom: 240px; /* Adjust for mobile */
+                bottom: 150px; /* Adjusted to be above action buttons */
                 left: 50%;
                 transform: translateX(-50%);
                 width: 90vw;
-                max-width: 90vw; /* Ensure it doesn't get too small or too big */
+                max-width: 90vw;
             }
 
             .bet-controls {
@@ -1158,14 +1168,27 @@
                 padding: 15px;
             }
 
-            .premium-button {
+            .action-buttons-side-panel {
+                gap: 8px; /* Tighter gap for very small screens */
+            }
+            
+            .action-buttons-side-panel .premium-button {
+                 padding: 10px 18px;
+                 font-size: 0.85rem;
+                 min-width: 100px;
+            }
+
+
+            .premium-button { /* General premium button adjustments for smallest screens */
                 padding: 10px 18px;
                 font-size: 0.85rem;
                 min-width: 100px;
             }
 
+
             .chat-panel {
                 max-height: 40vh;
+                bottom: 260px; /* Further adjustment */
             }
 
             .player-hand {
@@ -1406,7 +1429,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div id="actionsPanel" class="actions-panel hidden">
+            <div id="actionsPanel" class="ui-panel action-buttons-side-panel hidden">
                 <button class="premium-button button-hit" onclick="playerAction('hit')" id="hitBtn">👆 Hit</button>
                 <button class="premium-button button-stand" onclick="playerAction('stand')" id="standBtn">✋ Stand</button>
                 <button class="premium-button button-double" onclick="playerAction('double_down')" id="doubleBtn">⚡ Double</button>
@@ -2489,12 +2512,12 @@
                 const btnId = actionData.action + 'Btn';
                 const btn = document.getElementById(btnId);
                 if (btn) {
-                    btn.style.display = 'inline-block';
+                    btn.style.display = 'inline-block'; // or 'block' if they are full width in a column
                     btn.disabled = false;
 
                     if (typeof gsap !== 'undefined') {
                         gsap.fromTo(btn,
-                            { opacity: 0, scale: 0.8, y: 30 },
+                            { opacity: 0, scale: 0.8, y: 30 }, // y:30 might be too much for vertical stack, adjust if needed
                             {
                                 opacity: 1,
                                 scale: 1,
@@ -3006,18 +3029,35 @@
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 consoleLog("Window resized - updated renderer");
             }
-             // Re-evaluate betting panel position on resize for mobile responsiveness
+             // Re-evaluate panel positions on resize for mobile responsiveness
+            const betPanel = document.getElementById('betControls');
+            const actionPanel = document.getElementById('actionsPanel');
+
             if (window.innerWidth <= 768) {
-                const betPanel = document.getElementById('betControls');
                 if (betPanel && !betPanel.classList.contains('hidden')) {
                     betPanel.style.left = '50%';
                     betPanel.style.transform = 'translateX(-50%)';
+                     betPanel.style.bottom = '150px'; // Mobile specific
+                }
+                if (actionPanel && !actionPanel.classList.contains('hidden')) {
+                    actionPanel.style.left = '50%';
+                    actionPanel.style.transform = 'translateX(-50%)';
+                    actionPanel.style.right = 'auto';
+                    actionPanel.style.bottom = '30px'; // Mobile specific
+                    actionPanel.style.flexDirection = 'row';
                 }
             } else {
-                const betPanel = document.getElementById('betControls');
                  if (betPanel && !betPanel.classList.contains('hidden')) {
                     betPanel.style.left = '30px';
                     betPanel.style.transform = 'none';
+                    betPanel.style.bottom = '200px'; // Desktop specific
+                }
+                if (actionPanel && !actionPanel.classList.contains('hidden')) {
+                    actionPanel.style.left = 'auto';
+                    actionPanel.style.transform = 'none';
+                    actionPanel.style.right = '30px';
+                    actionPanel.style.bottom = '200px'; // Desktop specific
+                    actionPanel.style.flexDirection = 'column';
                 }
             }
         });
@@ -3105,6 +3145,9 @@
 
                 // Create floating particles for visual appeal
                 createFloatingParticles();
+                 // Initial panel positioning based on screen size
+                window.dispatchEvent(new Event('resize'));
+
 
                 consoleLog("🎰 Royal Blackjack 3D initialization sequence completed successfully");
 
