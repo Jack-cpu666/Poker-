@@ -198,6 +198,9 @@
             left: 20px; 
             max-width: 350px; 
             z-index: 800;
+            max-height: 40vh; /* ADDED: Restrict max height to 40% of viewport height */
+                               /* This should be enough for its content and prevent overreach */
+                               /* It will scroll if content (e.g. two buttons) exceeds this */
         }
 
         .hud-item {
