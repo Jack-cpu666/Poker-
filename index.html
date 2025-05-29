@@ -946,7 +946,7 @@
                     <button class="action-button" onclick="startGame()" id="startGameBtn" style="width: 100%;">
                         🚀 Start Game
                     </button>
-                    <button class="action-button" onclick="leaveRoom()" style="width: 100%;">
+                    <button class="action-button" onclick="leaveRoom()" id="leaveRoomBtn" style="width: 100%;">
                         🚪 Leave Room
                     </button>
                 </div>
@@ -1053,6 +1053,7 @@
             if (!connectionStatusEl) {
                 connectionStatusEl = document.getElementById('connectionStatus');
             }
+            if (!connectionStatusEl) return; // Guard if not found
             
             connectionStatusEl.className = `connection-status ${status}`;
             
@@ -1116,1223 +1117,392 @@
         }
         
         function setupLighting() {
-            // Enhanced ambient lighting
             const ambientLight = new THREE.AmbientLight(0x404040, 0.8);
             scene.add(ambientLight);
-            
-            // Main directional light with better shadows
             const mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
             mainLight.position.set(15, 25, 15);
             mainLight.castShadow = true;
-            mainLight.shadow.mapSize.width = 2048;
-            mainLight.shadow.mapSize.height = 2048;
-            mainLight.shadow.camera.near = 0.5;
-            mainLight.shadow.camera.far = 100;
-            mainLight.shadow.camera.left = -25;
-            mainLight.shadow.camera.right = 25;
-            mainLight.shadow.camera.top = 25;
-            mainLight.shadow.camera.bottom = -25;
+            mainLight.shadow.mapSize.width = 2048; mainLight.shadow.mapSize.height = 2048;
+            mainLight.shadow.camera.near = 0.5; mainLight.shadow.camera.far = 100;
+            mainLight.shadow.camera.left = -25; mainLight.shadow.camera.right = 25;
+            mainLight.shadow.camera.top = 25; mainLight.shadow.camera.bottom = -25;
             mainLight.shadow.bias = -0.001;
             scene.add(mainLight);
-            
-            // Spotlight for dramatic table lighting
             const tableLight = new THREE.SpotLight(0xffd700, 2.0, 35, Math.PI / 3, 0.2, 1.8);
-            tableLight.position.set(0, 15, 0);
-            tableLight.target.position.set(0, 0, 0);
-            tableLight.castShadow = true;
-            tableLight.shadow.mapSize.width = 1024;
-            tableLight.shadow.mapSize.height = 1024;
-            scene.add(tableLight);
-            scene.add(tableLight.target);
-            
-            // Rim lighting for atmosphere
-            const rimLight1 = new THREE.DirectionalLight(0x4169e1, 0.5);
-            rimLight1.position.set(-10, 5, -10);
-            scene.add(rimLight1);
-            
-            const rimLight2 = new THREE.DirectionalLight(0xdc143c, 0.3);
-            rimLight2.position.set(10, 5, 10);
-            scene.add(rimLight2);
+            tableLight.position.set(0, 15, 0); tableLight.target.position.set(0, 0, 0);
+            tableLight.castShadow = true; tableLight.shadow.mapSize.width = 1024; tableLight.shadow.mapSize.height = 1024;
+            scene.add(tableLight); scene.add(tableLight.target);
+            const rimLight1 = new THREE.DirectionalLight(0x4169e1, 0.5); rimLight1.position.set(-10, 5, -10); scene.add(rimLight1);
+            const rimLight2 = new THREE.DirectionalLight(0xdc143c, 0.3); rimLight2.position.set(10, 5, 10); scene.add(rimLight2);
         }
 
         function createCasinoEnvironment() {
-            // Enhanced floor with pattern
             const floorGeometry = new THREE.PlaneGeometry(120, 120);
             const floorTexture = createFloorTexture();
-            const floorMaterial = new THREE.MeshLambertMaterial({ 
-                map: floorTexture, 
-                transparent: true, 
-                opacity: 0.9 
-            });
+            const floorMaterial = new THREE.MeshLambertMaterial({ map: floorTexture, transparent: true, opacity: 0.9 });
             const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-            floor.rotation.x = -Math.PI / 2;
-            floor.position.y = -2.5;
-            floor.receiveShadow = true;
+            floor.rotation.x = -Math.PI / 2; floor.position.y = -2.5; floor.receiveShadow = true;
             scene.add(floor);
-            
-            // Enhanced skybox with gradient
             const skyboxGeometry = new THREE.SphereGeometry(150, 32, 32);
             const skyboxTexture = createSkyboxTexture();
-            const skyboxMaterial = new THREE.MeshBasicMaterial({ 
-                map: skyboxTexture, 
-                side: THREE.BackSide, 
-                fog: false 
-            });
+            const skyboxMaterial = new THREE.MeshBasicMaterial({ map: skyboxTexture, side: THREE.BackSide, fog: false });
             const skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
             scene.add(skybox);
-            
-            // Add atmospheric elements
             createAtmosphericLights();
         }
 
         function createFloorTexture() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 512;
-            canvas.height = 512;
-            
-            // Create carpet-like pattern
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 512; canvas.height = 512;
             const gradient = ctx.createRadialGradient(256, 256, 50, 256, 256, 300);
-            gradient.addColorStop(0, '#2a0a0a');
-            gradient.addColorStop(0.7, '#1a0505');
-            gradient.addColorStop(1, '#0f0202');
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 512, 512);
-            
-            // Add subtle pattern
-            ctx.strokeStyle = 'rgba(100, 50, 50, 0.1)';
-            ctx.lineWidth = 1;
+            gradient.addColorStop(0, '#2a0a0a'); gradient.addColorStop(0.7, '#1a0505'); gradient.addColorStop(1, '#0f0202');
+            ctx.fillStyle = gradient; ctx.fillRect(0, 0, 512, 512);
+            ctx.strokeStyle = 'rgba(100, 50, 50, 0.1)'; ctx.lineWidth = 1;
             for (let i = 0; i < 512; i += 32) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, 512);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(512, i);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke();
             }
-            
             const texture = new THREE.CanvasTexture(canvas);
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(4, 4);
+            texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping; texture.repeat.set(4, 4);
             return texture;
         }
 
         function createSkyboxTexture() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 1024;
-            canvas.height = 512;
-            
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 1024; canvas.height = 512;
             const gradient = ctx.createLinearGradient(0, 0, 0, 512);
-            gradient.addColorStop(0, '#051a11');
-            gradient.addColorStop(0.5, '#0a2a1f');
-            gradient.addColorStop(1, '#030f0a');
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 1024, 512);
-            
+            gradient.addColorStop(0, '#051a11'); gradient.addColorStop(0.5, '#0a2a1f'); gradient.addColorStop(1, '#030f0a');
+            ctx.fillStyle = gradient; ctx.fillRect(0, 0, 1024, 512);
             return new THREE.CanvasTexture(canvas);
         }
 
         function createAtmosphericLights() {
-            // Create floating light orbs
             for (let i = 0; i < 8; i++) {
-                const orb = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.1, 8, 8),
-                    new THREE.MeshBasicMaterial({ 
-                        color: 0xffd700, 
-                        transparent: true, 
-                        opacity: 0.6 
-                    })
-                );
-                
+                const orb = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.6 }));
                 const angle = (i / 8) * Math.PI * 2;
-                orb.position.set(
-                    Math.cos(angle) * 12,
-                    8 + Math.sin(i) * 2,
-                    Math.sin(angle) * 12
-                );
-                
+                orb.position.set(Math.cos(angle) * 12, 8 + Math.sin(i) * 2, Math.sin(angle) * 12);
                 scene.add(orb);
-                
-                // Add point light for each orb
-                const light = new THREE.PointLight(0xffd700, 0.3, 10);
-                light.position.copy(orb.position);
-                scene.add(light);
+                const light = new THREE.PointLight(0xffd700, 0.3, 10); light.position.copy(orb.position); scene.add(light);
             }
         }
 
         function createBlackjackTable() {
             tableGroup = new THREE.Group();
-            
-            // Enhanced main table with better materials
             const tableGeometry = new THREE.CylinderGeometry(6.2, 6.2, 0.5, 64);
             const woodTexture = createWoodTexture();
-            const tableMaterial = new THREE.MeshPhongMaterial({ 
-                map: woodTexture,
-                shininess: 40,
-                bumpMap: woodTexture,
-                bumpScale: 0.02
-            });
+            const tableMaterial = new THREE.MeshPhongMaterial({ map: woodTexture, shininess: 40, bumpMap: woodTexture, bumpScale: 0.02 });
             blackjackTable = new THREE.Mesh(tableGeometry, tableMaterial);
-            blackjackTable.position.y = -0.25;
-            blackjackTable.receiveShadow = true;
-            blackjackTable.castShadow = true;
+            blackjackTable.position.y = -0.25; blackjackTable.receiveShadow = true; blackjackTable.castShadow = true;
             tableGroup.add(blackjackTable);
-            
-            // Enhanced table edge with brass-like material
             const edgeGeometry = new THREE.TorusGeometry(6.2, 0.35, 16, 64);
-            const edgeMaterial = new THREE.MeshPhongMaterial({ 
-                color: 0xb8860b, 
-                shininess: 80,
-                reflectivity: 0.3
-            });
+            const edgeMaterial = new THREE.MeshPhongMaterial({ color: 0xb8860b, shininess: 80, reflectivity: 0.3 });
             const tableEdge = new THREE.Mesh(edgeGeometry, edgeMaterial);
-            tableEdge.rotation.x = Math.PI / 2;
-            tableEdge.position.y = 0;
-            tableEdge.castShadow = true;
+            tableEdge.rotation.x = Math.PI / 2; tableEdge.position.y = 0; tableEdge.castShadow = true;
             tableGroup.add(tableEdge);
-            
-            // Enhanced felt surface with texture
             const feltGeometry = new THREE.CylinderGeometry(5.8, 5.8, 0.08, 64);
             const feltTexture = createFeltTexture();
-            const feltMaterial = new THREE.MeshLambertMaterial({ 
-                map: feltTexture,
-                bumpMap: feltTexture,
-                bumpScale: 0.005
-            });
+            const feltMaterial = new THREE.MeshLambertMaterial({ map: feltTexture, bumpMap: feltTexture, bumpScale: 0.005 });
             const tableFelt = new THREE.Mesh(feltGeometry, feltMaterial);
-            tableFelt.position.y = 0.04;
-            tableFelt.receiveShadow = true;
+            tableFelt.position.y = 0.04; tableFelt.receiveShadow = true;
             tableGroup.add(tableFelt);
-            
-            createPlayerPositions(); // Call this before createTableMarkings if markings depend on positions
+            createPlayerPositions(); 
             createTableMarkings();
             scene.add(tableGroup);
         }
 
         function createWoodTexture() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 256;
-            canvas.height = 256;
-            
-            // Create wood grain pattern
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 256; canvas.height = 256;
             const gradient = ctx.createLinearGradient(0, 0, 0, 256);
-            gradient.addColorStop(0, '#8B4513');
-            gradient.addColorStop(0.3, '#A0522D');
-            gradient.addColorStop(0.7, '#8B4513');
-            gradient.addColorStop(1, '#654321');
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 256, 256);
-            
-            // Add wood grain lines
-            ctx.strokeStyle = 'rgba(101, 67, 33, 0.5)';
-            ctx.lineWidth = 1;
+            gradient.addColorStop(0, '#8B4513'); gradient.addColorStop(0.3, '#A0522D'); gradient.addColorStop(0.7, '#8B4513'); gradient.addColorStop(1, '#654321');
+            ctx.fillStyle = gradient; ctx.fillRect(0, 0, 256, 256);
+            ctx.strokeStyle = 'rgba(101, 67, 33, 0.5)'; ctx.lineWidth = 1;
             for (let i = 0; i < 256; i += 8) {
-                ctx.beginPath();
-                ctx.moveTo(0, i + Math.sin(i * 0.1) * 3);
-                ctx.lineTo(256, i + Math.sin(i * 0.1) * 3);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, i + Math.sin(i * 0.1) * 3); ctx.lineTo(256, i + Math.sin(i * 0.1) * 3); ctx.stroke();
             }
-            
             return new THREE.CanvasTexture(canvas);
         }
 
         function createFeltTexture() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 256;
-            canvas.height = 256;
-            
-            ctx.fillStyle = '#0d4d2a';
-            ctx.fillRect(0, 0, 256, 256);
-            
-            // Add felt texture noise
-            const imageData = ctx.getImageData(0, 0, 256, 256);
-            const data = imageData.data;
-            
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 256; canvas.height = 256;
+            ctx.fillStyle = '#0d4d2a'; ctx.fillRect(0, 0, 256, 256);
+            const imageData = ctx.getImageData(0, 0, 256, 256); const data = imageData.data;
             for (let i = 0; i < data.length; i += 4) {
                 const noise = (Math.random() - 0.5) * 30;
-                data[i] = Math.max(0, Math.min(255, data[i] + noise));     // R
-                data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise)); // G
-                data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise)); // B
+                data[i] = Math.max(0, Math.min(255, data[i] + noise)); data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise)); data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise));
             }
-            
-            ctx.putImageData(imageData, 0, 0);
-            return new THREE.CanvasTexture(canvas);
+            ctx.putImageData(imageData, 0, 0); return new THREE.CanvasTexture(canvas);
         }
 
         function createTableMarkings() {
-            // Enhanced dealer area marking
             const dealerAreaGeometry = new THREE.RingGeometry(1.2, 1.3, 32);
-            const dealerAreaMaterial = new THREE.MeshBasicMaterial({ 
-                color: 0xffd700, 
-                transparent: true, 
-                opacity: 0.7 
-            });
+            const dealerAreaMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.7 });
             const dealerArea = new THREE.Mesh(dealerAreaGeometry, dealerAreaMaterial);
-            dealerArea.rotation.x = -Math.PI / 2;
-            dealerArea.position.set(0, 0.05, -3.5);
+            dealerArea.rotation.x = -Math.PI / 2; dealerArea.position.set(0, 0.05, -3.5);
             tableGroup.add(dealerArea);
-            
-            // Add betting circles for each player position
-            // Ensure playerPositions is populated before this runs
             if (playerPositions && playerPositions.length > 0) {
                 playerPositions.forEach((pos, index) => {
-                    const bettingCircle = new THREE.Mesh(
-                        new THREE.RingGeometry(0.4, 0.45, 24),
-                        new THREE.MeshBasicMaterial({ 
-                            color: 0xffd700, 
-                            transparent: true, 
-                            opacity: 0.5 
-                        })
-                    );
-                    bettingCircle.rotation.x = -Math.PI / 2;
-                    bettingCircle.position.set(pos.chipX, 0.051, pos.chipZ); // Slight y offset for visibility
+                    const bettingCircle = new THREE.Mesh(new THREE.RingGeometry(0.4, 0.45, 24), new THREE.MeshBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.5 }));
+                    bettingCircle.rotation.x = -Math.PI / 2; bettingCircle.position.set(pos.chipX, 0.051, pos.chipZ);
                     tableGroup.add(bettingCircle);
                 });
             }
         }
 
         function createPlayerPositions() {
-            playerPositions = [];
-            const radius = 4.5;
-            const angleStep = Math.PI / 7; // For 6 players, leaves a gap
-            const startAngle = Math.PI + angleStep / 2; // Adjust start angle slightly
-            
-            for (let i = 0; i < 6; i++) { // Max 6 players
+            playerPositions = []; const radius = 4.5; const angleStep = Math.PI / 7; const startAngle = Math.PI + angleStep / 2;
+            for (let i = 0; i < 6; i++) {
                 const angle = startAngle + i * angleStep;
-                playerPositions.push({
-                    angle: angle,
-                    x: Math.cos(angle) * radius,
-                    z: Math.sin(angle) * radius,
-                    cardXOffset: 0, // Adjust based on actual card placement logic
-                    cardSpacing: 0.7,
-                    chipX: Math.cos(angle) * (radius - 1.2), // Position for chips
-                    chipZ: Math.sin(angle) * (radius - 1.2)
-                });
+                playerPositions.push({ angle: angle, x: Math.cos(angle) * radius, z: Math.sin(angle) * radius, cardXOffset: 0, cardSpacing: 0.7, chipX: Math.cos(angle) * (radius - 1.2), chipZ: Math.sin(angle) * (radius - 1.2) });
             }
         }
 
-
-        function createCardMaterials() {
-            cardMaterials.back = new THREE.MeshPhongMaterial({ 
-                map: createCardTexture("?", "?", true), 
-                shininess: 30 
-            });
-        }
+        function createCardMaterials() { cardMaterials.back = new THREE.MeshPhongMaterial({ map: createCardTexture("?", "?", true), shininess: 30 }); }
 
         function createCardTexture(rank, suitName, isBack = false) {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 200;
-            canvas.height = 280;
-            
-            // Rounded corners for the card background
-            ctx.fillStyle = isBack ? '#1E3A8A' : '#FFFFFF';
-            ctx.beginPath();
-            const cornerRadius = 10;
-            ctx.moveTo(cornerRadius, 0);
-            ctx.lineTo(canvas.width - cornerRadius, 0);
-            ctx.quadraticCurveTo(canvas.width, 0, canvas.width, cornerRadius);
-            ctx.lineTo(canvas.width, canvas.height - cornerRadius);
-            ctx.quadraticCurveTo(canvas.width, canvas.height, canvas.width - cornerRadius, canvas.height);
-            ctx.lineTo(cornerRadius, canvas.height);
-            ctx.quadraticCurveTo(0, canvas.height, 0, canvas.height - cornerRadius);
-            ctx.lineTo(0, cornerRadius);
-            ctx.quadraticCurveTo(0, 0, cornerRadius, 0);
-            ctx.closePath();
-            ctx.fill();
-
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 200; canvas.height = 280; const cornerRadius = 10;
+            ctx.fillStyle = isBack ? '#1E3A8A' : '#FFFFFF'; ctx.beginPath();
+            ctx.moveTo(cornerRadius, 0); ctx.lineTo(canvas.width - cornerRadius, 0); ctx.quadraticCurveTo(canvas.width, 0, canvas.width, cornerRadius);
+            ctx.lineTo(canvas.width, canvas.height - cornerRadius); ctx.quadraticCurveTo(canvas.width, canvas.height, canvas.width - cornerRadius, canvas.height);
+            ctx.lineTo(cornerRadius, canvas.height); ctx.quadraticCurveTo(0, canvas.height, 0, canvas.height - cornerRadius);
+            ctx.lineTo(0, cornerRadius); ctx.quadraticCurveTo(0, 0, cornerRadius, 0); ctx.closePath(); ctx.fill();
             if (!isBack) {
-                // Card front
-                // Card border (already handled by shape)
-                // Inner border (optional, can be removed if shape is enough)
-                /*
-                ctx.strokeStyle = '#DDDDDD';
-                ctx.lineWidth = 4;
-                ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
-                */
-                
                 const suitSymbols = { 'hearts': '♥', 'diamonds': '♦', 'clubs': '♣', 'spades': '♠' };
                 const suitColor = (suitName === 'hearts' || suitName === 'diamonds') ? '#DC143C' : '#000000';
-                
-                ctx.fillStyle = suitColor;
-                ctx.font = 'bold 32px Arial';
-                ctx.textAlign = 'left';
-                
-                // Top left corner
-                ctx.fillText(rank, 15, 40);
-                ctx.font = 'bold 28px Arial';
-                ctx.fillText(suitSymbols[suitName] || '', 15, 70);
-                
-                // Bottom right corner (rotated)
-                ctx.save();
-                ctx.translate(canvas.width - 15, canvas.height - 40);
-                ctx.rotate(Math.PI);
-                ctx.font = 'bold 32px Arial';
-                ctx.fillText(rank, 0, 0);
-                ctx.font = 'bold 28px Arial';
-                ctx.fillText(suitSymbols[suitName] || '', 0, 30);
-                ctx.restore();
-                
-                // Center symbol
-                ctx.font = 'bold 80px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(suitSymbols[suitName] || '', canvas.width / 2, canvas.height / 2 + 30); // Adjusted y
-                
+                ctx.fillStyle = suitColor; ctx.font = 'bold 32px Arial'; ctx.textAlign = 'left';
+                ctx.fillText(rank, 15, 40); ctx.font = 'bold 28px Arial'; ctx.fillText(suitSymbols[suitName] || '', 15, 70);
+                ctx.save(); ctx.translate(canvas.width - 15, canvas.height - 40); ctx.rotate(Math.PI);
+                ctx.font = 'bold 32px Arial'; ctx.fillText(rank, 0, 0); ctx.font = 'bold 28px Arial'; ctx.fillText(suitSymbols[suitName] || '', 0, 30); ctx.restore();
+                ctx.font = 'bold 80px Arial'; ctx.textAlign = 'center'; ctx.fillText(suitSymbols[suitName] || '', canvas.width / 2, canvas.height / 2 + 30);
             } else {
-                // Card back
-                // Border
-                ctx.strokeStyle = '#FBBF24';
-                ctx.lineWidth = 6;
-                // Redraw rounded rect for border
-                ctx.beginPath();
-                ctx.moveTo(cornerRadius + 3, 3); // +3 for half lineWidth
-                ctx.lineTo(canvas.width - cornerRadius - 3, 3);
-                ctx.quadraticCurveTo(canvas.width - 3, 3, canvas.width - 3, cornerRadius + 3);
-                ctx.lineTo(canvas.width - 3, canvas.height - cornerRadius - 3);
-                ctx.quadraticCurveTo(canvas.width - 3, canvas.height - 3, canvas.width - cornerRadius - 3, canvas.height - 3);
-                ctx.lineTo(cornerRadius + 3, canvas.height - 3);
-                ctx.quadraticCurveTo(3, canvas.height - 3, 3, canvas.height - cornerRadius - 3);
-                ctx.lineTo(3, cornerRadius + 3);
-                ctx.quadraticCurveTo(3, 3, cornerRadius + 3, 3);
-                ctx.closePath();
-                ctx.stroke();
-                
-                // Center design
-                ctx.fillStyle = 'rgba(251, 191, 36, 0.3)';
-                ctx.beginPath();
-                ctx.arc(canvas.width / 2, canvas.height / 2, 60, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.fillStyle = '#FBBF24';
-                ctx.font = 'bold 18px Orbitron';
-                ctx.textAlign = 'center';
-                ctx.fillText('ROYAL', canvas.width/2, canvas.height/2 - 15);
-                ctx.fillText('BLACKJACK', canvas.width/2, canvas.height/2 + 5);
-                ctx.fillText('3D', canvas.width/2, canvas.height/2 + 25);
+                ctx.strokeStyle = '#FBBF24'; ctx.lineWidth = 6; ctx.beginPath();
+                ctx.moveTo(cornerRadius + 3, 3); ctx.lineTo(canvas.width - cornerRadius - 3, 3); ctx.quadraticCurveTo(canvas.width - 3, 3, canvas.width - 3, cornerRadius + 3);
+                ctx.lineTo(canvas.width - 3, canvas.height - cornerRadius - 3); ctx.quadraticCurveTo(canvas.width - 3, canvas.height - 3, canvas.width - cornerRadius - 3, canvas.height - 3);
+                ctx.lineTo(cornerRadius + 3, canvas.height - 3); ctx.quadraticCurveTo(3, canvas.height - 3, 3, canvas.height - cornerRadius - 3);
+                ctx.lineTo(3, cornerRadius + 3); ctx.quadraticCurveTo(3, 3, cornerRadius + 3, 3); ctx.closePath(); ctx.stroke();
+                ctx.fillStyle = 'rgba(251, 191, 36, 0.3)'; ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, 60, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#FBBF24'; ctx.font = 'bold 18px Orbitron'; ctx.textAlign = 'center';
+                ctx.fillText('ROYAL', canvas.width/2, canvas.height/2 - 15); ctx.fillText('BLACKJACK', canvas.width/2, canvas.height/2 + 5); ctx.fillText('3D', canvas.width/2, canvas.height/2 + 25);
             }
-            
-            const texture = new THREE.CanvasTexture(canvas);
-            texture.needsUpdate = true;
-            return texture;
+            const texture = new THREE.CanvasTexture(canvas); texture.needsUpdate = true; return texture;
         }
 
         function createChipMaterials() {
-            const denominations = [10, 25, 50, 100, 500];
-            const colors = [0xFFFFFF, 0x00AA00, 0xFF4444, 0x222222, 0x800080];
-            
+            const denominations = [10, 25, 50, 100, 500]; const colors = [0xFFFFFF, 0x00AA00, 0xFF4444, 0x222222, 0x800080];
             denominations.forEach((denom, index) => {
                 const chipTexture = createChipTexture(denom, colors[index]);
-                chipMaterials[denom] = new THREE.MeshPhongMaterial({ 
-                    map: chipTexture,
-                    shininess: 60,
-                    reflectivity: 0.2
-                });
+                chipMaterials[denom] = new THREE.MeshPhongMaterial({ map: chipTexture, shininess: 60, reflectivity: 0.2 });
             });
-            
-            chipMaterials['default'] = new THREE.MeshPhongMaterial({ 
-                color: 0xFFAA00, 
-                shininess: 50 
-            });
+            chipMaterials['default'] = new THREE.MeshPhongMaterial({ color: 0xFFAA00, shininess: 50 });
         }
 
         function createChipTexture(value, baseColor) {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 64;
-            canvas.height = 64;
-            
-            const centerX = 32;
-            const centerY = 32;
-            const radius = 28;
-            
-            // Outer ring
-            ctx.fillStyle = `#${baseColor.toString(16).padStart(6, '0')}`;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Inner circle
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius - 6, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Center circle
-            ctx.fillStyle = `#${baseColor.toString(16).padStart(6, '0')}`;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius - 10, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Value text
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = 'bold 12px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(`$${value}`, centerX, centerY + 4);
-            
-            // Edge pattern
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-            ctx.lineWidth = 1;
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 64; canvas.height = 64; const centerX = 32; const centerY = 32; const radius = 28;
+            ctx.fillStyle = `#${baseColor.toString(16).padStart(6, '0')}`; ctx.beginPath(); ctx.arc(centerX, centerY, radius, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'; ctx.beginPath(); ctx.arc(centerX, centerY, radius - 6, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = `#${baseColor.toString(16).padStart(6, '0')}`; ctx.beginPath(); ctx.arc(centerX, centerY, radius - 10, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.fillText(`$${value}`, centerX, centerY + 4);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'; ctx.lineWidth = 1;
             for (let i = 0; i < 8; i++) {
-                const angle = (i / 8) * Math.PI * 2;
-                ctx.beginPath();
-                ctx.moveTo(
-                    centerX + Math.cos(angle) * (radius - 2),
-                    centerY + Math.sin(angle) * (radius - 2)
-                );
-                ctx.lineTo(
-                    centerX + Math.cos(angle) * (radius - 8),
-                    centerY + Math.sin(angle) * (radius - 8)
-                );
-                ctx.stroke();
+                const angle = (i / 8) * Math.PI * 2; ctx.beginPath();
+                ctx.moveTo(centerX + Math.cos(angle) * (radius - 2), centerY + Math.sin(angle) * (radius - 2));
+                ctx.lineTo(centerX + Math.cos(angle) * (radius - 8), centerY + Math.sin(angle) * (radius - 8)); ctx.stroke();
             }
-            
             return new THREE.CanvasTexture(canvas);
         }
 
         function createCard3D(cardData, position, rotationY = 0, faceUp = true) {
-            const cardGroup = new THREE.Group();
-            const cardWidth = 1.0, cardHeight = 1.4, cardDepth = 0.02;
-            
-            const cardShape = new THREE.Shape();
-            const x = -cardWidth / 2, y = -cardHeight / 2, width = cardWidth, height = cardHeight, radius = 0.05;
-            cardShape.moveTo(x, y + radius);
-            cardShape.lineTo(x, y + height - radius);
-            cardShape.quadraticCurveTo(x, y + height, x + radius, y + height);
-            cardShape.lineTo(x + width - radius, y + height);
-            cardShape.quadraticCurveTo(x + width, y + height, x + width, y + height - radius);
-            cardShape.lineTo(x + width, y + radius);
-            cardShape.quadraticCurveTo(x + width, y, x + width - radius, y);
-            cardShape.lineTo(x + radius, y);
-            cardShape.quadraticCurveTo(x, y, x, y + radius);
-
-            const extrudeSettings = { depth: cardDepth, bevelEnabled: false };
-            const cardGeometry = new THREE.ExtrudeGeometry(cardShape, extrudeSettings);
-            
+            const cardGroup = new THREE.Group(); const cardWidth = 1.0, cardHeight = 1.4, cardDepth = 0.02;
+            const simplerCardGeom = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
             const frontTexture = faceUp ? createCardTexture(cardData.rank, cardData.suit) : createCardTexture("?", "?", true);
             const backTexture = createCardTexture("?", "?", true);
             const sideMaterial = new THREE.MeshPhongMaterial({color: 0xf0f0f0, shininess: 10});
-            
-            const materials = [
-                new THREE.MeshPhongMaterial({ map: frontTexture, shininess: faceUp ? 20 : 40 }), // Front face
-                new THREE.MeshPhongMaterial({ map: backTexture, shininess: 40 }), // Back face (will be assigned correctly by THREE for extrude)
-                sideMaterial // Side material
-            ];
-            
-            const cardMesh = new THREE.Mesh(cardGeometry, materials);
-             // THREE.js ExtrudeGeometry maps materials differently. 
-            // Material 0 is front, 1 is back, 2 is side.
-            // To make sure front/back are correct:
-            cardMesh.material = [
-                new THREE.MeshPhongMaterial({ map: frontTexture, shininess: faceUp ? 20 : 40 }), // Material for extruded front face
-                sideMaterial // Material for extruded sides
-            ];
-            // Create a separate plane for the back if needed, or adjust material mapping.
-            // For simplicity, let's assume the default mapping works or we adjust UVs.
-            // A common approach is to make the main extrude be one material (e.g. front + sides)
-            // and then add a thin plane for the back.
-            // Or, ensure your texture mapping for ExtrudeGeometry is correct.
-            // The default ExtrudeGeometry puts the front face material (index 0) on the front/back, and side (index 1) on sides.
-            // Let's re-map to be more like BoxGeometry's order for consistency with the original code.
-            const cardMaterialsArray = [
-                sideMaterial, // right
-                sideMaterial, // left
-                sideMaterial, // top
-                sideMaterial, // bottom
-                new THREE.MeshPhongMaterial({ map: frontTexture, shininess: faceUp ? 20 : 40 }), // front
-                new THREE.MeshPhongMaterial({ map: backTexture, shininess: 40 })  // back
-            ];
-            // This remapping for ExtrudeGeometry is non-trivial.
-            // The simplest way with ExtrudeGeometry is using materialIndex in faces or groups.
-            // For now, let's revert to BoxGeometry for simplicity in material assignment and keep rounded look via texture.
-            const simplerCardGeom = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
+            const cardMaterialsArray = [sideMaterial, sideMaterial, sideMaterial, sideMaterial, new THREE.MeshPhongMaterial({ map: frontTexture, shininess: faceUp ? 20 : 40 }), new THREE.MeshPhongMaterial({ map: backTexture, shininess: 40 })];
             const cardMeshSimple = new THREE.Mesh(simplerCardGeom, cardMaterialsArray);
-
-            cardMeshSimple.castShadow = true;
-            cardMeshSimple.receiveShadow = true;
-            cardGroup.add(cardMeshSimple);
-            
-            cardGroup.position.copy(position);
-            cardGroup.rotation.y = rotationY;
-            cardGroup.userData = { 
-                id: cardData.id, 
-                suit: cardData.suit, 
-                rank: cardData.rank, 
-                faceUp: faceUp,
-                originalPosition: position.clone()
-            };
-            
+            cardMeshSimple.castShadow = true; cardMeshSimple.receiveShadow = true; cardGroup.add(cardMeshSimple);
+            cardGroup.position.copy(position); cardGroup.rotation.y = rotationY;
+            cardGroup.userData = { id: cardData.id, suit: cardData.suit, rank: cardData.rank, faceUp: faceUp, originalPosition: position.clone() };
             return cardGroup;
         }
 
-
         function createChip3D(value, position, stackCount = 1) {
-            const chipGroup = new THREE.Group();
-            const chipRadius = 0.18, chipHeight = 0.06;
-            const denomination = getChipDenomination(value);
-            const chipMaterial = chipMaterials[denomination] || chipMaterials['default'];
-            
+            const chipGroup = new THREE.Group(); const chipRadius = 0.18, chipHeight = 0.06;
+            const denomination = getChipDenomination(value); const chipMaterial = chipMaterials[denomination] || chipMaterials['default'];
             for (let i = 0; i < Math.min(stackCount, 10); i++) {
                 const chipGeometry = new THREE.CylinderGeometry(chipRadius, chipRadius, chipHeight, 24);
                 const chip = new THREE.Mesh(chipGeometry, chipMaterial);
-                chip.position.y = i * (chipHeight + 0.002) + chipHeight/2;
-                chip.castShadow = true;
-                chip.receiveShadow = true;
-                
-                // Add subtle rotation for realism
-                chip.rotation.y = Math.random() * Math.PI * 2;
-                
-                chipGroup.add(chip);
+                chip.position.y = i * (chipHeight + 0.002) + chipHeight/2; chip.castShadow = true; chip.receiveShadow = true;
+                chip.rotation.y = Math.random() * Math.PI * 2; chipGroup.add(chip);
             }
-            
-            chipGroup.position.copy(position);
-            chipGroup.userData = { value: value, count: stackCount };
-            
-            // Add gentle floating animation
-            gsap.to(chipGroup.position, {
-                y: position.y + 0.05,
-                duration: 2 + Math.random() * 2,
-                yoyo: true,
-                repeat: -1,
-                ease: "sine.inOut"
-            });
-            
+            chipGroup.position.copy(position); chipGroup.userData = { value: value, count: stackCount };
+            gsap.to(chipGroup.position, { y: position.y + 0.05, duration: 2 + Math.random() * 2, yoyo: true, repeat: -1, ease: "sine.inOut" });
             return chipGroup;
         }
 
         function getChipDenomination(totalAmount) {
-            if (totalAmount >= 500) return 500;
-            if (totalAmount >= 100) return 100;
-            if (totalAmount >= 50) return 50;
-            if (totalAmount >= 25) return 25;
-            return 10;
+            if (totalAmount >= 500) return 500; if (totalAmount >= 100) return 100; if (totalAmount >= 50) return 50; if (totalAmount >= 25) return 25; return 10;
         }
 
         function createParticleSystem() {
-            const particleCount = 300;
-            const particles = new THREE.BufferGeometry();
-            const particlePositions = new Float32Array(particleCount * 3);
-            const particleColors = new Float32Array(particleCount * 3);
-            
+            const particleCount = 300; const particles = new THREE.BufferGeometry();
+            const particlePositions = new Float32Array(particleCount * 3); const particleColors = new Float32Array(particleCount * 3);
             for (let i = 0; i < particleCount; i++) {
-                const i3 = i * 3;
-                particlePositions[i3] = (Math.random() - 0.5) * 80;
-                particlePositions[i3 + 1] = Math.random() * 30 + 5;
-                particlePositions[i3 + 2] = (Math.random() - 0.5) * 80;
-                
-                // Varying particle colors
-                const color = new THREE.Color();
-                color.setHSL(0.15, 0.8, 0.3 + Math.random() * 0.4);
-                particleColors[i3] = color.r;
-                particleColors[i3 + 1] = color.g;
-                particleColors[i3 + 2] = color.b;
+                const i3 = i * 3; particlePositions[i3] = (Math.random() - 0.5) * 80; particlePositions[i3 + 1] = Math.random() * 30 + 5; particlePositions[i3 + 2] = (Math.random() - 0.5) * 80;
+                const color = new THREE.Color(); color.setHSL(0.15, 0.8, 0.3 + Math.random() * 0.4);
+                particleColors[i3] = color.r; particleColors[i3 + 1] = color.g; particleColors[i3 + 2] = color.b;
             }
-            
-            particles.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-            particles.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
-            
-            const particleMaterial = new THREE.PointsMaterial({
-                size: 0.1, 
-                transparent: true, 
-                opacity: 0.4, 
-                blending: THREE.AdditiveBlending, 
-                fog: false,
-                vertexColors: true
-            });
-            
-            particleSystem = new THREE.Points(particles, particleMaterial);
-            scene.add(particleSystem);
+            particles.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3)); particles.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+            const particleMaterial = new THREE.PointsMaterial({ size: 0.1, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, fog: false, vertexColors: true });
+            particleSystem = new THREE.Points(particles, particleMaterial); scene.add(particleSystem);
         }
 
         function addMouseControls() {
-            let mouseDown = false, lastMouseX = 0, lastMouseY = 0;
-            let touchStartX = 0, touchStartY = 0;
-            const menuPanel = document.getElementById('menuPanel');
-            const canvasEl = document.getElementById('canvas');
-
-            // Mouse controls
-            canvasEl.addEventListener('mousedown', (event) => {
-                if (menuPanel.classList.contains('hidden')) {
-                    mouseDown = true;
-                    lastMouseX = event.clientX;
-                    lastMouseY = event.clientY;
-                }
-            });
-            
+            let mouseDown = false, lastMouseX = 0, lastMouseY = 0; let touchStartX = 0, touchStartY = 0;
+            const menuPanel = document.getElementById('menuPanel'); const canvasEl = document.getElementById('canvas');
+            canvasEl.addEventListener('mousedown', (event) => { if (menuPanel.classList.contains('hidden')) { mouseDown = true; lastMouseX = event.clientX; lastMouseY = event.clientY; } });
             document.addEventListener('mouseup', () => { mouseDown = false; });
-            
             document.addEventListener('mousemove', (event) => {
                 if (mouseDown && menuPanel.classList.contains('hidden') && !cameraAnimating) {
-                    const deltaX = event.clientX - lastMouseX;
-                    const deltaY = event.clientY - lastMouseY;
-                    
+                    const deltaX = event.clientX - lastMouseX; const deltaY = event.clientY - lastMouseY;
                     camera.userData.targetRotationY -= deltaX * 0.005;
-                    
-                    // Vertical camera movement
-                    camera.userData.targetHeight = camera.userData.targetHeight || 12;
-                    camera.userData.targetHeight += deltaY * 0.02;
-                    camera.userData.targetHeight = Math.max(5, Math.min(20, camera.userData.targetHeight));
-                    
-                    lastMouseX = event.clientX;
-                    lastMouseY = event.clientY;
+                    camera.userData.targetHeight = camera.userData.targetHeight || 12; camera.userData.targetHeight += deltaY * 0.02; camera.userData.targetHeight = Math.max(5, Math.min(20, camera.userData.targetHeight));
+                    lastMouseX = event.clientX; lastMouseY = event.clientY;
                 }
             });
-
-            // Touch controls for mobile
-            canvasEl.addEventListener('touchstart', (event) => {
-                if (menuPanel.classList.contains('hidden') && event.touches.length === 1) {
-                    touchStartX = event.touches[0].clientX;
-                    touchStartY = event.touches[0].clientY;
-                    event.preventDefault();
-                }
-            });
-
+            canvasEl.addEventListener('touchstart', (event) => { if (menuPanel.classList.contains('hidden') && event.touches.length === 1) { touchStartX = event.touches[0].clientX; touchStartY = event.touches[0].clientY; event.preventDefault(); } });
             canvasEl.addEventListener('touchmove', (event) => {
                 if (menuPanel.classList.contains('hidden') && event.touches.length === 1 && !cameraAnimating) {
-                    const deltaX = event.touches[0].clientX - touchStartX;
-                    const deltaY = event.touches[0].clientY - touchStartY;
-                    
+                    const deltaX = event.touches[0].clientX - touchStartX; const deltaY = event.touches[0].clientY - touchStartY;
                     camera.userData.targetRotationY -= deltaX * 0.01;
-                    
-                    camera.userData.targetHeight = camera.userData.targetHeight || 12;
-                    camera.userData.targetHeight += deltaY * 0.05;
-                    camera.userData.targetHeight = Math.max(5, Math.min(20, camera.userData.targetHeight));
-                    
-                    touchStartX = event.touches[0].clientX;
-                    touchStartY = event.touches[0].clientY;
-                    event.preventDefault();
+                    camera.userData.targetHeight = camera.userData.targetHeight || 12; camera.userData.targetHeight += deltaY * 0.05; camera.userData.targetHeight = Math.max(5, Math.min(20, camera.userData.targetHeight));
+                    touchStartX = event.touches[0].clientX; touchStartY = event.touches[0].clientY; event.preventDefault();
                 }
             });
-            
-            // Enhanced wheel controls with zoom limits
-            canvasEl.addEventListener('wheel', (event) => {
-                if (menuPanel.classList.contains('hidden') && !cameraAnimating) {
-                    event.preventDefault();
-                    camera.userData.targetDistance += event.deltaY * 0.02;
-                    camera.userData.targetDistance = Math.max(6, Math.min(30, camera.userData.targetDistance));
-                }
-            });
+            canvasEl.addEventListener('wheel', (event) => { if (menuPanel.classList.contains('hidden') && !cameraAnimating) { event.preventDefault(); camera.userData.targetDistance += event.deltaY * 0.02; camera.userData.targetDistance = Math.max(6, Math.min(30, camera.userData.targetDistance)); } });
         }
 
         function animate() {
-            requestAnimationFrame(animate);
-            
-            const currentTime = Date.now() * 0.001;
-            
+            requestAnimationFrame(animate); const currentTime = Date.now() * 0.001;
             if (!cameraAnimating) {
-                // Smooth camera interpolation
-                const lerpFactor = 0.08;
-                
-                const targetHeight = camera.userData.targetHeight || 12;
-                camera.position.x = THREE.MathUtils.lerp(
-                    camera.position.x, 
-                    Math.sin(camera.userData.targetRotationY) * camera.userData.targetDistance, 
-                    lerpFactor
-                );
-                camera.position.z = THREE.MathUtils.lerp(
-                    camera.position.z, 
-                    Math.cos(camera.userData.targetRotationY) * camera.userData.targetDistance, 
-                    lerpFactor
-                );
-                camera.position.y = THREE.MathUtils.lerp(
-                    camera.position.y, 
-                    targetHeight + (camera.userData.targetDistance - 15) * 0.15, 
-                    lerpFactor
-                );
+                const lerpFactor = 0.08; const targetHeight = camera.userData.targetHeight || 12;
+                camera.position.x = THREE.MathUtils.lerp(camera.position.x, Math.sin(camera.userData.targetRotationY) * camera.userData.targetDistance, lerpFactor);
+                camera.position.z = THREE.MathUtils.lerp(camera.position.z, Math.cos(camera.userData.targetRotationY) * camera.userData.targetDistance, lerpFactor);
+                camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetHeight + (camera.userData.targetDistance - 15) * 0.15, lerpFactor);
                 camera.lookAt(0, 0, 0);
             }
-            
-            // Enhanced table rotation
-            if (tableGroup) {
-                // tableGroup.rotation.y += 0.0002; // Subtle rotation can be distracting
-            }
-            
-            // Enhanced particle animation
             if (particleSystem) {
-                particleSystem.rotation.y += 0.0003;
-                const positions = particleSystem.geometry.attributes.position.array;
-                for (let i = 1; i < positions.length; i += 3) { // Start from Y component
-                    positions[i] = (positions[i] + Math.sin(currentTime + i*0.1) * 0.005);
-                    // Keep particles within a vertical range
-                    if (positions[i] < 5) positions[i] = 5 + Math.random()*20;
-                    if (positions[i] > 35) positions[i] = 35 - Math.random()*20;
-                }
+                particleSystem.rotation.y += 0.0003; const positions = particleSystem.geometry.attributes.position.array;
+                for (let i = 1; i < positions.length; i += 3) { positions[i] = (positions[i] + Math.sin(currentTime + i*0.1) * 0.005); if (positions[i] < 5) positions[i] = 5 + Math.random()*20; if (positions[i] > 35) positions[i] = 35 - Math.random()*20; }
                 particleSystem.geometry.attributes.position.needsUpdate = true;
             }
-            
-            // Enhanced card animations (gentle bobbing)
             const allCardObjects = [...dealerCardObjects3D, ...Object.values(playerCardObjects3D).flat()];
-            allCardObjects.forEach((cardMesh, index) => {
-                if (cardMesh && cardMesh.userData && cardMesh.userData.originalPosition) {
-                    const baseY = cardMesh.userData.originalPosition.y;
-                    cardMesh.position.y = baseY + Math.sin(currentTime * 1.5 + index * 0.5) * 0.01;
-                }
-            });
-            
+            allCardObjects.forEach((cardMesh, index) => { if (cardMesh && cardMesh.userData && cardMesh.userData.originalPosition) { const baseY = cardMesh.userData.originalPosition.y; cardMesh.position.y = baseY + Math.sin(currentTime * 1.5 + index * 0.5) * 0.01; } });
             renderer.render(scene, camera);
         }
 
-        // Enhanced 3D Object Management
         function updateTableVisuals() {
-            consoleLog("updateTableVisuals START");
-            if (!currentGameState) return;
-            
-            const cardBaseY = 0.08 + 0.01; // Slightly above felt + card depth/2 approx
-
-            // Update dealer cards with enhanced animations
-            clearDealerCards();
+            consoleLog("updateTableVisuals START"); if (!currentGameState) return;
+            const cardBaseY = 0.08 + 0.01; clearDealerCards();
             if (currentGameState.dealer_hand && currentGameState.dealer_hand.cards) {
                 currentGameState.dealer_hand.cards.forEach((cardData, index) => {
-                    const position = new THREE.Vector3(-2.0 + index * 1.1, cardBaseY, -3.8); // Increased spacing
-                    const faceUp = cardData.suit !== 'back';
-                    const cardObj = createCard3D(cardData, position, 0, faceUp);
-                    scene.add(cardObj);
-                    dealerCardObjects3D.push(cardObj);
-                    
-                    gsap.fromTo(cardObj.position, 
-                        { x: 0, y: cardBaseY + 2, z: 0 },
-                        { 
-                            x: position.x, y: position.y, z: position.z,
-                            duration: 0.6, ease: "back.out(1.2)", delay: index * 0.15 
-                        }
-                    );
+                    const position = new THREE.Vector3(-2.0 + index * 1.1, cardBaseY, -3.8); const faceUp = cardData.suit !== 'back';
+                    const cardObj = createCard3D(cardData, position, 0, faceUp); scene.add(cardObj); dealerCardObjects3D.push(cardObj);
+                    gsap.fromTo(cardObj.position, { x: 0, y: cardBaseY + 2, z: 0 }, { x: position.x, y: position.y, z: position.z, duration: 0.6, ease: "back.out(1.2)", delay: index * 0.15 });
                     gsap.from(cardObj.rotation, { y: Math.PI, duration: 0.6, ease: "power2.out", delay: index * 0.15 });
                 });
             }
-
-            // Clear old player cards and chips
             Object.keys(playerCardObjects3D).forEach(pid => clearPlayerCards(pid));
-            Object.values(chipStackObjects).forEach(obj => {
-                if (obj.parent) obj.parent.remove(obj);
-                 // Stop GSAP animations associated with this chip
-                gsap.killTweensOf(obj.position);
-            });
+            Object.values(chipStackObjects).forEach(obj => { if (obj.parent) obj.parent.remove(obj); gsap.killTweensOf(obj.position); });
             chipStackObjects = {};
-
-
-            // Update player cards and chips
             Object.values(currentGameState.players).forEach((player, pIndex) => {
-                if (pIndex >= playerPositions.length) {
-                    consoleWarn(`Player index ${pIndex} out of bounds for playerPositions (length ${playerPositions.length})`);
-                    return;
-                }
-                
-                const pos3D = playerPositions[pIndex];
-                if (!playerCardObjects3D[player.id]) playerCardObjects3D[player.id] = [];
-
-                let cardRenderIndex = 0; // Used for animation delays across all hands of a player
+                if (pIndex >= playerPositions.length) { consoleWarn(`Player index ${pIndex} out of bounds`); return; }
+                const pos3D = playerPositions[pIndex]; if (!playerCardObjects3D[player.id]) playerCardObjects3D[player.id] = [];
+                let cardRenderIndex = 0;
                 player.hands.forEach((hand, handIndex) => {
-                    // Calculate base offset for this hand (to center multiple hands)
-                    const handCardCount = hand.cards.length;
-                    const handWidth = (handCardCount -1) * (pos3D.cardSpacing * 0.5); // Adjusted spacing for visual
-                    const handStartX = pos3D.x + pos3D.cardXOffset - handWidth / 2 + (handIndex * 2.0); // Spacing between hands
-
+                    const handCardCount = hand.cards.length; const handWidth = (handCardCount -1) * (pos3D.cardSpacing * 0.5);
+                    const handStartX = pos3D.x + pos3D.cardXOffset - handWidth / 2 + (handIndex * 2.0);
                     hand.cards.forEach((cardData, cardInHandIndex) => {
-                        const cardPosition = new THREE.Vector3(
-                            handStartX + cardInHandIndex * (pos3D.cardSpacing * 0.5),
-                            cardBaseY,
-                            pos3D.z // Cards are arranged along player's local X axis (table's X-Z plane)
-                        );
-                        const cardRotationY = pos3D.angle + Math.PI / 2; // Orient cards towards center
-                        const cardObj = createCard3D(cardData, cardPosition, cardRotationY, true);
-                        scene.add(cardObj);
-                        playerCardObjects3D[player.id].push(cardObj);
-                        
+                        const cardPosition = new THREE.Vector3(handStartX + cardInHandIndex * (pos3D.cardSpacing * 0.5), cardBaseY, pos3D.z);
+                        const cardRotationY = pos3D.angle + Math.PI / 2; const cardObj = createCard3D(cardData, cardPosition, cardRotationY, true);
+                        scene.add(cardObj); playerCardObjects3D[player.id].push(cardObj);
                         const totalDelay = pIndex * 0.1 + cardRenderIndex * 0.08;
-                        
-                        gsap.fromTo(cardObj.position, 
-                            { x: 0, y: cardBaseY + 2, z: 0 },
-                            { 
-                                x: cardPosition.x, y: cardPosition.y, z: cardPosition.z,
-                                duration: 0.5, ease: "power2.out", delay: totalDelay 
-                            }
-                        );
-                        gsap.fromTo(cardObj.rotation, 
-                            { y: cardRotationY + Math.PI }, // Start from facing away
-                            { y: cardRotationY, duration: 0.5, ease: "power2.out", delay: totalDelay }
-                        );
+                        gsap.fromTo(cardObj.position, { x: 0, y: cardBaseY + 2, z: 0 }, { x: cardPosition.x, y: cardPosition.y, z: cardPosition.z, duration: 0.5, ease: "power2.out", delay: totalDelay });
+                        gsap.fromTo(cardObj.rotation, { y: cardRotationY + Math.PI }, { y: cardRotationY, duration: 0.5, ease: "power2.out", delay: totalDelay });
                         cardRenderIndex++;
                     });
-
-                    // Add bet chips
                     if (hand.bet_amount > 0) {
-                        const chipPosition = new THREE.Vector3(
-                            pos3D.chipX + handIndex * 0.6, // Chips slightly offset per hand
-                            0.02, 
-                            pos3D.chipZ
-                        );
+                        const chipPosition = new THREE.Vector3(pos3D.chipX + handIndex * 0.6, 0.02, pos3D.chipZ);
                         const stackCount = Math.min(Math.ceil(hand.bet_amount / getChipDenomination(hand.bet_amount)), 8);
-                        const chipStack = createChip3D(hand.bet_amount, chipPosition, stackCount);
-                        scene.add(chipStack);
+                        const chipStack = createChip3D(hand.bet_amount, chipPosition, stackCount); scene.add(chipStack);
                         chipStackObjects[`player_bet_${player.id}_${handIndex}`] = chipStack;
-                        
-                        gsap.from(chipStack.scale, {
-                            x: 0, y: 0, z: 0, duration: 0.4, ease: "back.out(1.7)", delay: pIndex * 0.1
-                        });
+                        gsap.from(chipStack.scale, { x: 0, y: 0, z: 0, duration: 0.4, ease: "back.out(1.7)", delay: pIndex * 0.1 });
                     }
                 });
             });
-            
             consoleLog("updateTableVisuals COMPLETE");
         }
 
+        function clearDealerCards() { dealerCardObjects3D.forEach(obj => { if (obj.parent) obj.parent.remove(obj); gsap.killTweensOf(obj.position); gsap.killTweensOf(obj.rotation); }); dealerCardObjects3D = []; }
+        function clearPlayerCards(playerId) { if (playerCardObjects3D[playerId]) { playerCardObjects3D[playerId].forEach(obj => { if (obj.parent) obj.parent.remove(obj); gsap.killTweensOf(obj.position); gsap.killTweensOf(obj.rotation); }); playerCardObjects3D[playerId] = []; } }
+        function clearAll3DObjects() { clearDealerCards(); Object.keys(playerCardObjects3D).forEach(playerId => clearPlayerCards(playerId)); Object.values(chipStackObjects).forEach(obj => { if (obj.parent) obj.parent.remove(obj); gsap.killTweensOf(obj.position); gsap.killTweensOf(obj.scale); }); chipStackObjects = {}; }
 
-        function clearDealerCards() {
-            dealerCardObjects3D.forEach(obj => {
-                if (obj.parent) obj.parent.remove(obj);
-                gsap.killTweensOf(obj.position); 
-                gsap.killTweensOf(obj.rotation);
-            });
-            dealerCardObjects3D = [];
-        }
-
-        function clearPlayerCards(playerId) {
-            if (playerCardObjects3D[playerId]) {
-                playerCardObjects3D[playerId].forEach(obj => {
-                    if (obj.parent) obj.parent.remove(obj);
-                    gsap.killTweensOf(obj.position);
-                    gsap.killTweensOf(obj.rotation);
-                });
-                playerCardObjects3D[playerId] = [];
-            }
-        }
-
-        function clearAll3DObjects() {
-            clearDealerCards();
-            Object.keys(playerCardObjects3D).forEach(playerId => clearPlayerCards(playerId));
-            Object.values(chipStackObjects).forEach(obj => {
-                if (obj.parent) obj.parent.remove(obj);
-                gsap.killTweensOf(obj.position); // Kill chip animations too
-                gsap.killTweensOf(obj.scale);
-            });
-            chipStackObjects = {};
-        }
-
-        // Enhanced WebSocket Connection with Reconnection Logic
         function connectWebSocket() {
-            consoleLog("connectWebSocket START");
-            
-            if (isLoadingOrReconnecting && ws && ws.readyState === WebSocket.CONNECTING) {
-                consoleLog("Already connecting, skipping duplicate connection attempt");
-                return;
-            }
-            
-            isLoadingOrReconnecting = true;
-            updateConnectionStatus('connecting');
-            
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.host}/ws`;
-            
-            if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
-                ws.close();
-            }
-
+            consoleLog("connectWebSocket START"); if (isLoadingOrReconnecting && ws && ws.readyState === WebSocket.CONNECTING) { consoleLog("Already connecting"); return; }
+            isLoadingOrReconnecting = true; updateConnectionStatus('connecting');
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'; const wsUrl = `${protocol}//${window.location.host}/ws`;
+            if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) { ws.close(); }
             ws = new WebSocket(wsUrl);
-            
-            ws.onopen = function() {
-                consoleLog('WebSocket connected successfully');
-                isConnected = true;
-                isLoadingOrReconnecting = false;
-                reconnectAttempts = 0;
-                hideLoadingScreen();
-                updateConnectionStatus('connected');
-                showNotification('Connected to Royal Blackjack 3D!', 'success', 3000);
-            };
-            
-            ws.onmessage = function(event) {
-                try {
-                    const message = JSON.parse(event.data);
-                    consoleLog('WebSocket message received:', message.type);
-                    handleServerMessage(message);
-                } catch (e) {
-                    consoleError("Error parsing server message:", e, event.data);
-                    showNotification('Received invalid message from server', 'error', 3000);
-                }
-            };
-            
+            ws.onopen = function() { consoleLog('WebSocket connected'); isConnected = true; isLoadingOrReconnecting = false; reconnectAttempts = 0; hideLoadingScreen(); updateConnectionStatus('connected'); showNotification('Connected!', 'success', 3000); };
+            ws.onmessage = function(event) { try { const message = JSON.parse(event.data); consoleLog('WS recv:', message.type); handleServerMessage(message); } catch (e) { consoleError("Error parsing server message:", e, event.data); showNotification('Invalid server message', 'error'); } };
             ws.onclose = function(event) {
-                consoleLog(`WebSocket disconnected. Code: ${event.code}, Reason: ${event.reason}`);
-                isConnected = false;
-                updateConnectionStatus('disconnected', `Code: ${event.code}`);
-                
-                clearAll3DObjects();
-                
-                if (!isLoadingOrReconnecting) {
-                    showMainMenu();
-                    animateCameraToMenu();
-                }
-                
-                // Enhanced reconnection logic
+                consoleLog(`WS disconnected. Code: ${event.code}, Reason: ${event.reason}`); isConnected = false; updateConnectionStatus('disconnected', `Code: ${event.code}`);
+                clearAll3DObjects(); if (!isLoadingOrReconnecting) { showMainMenu(); animateCameraToMenu(); }
                 if (reconnectAttempts < maxReconnectAttempts && !isLoadingOrReconnecting) {
-                    reconnectAttempts++;
-                    const delay = Math.min(reconnectDelay * Math.pow(2, reconnectAttempts - 1), 30000);
-                    
-                    updateConnectionStatus('reconnecting');
-                    showLoadingScreen(`Connection lost. Reconnecting in ${Math.ceil(delay/1000)}s... (${reconnectAttempts}/${maxReconnectAttempts})`);
-                    showNotification(`Reconnecting... Attempt ${reconnectAttempts}/${maxReconnectAttempts}`, 'warning', 3000);
-                    
-                    setTimeout(() => {
-                        if (!isConnected) {
-                            connectWebSocket();
-                        }
-                    }, delay);
-                } else if (reconnectAttempts >= maxReconnectAttempts) {
-                    updateConnectionStatus('disconnected', 'Max reconnect attempts reached');
-                    showNotification('Connection lost. Please refresh the page.', 'error', 10000);
-                    // Don't hide loading screen if it was shown for reconnection attempts.
-                    // Let user decide to refresh.
-                }
+                    reconnectAttempts++; const delay = Math.min(reconnectDelay * Math.pow(2, reconnectAttempts - 1), 30000);
+                    updateConnectionStatus('reconnecting'); showLoadingScreen(`Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})`); showNotification(`Reconnecting... Attempt ${reconnectAttempts}`, 'warning');
+                    setTimeout(() => { if (!isConnected) { connectWebSocket(); } }, delay);
+                } else if (reconnectAttempts >= maxReconnectAttempts) { updateConnectionStatus('disconnected', 'Max reconnect attempts'); showNotification('Connection lost. Please refresh.', 'error', 10000); }
             };
-            
-            ws.onerror = function(error) {
-                consoleError('WebSocket error:', error);
-                updateConnectionStatus('disconnected', 'Connection error');
-                showNotification('Connection error occurred', 'error', 5000);
-                 // If an error occurs, it might prevent onopen, so isLoadingOrReconnecting might be true.
-                // Consider setting isLoadingOrReconnecting = false here to allow reconnection attempts.
-                // However, this could also lead to rapid failed reconnection attempts.
-                // For now, let onclose handle the main reconnection logic.
-            };
+            ws.onerror = function(error) { consoleError('WS error:', error); updateConnectionStatus('disconnected', 'Connection error'); showNotification('Connection error', 'error'); };
         }
 
         function sendMessage(action, payload = {}) {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                const message = { action, payload };
-                consoleLog('WebSocket send:', action, payload);
-                try {
-                    ws.send(JSON.stringify(message));
-                    return true;
-                } catch (e) {
-                    consoleError('Error sending WebSocket message:', e);
-                    showNotification('Failed to send message', 'error', 3000);
-                    return false;
-                }
-            } else {
-                consoleError('WebSocket not open, current state:', ws ? ws.readyState : 'null');
-                showNotification('Not connected. Please wait for reconnection.', 'warning', 3000);
-                return false;
-            }
+            if (ws && ws.readyState === WebSocket.OPEN) { const message = { action, payload }; consoleLog('WS send:', action, payload); try { ws.send(JSON.stringify(message)); return true; } catch (e) { consoleError('Error sending WS message:', e); showNotification('Failed to send', 'error'); return false; } }
+            else { consoleError('WS not open:', ws ? ws.readyState : 'null'); showNotification('Not connected.', 'warning'); return false; }
         }
 
-        // Enhanced Server Message Handling
         function handleServerMessage(message) {
             try {
                 switch (message.type) {
-                    case 'connected':
-                        myPlayerId = message.data.player_id;
-                        consoleLog(`Connected successfully. Player ID: ${myPlayerId}`);
-                        hideLoadingScreen(); // Hide initial loading screen
-                        showMainMenu();
-                        break;
-                        
-                    case 'room_created':
-                    case 'room_joined':
-                        currentRoomCode = message.data.room_code;
-                        isPlayerInGame = true;
-                        hideLoadingScreen(); // ADDED: Hide "Creating/Joining room..." loading screen
-                        showGameInterface();
-                        showNotification(`Joined room: ${currentRoomCode}`, 'success', 4000);
-                        animateCameraToTable();
-                        break;
-                        
-                    case 'spectating':
-                        currentRoomCode = message.data.room_code;
-                        isPlayerInGame = false;
-                        hideLoadingScreen(); // ADDED: Hide "Spectating room..." loading screen
-                        showGameInterface();
-                        showNotification(`Spectating room: ${currentRoomCode}`, 'info', 4000);
-                        animateCameraToTable();
-                        break;
-                        
-                    case 'room_left':
-                        hideLoadingScreen(); // ADDED: Hide "Leaving room..." loading screen
-                        handleRoomLeft(); // This will show main menu
-                        break;
-                        
-                    case 'game_state':
-                        currentGameState = message.data;
-                        updateGameInterface();
-                        break;
-                        
-                    case 'room_list':
-                        updateRoomList(message.data.rooms);
-                        break;
-                        
-                    case 'error':
-                        consoleError('Server error:', message.message);
-                        showNotification('Error: ' + message.message, 'error', 5000);
-                        // If an error implies a failed action that showed a loading screen, hide it.
-                        // This is a bit broad, but can help prevent stuck loading screens on server error.
-                        hideLoadingScreen(); 
-                        break;
-                        
-                    default:
-                        consoleWarn('Unknown message type:', message.type);
+                    case 'connected': myPlayerId = message.data.player_id; consoleLog(`Player ID: ${myPlayerId}`); hideLoadingScreen(); showMainMenu(); break;
+                    case 'room_created': case 'room_joined': currentRoomCode = message.data.room_code; isPlayerInGame = true; hideLoadingScreen(); showGameInterface(); showNotification(`Joined: ${currentRoomCode}`, 'success'); animateCameraToTable(); break;
+                    case 'spectating': currentRoomCode = message.data.room_code; isPlayerInGame = false; hideLoadingScreen(); showGameInterface(); showNotification(`Spectating: ${currentRoomCode}`, 'info'); animateCameraToTable(); break;
+                    case 'room_left': hideLoadingScreen(); handleRoomLeft(); break;
+                    case 'game_state': currentGameState = message.data; updateGameInterface(); break;
+                    case 'room_list': updateRoomList(message.data.rooms); break;
+                    case 'error': consoleError('Server error:', message.message); showNotification('Error: ' + message.message, 'error'); hideLoadingScreen(); break;
+                    default: consoleWarn('Unknown message type:', message.type);
                 }
-            } catch (e) {
-                consoleError('Error handling server message:', e, message);
-                showNotification('Error processing server message', 'error', 3000);
-            }
+            } catch (e) { consoleError('Error handling server message:', e, message); showNotification('Error processing message', 'error'); }
         }
 
-
-        function handleRoomLeft() {
-            // hideLoadingScreen() is now called in handleServerMessage before this
-            showMainMenu();
-            showNotification('You have left the room.', 'info', 3000);
-            animateCameraToMenu();
-            currentRoomCode = null;
-            currentGameState = null;
-            isPlayerInGame = false;
-            clearAll3DObjects();
-        }
-
-        // Enhanced Camera Animations
-        function animateCameraToTable() {
-            consoleLog("Animating camera to table view");
-            cameraAnimating = true;
-            camera.userData.targetRotationY = 0;
-            camera.userData.targetDistance = 15;
-            camera.userData.targetHeight = 12;
-            
-            gsap.to(camera.position, {
-                duration: 1.5, 
-                x: 0, 
-                y: 12, 
-                z: 15, 
-                ease: "power2.inOut",
-                onUpdate: () => camera.lookAt(0, 0, 0),
-                onComplete: () => {
-                    cameraAnimating = false;
-                    consoleLog("Camera animation to table complete");
-                }
-            });
-            
-            // Add some visual flair
-            if (particleSystem) {
-                gsap.to(particleSystem.material, {
-                    opacity: 0.6,
-                    duration: 1.5,
-                    ease: "power2.inOut"
-                });
-            }
-        }
-
-        function animateCameraToMenu() {
-            consoleLog("Animating camera to menu view");
-            cameraAnimating = true;
-            camera.userData.targetRotationY = Math.PI / 6;
-            camera.userData.targetDistance = 22;
-            camera.userData.targetHeight = 16;
-            
-            gsap.to(camera.position, {
-                duration: 1.5, 
-                x: 8, 
-                y: 16, 
-                z: 22, 
-                ease: "power2.inOut",
-                onUpdate: () => camera.lookAt(0, 0, 0),
-                onComplete: () => {
-                    cameraAnimating = false;
-                    consoleLog("Camera animation to menu complete");
-                }
-            });
-            
-            if (particleSystem) {
-                gsap.to(particleSystem.material, {
-                    opacity: 0.3,
-                    duration: 1.5,
-                    ease: "power2.inOut"
-                });
-            }
-        }
-
-        // Enhanced UI Management
-        function hideLoadingScreen() {
-            const loadingScreen = document.getElementById('loadingScreen');
-            if (loadingScreen && loadingScreen.style.display !== 'none') {
-                gsap.to(loadingScreen, {
-                    duration: 0.8, 
-                    opacity: 0,
-                    ease: "power2.out",
-                    onComplete: () => {
-                        loadingScreen.style.display = 'none';
-                        consoleLog("Loading screen hidden");
-                    }
-                });
-            } else {
-                 consoleLog("hideLoadingScreen called, but screen already hidden or not found.");
-            }
-        }
-
-        function showLoadingScreen(text = 'Loading casino experience...') {
-            const loadingScreen = document.getElementById('loadingScreen');
-            const textElement = loadingScreen.querySelector('.loading-text');
-            
-            if (textElement) textElement.textContent = text;
-            loadingScreen.style.display = 'flex';
-            // Ensure opacity is reset for GSAP animation if it was previously faded out
-            loadingScreen.style.opacity = '0'; 
-            
-            gsap.to(loadingScreen, { 
-                duration: 0.5, 
-                opacity: 1,
-                ease: "power2.out"
-            });
-            
-            consoleLog("Loading screen shown:", text);
-        }
-
-
-        function showMainMenu() {
-            consoleLog("Showing main menu");
-            
-            document.getElementById('menuPanel').classList.remove('hidden');
-            document.getElementById('gameHUD').classList.add('hidden');
-            document.getElementById('dealerArea').classList.add('hidden');
-            document.getElementById('betControls').classList.add('hidden');
-            document.getElementById('actionsPanel').classList.add('hidden');
-            document.getElementById('chatPanel').classList.add('hidden');
-            document.getElementById('playerHandsDisplay').classList.add('hidden');
-            clearAll3DObjects();
-            
-            // Animate menu panel entrance
-            gsap.fromTo('#menuPanel', 
-                { opacity: 0, scale: 0.8 },
-                { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.2)" }
-            );
-        }
-
-        function showGameInterface() {
-            consoleLog("Showing game interface");
-            
-            document.getElementById('menuPanel').classList.add('hidden');
-            document.getElementById('gameHUD').classList.remove('hidden');
-            document.getElementById('dealerArea').classList.remove('hidden');
-            document.getElementById('chatPanel').classList.remove('hidden');
-            document.getElementById('playerHandsDisplay').classList.remove('hidden');
-            
-            // Animate interface elements
-            gsap.fromTo(['#gameHUD', '#dealerArea', '#chatPanel'], 
-                { opacity: 0, y: -20 },
-                { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.1 }
-            );
-        }
+        function handleRoomLeft() { showMainMenu(); showNotification('Left room.', 'info'); animateCameraToMenu(); currentRoomCode = null; currentGameState = null; isPlayerInGame = false; clearAll3DObjects(); }
+        function animateCameraToTable() { consoleLog("Cam to table"); cameraAnimating = true; camera.userData.targetRotationY = 0; camera.userData.targetDistance = 15; camera.userData.targetHeight = 12; gsap.to(camera.position, { duration: 1.5, x: 0, y: 12, z: 15, ease: "power2.inOut", onUpdate: () => camera.lookAt(0, 0, 0), onComplete: () => { cameraAnimating = false; } }); if (particleSystem) gsap.to(particleSystem.material, { opacity: 0.6, duration: 1.5, ease: "power2.inOut" }); }
+        function animateCameraToMenu() { consoleLog("Cam to menu"); cameraAnimating = true; camera.userData.targetRotationY = Math.PI / 6; camera.userData.targetDistance = 22; camera.userData.targetHeight = 16; gsap.to(camera.position, { duration: 1.5, x: 8, y: 16, z: 22, ease: "power2.inOut", onUpdate: () => camera.lookAt(0, 0, 0), onComplete: () => { cameraAnimating = false; } }); if (particleSystem) gsap.to(particleSystem.material, { opacity: 0.3, duration: 1.5, ease: "power2.inOut" }); }
+        
+        function hideLoadingScreen() { const ls = document.getElementById('loadingScreen'); if (ls && ls.style.display !== 'none') { gsap.to(ls, { duration: 0.8, opacity: 0, ease: "power2.out", onComplete: () => { ls.style.display = 'none'; consoleLog("Loading screen hidden"); } }); } else { consoleLog("hideLoadingScreen: already hidden/not found."); } }
+        function showLoadingScreen(text = 'Loading...') { const ls = document.getElementById('loadingScreen'); const txtEl = ls.querySelector('.loading-text'); if (txtEl) txtEl.textContent = text; ls.style.display = 'flex'; ls.style.opacity = '0'; gsap.to(ls, { duration: 0.5, opacity: 1, ease: "power2.out" }); consoleLog("Loading screen shown:", text); }
+        
+        function showMainMenu() { consoleLog("Show main menu"); document.getElementById('menuPanel').classList.remove('hidden'); ['gameHUD', 'dealerArea', 'betControls', 'actionsPanel', 'chatPanel', 'playerHandsDisplay'].forEach(id => document.getElementById(id).classList.add('hidden')); clearAll3DObjects(); gsap.fromTo('#menuPanel', { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.2)" }); }
+        function showGameInterface() { consoleLog("Show game interface"); document.getElementById('menuPanel').classList.add('hidden'); ['gameHUD', 'dealerArea', 'chatPanel', 'playerHandsDisplay'].forEach(id => document.getElementById(id).classList.remove('hidden')); gsap.fromTo(['#gameHUD', '#dealerArea', '#chatPanel'], { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.1 }); }
 
         function updateGameInterface() {
             if (!currentGameState) return;
-            
-            consoleLog("updateGameInterface: Phase:", currentGameState.phase);
+            consoleLog("updateGameInterface: Phase:", currentGameState.phase, "Owner:", currentGameState.owner_id, "MyID:", myPlayerId);
 
-            // Update HUD information
             document.getElementById('currentRoomCodeDisplay').textContent = currentGameState.room_code || '-';
             document.getElementById('phaseText').textContent = currentGameState.phase.replace(/_/g, ' ').toUpperCase();
             document.getElementById('handNumber').textContent = currentGameState.hand_number || '0';
@@ -2341,42 +1511,39 @@
             if (myPlayerState) {
                 document.getElementById('moneyAmount').textContent = myPlayerState.money.toLocaleString();
             } else {
-                document.getElementById('moneyAmount').textContent = 'N/A';
+                document.getElementById('moneyAmount').textContent = 'N/A (Spectator)';
             }
 
-            // Show/hide betting controls with animations
-            if (currentGameState.phase === 'waiting' && myPlayerState && isPlayerInGame && currentGameState.players[myPlayerId]?.hands[0]?.bet_amount === 0) {
-                showElement('betControls');
-                hideElement('actionsPanel');
+            if (currentGameState.phase === 'waiting' && myPlayerState && isPlayerInGame && myPlayerState.hands[0]?.bet_amount === 0) {
+                showElement('betControls'); hideElement('actionsPanel');
             } else if (currentGameState.can_act && currentGameState.available_actions && isPlayerInGame) {
-                hideElement('betControls');
-                showElement('actionsPanel');
-                updateActionButtons();
+                hideElement('betControls'); showElement('actionsPanel'); updateActionButtons();
             } else {
-                hideElement('betControls');
-                hideElement('actionsPanel');
+                hideElement('betControls'); hideElement('actionsPanel');
             }
 
+            updateDealerDisplay(); updatePlayerHandsUI(); updateChat(); updateTableVisuals();
 
-            // Update dealer display
-            updateDealerDisplay();
-            
-            // Update player hands display
-            updatePlayerHandsUI();
-            
-            // Update chat
-            updateChat();
-            
-            // Update 3D visuals
-            updateTableVisuals();
+            // ---- START DIAGNOSTIC LOGS FOR START BUTTON ----
+            consoleLog("--- Start Game Button Logic Check ---");
+            consoleLog("Phase OK?", currentGameState.phase === 'waiting');
+            consoleLog("myPlayerState exists?", !!myPlayerState);
+            if (myPlayerState) {
+                consoleLog("Is Owner?", myPlayerState.id === currentGameState.owner_id, `(My ID: ${myPlayerId}, Owner ID: ${currentGameState.owner_id})`);
+                consoleLog("My Bet Amount (hands[0]):", myPlayerState.hands[0]?.bet_amount);
+            }
+            const anyBetsPlaced = Object.values(currentGameState.players).some(p => p.hands[0]?.bet_amount > 0);
+            consoleLog("Any player has bet?", anyBetsPlaced);
+            // ---- END DIAGNOSTIC LOGS ----
 
-            // Show/hide start game button
             const startBtn = document.getElementById('startGameBtn');
             const canStartGame = currentGameState.phase === 'waiting' &&
                                  myPlayerState &&
                                  myPlayerState.id === currentGameState.owner_id &&
-                                 Object.values(currentGameState.players).some(p => p.hands[0]?.bet_amount > 0); // At least one bet placed
+                                 Object.values(currentGameState.players).some(p => p.hands[0]?.bet_amount > 0);
             
+            consoleLog("Final canStartGame evaluation:", canStartGame);
+
             if (canStartGame) {
                 startBtn.style.display = 'block';
                 gsap.fromTo(startBtn, { scale: 0.8 }, { scale: 1, duration: 0.3, ease: "back.out(1.7)" });
@@ -2385,632 +1552,152 @@
             }
         }
 
-        function showElement(elementId) {
-            const element = document.getElementById(elementId);
-            if (element && element.classList.contains('hidden')) {
-                element.classList.remove('hidden');
-                gsap.fromTo(element, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" });
-            }
-        }
-
-        function hideElement(elementId) {
-            const element = document.getElementById(elementId);
-            if (element && !element.classList.contains('hidden')) {
-                gsap.to(element, { 
-                    opacity: 0, 
-                    y: -20, 
-                    duration: 0.3, 
-                    ease: "power2.in",
-                    onComplete: () => element.classList.add('hidden')
-                });
-            }
-        }
+        function showElement(elementId) { const el = document.getElementById(elementId); if (el && el.classList.contains('hidden')) { el.classList.remove('hidden'); gsap.fromTo(el, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }); } }
+        function hideElement(elementId) { const el = document.getElementById(elementId); if (el && !el.classList.contains('hidden')) { gsap.to(el, { opacity: 0, y: -20, duration: 0.3, ease: "power2.in", onComplete: () => el.classList.add('hidden') }); } }
 
         function updateDealerDisplay() {
-            const dealerHandEl = document.getElementById('dealerHand');
-            const dealerValueEl = document.getElementById('dealerValue');
-            
-            if (!currentGameState.dealer_hand || !currentGameState.dealer_hand.cards) {
-                dealerHandEl.innerHTML = ''; // Clear previous cards
-                dealerValueEl.textContent = 'No cards';
-                return;
-            }
-
-
-            // Show dealer cards as mini cards with animations
-            // Only rebuild if necessary (e.g., card count changes or value changes significantly)
-            // For simplicity here, always rebuilding, but could be optimized
-            dealerHandEl.innerHTML = '';
+            const dhEl = document.getElementById('dealerHand'); const dvEl = document.getElementById('dealerValue');
+            if (!currentGameState.dealer_hand || !currentGameState.dealer_hand.cards) { dhEl.innerHTML = ''; dvEl.textContent = 'No cards'; return; }
+            dhEl.innerHTML = '';
             currentGameState.dealer_hand.cards.forEach((card, index) => {
-                const cardDiv = document.createElement('div');
-                cardDiv.className = 'card-mini';
-                
-                if (card.suit === 'back') {
-                    cardDiv.classList.add('back');
-                    cardDiv.textContent = '?';
-                } else {
-                    if (card.suit === 'hearts' || card.suit === 'diamonds') {
-                        cardDiv.classList.add('red');
-                    }
-                    cardDiv.textContent = card.rank;
-                }
-                
-                dealerHandEl.appendChild(cardDiv);
-                
-                // Animate card appearance
-                gsap.fromTo(cardDiv, 
-                    { opacity: 0, scale: 0, rotationY: 180 },
-                    { opacity: 1, scale: 1, rotationY: 0, duration: 0.5, delay: index * 0.1, ease: "back.out(1.7)" }
-                );
+                const cardDiv = document.createElement('div'); cardDiv.className = 'card-mini';
+                if (card.suit === 'back') { cardDiv.classList.add('back'); cardDiv.textContent = '?'; }
+                else { if (card.suit === 'hearts' || card.suit === 'diamonds') cardDiv.classList.add('red'); cardDiv.textContent = card.rank; }
+                dhEl.appendChild(cardDiv);
+                gsap.fromTo(cardDiv, { opacity: 0, scale: 0, rotationY: 180 }, { opacity: 1, scale: 1, rotationY: 0, duration: 0.5, delay: index * 0.1, ease: "back.out(1.7)" });
             });
-
-            // Show dealer value with animation
             if (currentGameState.dealer_hand.value !== null && currentGameState.dealer_hand.value !== undefined) {
-                const newValue = `Value: ${currentGameState.dealer_hand.value}`;
-                if (dealerValueEl.textContent !== newValue) {
-                    gsap.fromTo(dealerValueEl, 
-                        { scale: 1.2, color: '#ffd700' },
-                        { scale: 1, color: '#ffffff', duration: 0.5, ease: "power2.out", overwrite: "auto" }
-                    );
-                }
-                dealerValueEl.textContent = newValue;
-            } else {
-                dealerValueEl.textContent = 'Hidden';
-            }
+                const newVal = `Value: ${currentGameState.dealer_hand.value}`;
+                if (dvEl.textContent !== newVal) gsap.fromTo(dvEl, { scale: 1.2, color: '#ffd700' }, { scale: 1, color: '#ffffff', duration: 0.5, ease: "power2.out", overwrite: "auto" });
+                dvEl.textContent = newVal;
+            } else { dvEl.textContent = 'Hidden'; }
         }
 
         function updateActionButtons() {
             if (!currentGameState.available_actions) return;
-
-            const actions = currentGameState.available_actions;
-            const buttonIds = ['hitBtn', 'standBtn', 'doubleBtn', 'splitBtn', 'surrenderBtn'];
-            
-            // Hide all buttons first (or rather, ensure they are correctly enabled/disabled)
-            buttonIds.forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn) {
-                    btn.style.display = 'none'; // Start by hiding all
-                    btn.disabled = true;
-                }
-            });
-
-            // Show available actions with staggered animation
-            actions.forEach((actionData, index) => { // Assuming actionData is {action: "hit", label: "Hit"}
-                const btnId = actionData.action + 'Btn'; // e.g. "hitBtn"
-                const btn = document.getElementById(btnId);
-                if (btn) {
-                    btn.style.display = 'inline-block';
-                    btn.disabled = false;
-                    // Potentially update label if dynamic: btn.textContent = actionData.label;
-                    
-                    gsap.fromTo(btn, 
-                        { opacity: 0, scale: 0.8, y: 20 },
-                        { opacity: 1, scale: 1, y: 0, duration: 0.4, delay: index * 0.1, ease: "back.out(1.7)", overwrite: "auto" }
-                    );
-                }
+            const actions = currentGameState.available_actions; const btnIds = ['hitBtn', 'standBtn', 'doubleBtn', 'splitBtn', 'surrenderBtn'];
+            btnIds.forEach(id => { const btn = document.getElementById(id); if (btn) { btn.style.display = 'none'; btn.disabled = true; } });
+            actions.forEach((actionData, index) => {
+                const btnId = actionData.action + 'Btn'; const btn = document.getElementById(btnId);
+                if (btn) { btn.style.display = 'inline-block'; btn.disabled = false; gsap.fromTo(btn, { opacity: 0, scale: 0.8, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.4, delay: index * 0.1, ease: "back.out(1.7)", overwrite: "auto" }); }
             });
         }
-
 
         function updatePlayerHandsUI() {
-            const container = document.getElementById('playerHandsDisplay');
-            // Smart update: only update if player data actually changed to avoid re-creating DOM elements constantly.
-            // For now, simple clear and rebuild.
-            container.innerHTML = ''; 
-            
+            const container = document.getElementById('playerHandsDisplay'); container.innerHTML = '';
             if (!currentGameState.players) return;
-
             Object.values(currentGameState.players).forEach((player, index) => {
-                const playerDiv = document.createElement('div');
-                playerDiv.className = 'player-hand';
-                
-                if (player.is_current_player) playerDiv.classList.add('current-player');
-                if (player.status === 'bust') playerDiv.classList.add('bust');
-                if (player.status === 'blackjack') playerDiv.classList.add('blackjack');
-                if (player.id === myPlayerId) playerDiv.style.borderColor = '#00ffff'; // Highlight own player
-
+                const playerDiv = document.createElement('div'); playerDiv.className = 'player-hand';
+                if (player.is_current_player) playerDiv.classList.add('current-player'); if (player.status === 'bust') playerDiv.classList.add('bust'); if (player.status === 'blackjack') playerDiv.classList.add('blackjack'); if (player.id === myPlayerId) playerDiv.style.borderColor = '#00ffff';
                 let handsHtml = '';
                 player.hands.forEach((hand, handIndex) => {
-                    const cardsHtml = hand.cards.map(card => {
-                        const cardClass = (card.suit === 'hearts' || card.suit === 'diamonds') ? 'card-mini red' : 
-                                         card.suit === 'back' ? 'card-mini back' : 'card-mini';
-                        return `<div class="${cardClass}">${card.suit === 'back' ? '?' : card.rank}</div>`;
-                    }).join('');
-                    
-                    handsHtml += `
-                        <div class="hand-info" style="border-top: ${handIndex > 0 ? '1px solid rgba(255,215,0,0.3)' : 'none'}; margin-top: ${handIndex > 0 ? '10px' : '0'}; padding-top: ${handIndex > 0 ? '10px' : '0'};">
-                            <div class="hand-cards">${cardsHtml}</div>
-                            <div>Value: ${hand.value !== undefined ? hand.value : 'N/A'}</div>
-                            <div>Bet: $${hand.bet_amount}</div>
-                            ${hand.result ? `<div style="color: ${getResultColor(hand.result)}; font-weight: bold;">${hand.result.toUpperCase()}</div>` : ''}
-                            ${hand.payout > 0 && hand.result !== 'push' ? `<div style="color: #00ffaa;">Won: $${hand.payout - hand.bet_amount}</div>` : ''}
-                            ${hand.payout > 0 && hand.result === 'push' ? `<div style="color: #ffaa00;">Push: $${hand.bet_amount} returned</div>` : ''}
-                        </div>
-                    `;
+                    const cardsHtml = hand.cards.map(card => `<div class="${(card.suit === 'hearts' || card.suit === 'diamonds') ? 'card-mini red' : card.suit === 'back' ? 'card-mini back' : 'card-mini'}">${card.suit === 'back' ? '?' : card.rank}</div>`).join('');
+                    handsHtml += `<div class="hand-info" style="border-top: ${handIndex > 0 ? '1px solid rgba(255,215,0,0.3)' : 'none'}; margin-top: ${handIndex > 0 ? '10px' : '0'}; padding-top: ${handIndex > 0 ? '10px' : '0'};">
+                        <div class="hand-cards">${cardsHtml}</div><div>Value: ${hand.value !== undefined ? hand.value : 'N/A'}</div><div>Bet: $${hand.bet_amount}</div>
+                        ${hand.result ? `<div style="color: ${getResultColor(hand.result)}; font-weight: bold;">${hand.result.toUpperCase()}</div>` : ''}
+                        ${hand.payout > 0 && hand.result !== 'push' ? `<div style="color: #00ffaa;">Won: $${hand.payout - hand.bet_amount}</div>` : ''}
+                        ${hand.payout > 0 && hand.result === 'push' ? `<div style="color: #ffaa00;">Push: $${hand.bet_amount} returned</div>` : ''}</div>`;
                 });
-
-                playerDiv.innerHTML = `
-                    <div class="player-name">${player.name} (ID: ${player.id.substring(0,4)})</div>
-                    <div class="player-money">💰 $${player.money.toLocaleString()}</div>
-                    ${handsHtml}
-                `;
-                
+                playerDiv.innerHTML = `<div class="player-name">${player.name}</div><div class="player-money">💰 $${player.money.toLocaleString()}</div>${handsHtml}`;
                 container.appendChild(playerDiv);
-                
-                gsap.fromTo(playerDiv, 
-                    { opacity: 0, scale: 0.9, y: 10 },
-                    { opacity: 1, scale: 1, y: 0, duration: 0.4, delay: index * 0.05, ease: "power2.out", overwrite: "auto" }
-                );
+                gsap.fromTo(playerDiv, { opacity: 0, scale: 0.9, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.4, delay: index * 0.05, ease: "power2.out", overwrite: "auto" });
             });
         }
 
-
-        function getResultColor(result) {
-            switch(result) {
-                case 'win':
-                case 'blackjack': return '#00ff00'; // Bright Green
-                case 'lose':
-                case 'bust': return '#ff4444'; // Bright Red
-                case 'push': return '#ffaa00'; // Orange/Yellow
-                default: return '#ffffff'; // White
-            }
-        }
-
+        function getResultColor(result) { switch(result) { case 'win': case 'blackjack': return '#00ff00'; case 'lose': case 'bust': return '#ff4444'; case 'push': return '#ffaa00'; default: return '#ffffff'; } }
+        
         function updateChat() {
             if (!currentGameState || !currentGameState.chat_messages) return;
-            
-            const chatMessagesEl = document.getElementById('chatMessages');
-            const shouldScroll = chatMessagesEl.scrollHeight - chatMessagesEl.clientHeight <= chatMessagesEl.scrollTop + 20; // A bit more leeway
-            const currentMessageCount = chatMessagesEl.children.length;
-
-            const newMessages = currentGameState.chat_messages;
-
-            if (currentMessageCount !== newMessages.length || 
-                (newMessages.length > 0 && chatMessagesEl.lastChild?.textContent !== newMessages[newMessages.length-1].message)) { // Basic check if last message changed
-                
-                chatMessagesEl.innerHTML = ''; // Rebuild all for simplicity, can be optimized
+            const chatMessagesEl = document.getElementById('chatMessages'); const shouldScroll = chatMessagesEl.scrollHeight - chatMessagesEl.clientHeight <= chatMessagesEl.scrollTop + 20;
+            const currentMessageCount = chatMessagesEl.children.length; const newMessages = currentGameState.chat_messages;
+            if (currentMessageCount !== newMessages.length || (newMessages.length > 0 && chatMessagesEl.lastChild?.textContent !== newMessages[newMessages.length-1].message)) {
+                chatMessagesEl.innerHTML = '';
                 newMessages.forEach((msg, index) => {
-                    const msgDiv = document.createElement('div');
-                    msgDiv.className = 'chat-message';
-                    msgDiv.style.borderLeftColor = msg.player_color || '#ffd700'; // Default to gold
-                    
-                    const nameSpan = document.createElement('span');
-                    nameSpan.className = 'chat-player-name';
-                    nameSpan.style.color = msg.player_color || '#ffd700';
-                    nameSpan.textContent = msg.player_name + ': ';
-                    
-                    const messageSpan = document.createElement('span');
-                    messageSpan.textContent = msg.message; // Assume message is already sanitized on server
-                    
-                    const timeSpan = document.createElement('span');
-                    timeSpan.className = 'chat-timestamp';
-                    timeSpan.textContent = msg.formatted_time;
-                    
-                    msgDiv.appendChild(nameSpan);
-                    msgDiv.appendChild(messageSpan);
-                    msgDiv.appendChild(timeSpan);
-                    chatMessagesEl.appendChild(msgDiv);
-                    
-                    // Animate new messages (if this is a partial update logic)
-                    // With full rebuild, this animation applies to all on each update, which might be too much.
-                    // For now, keeping it.
-                    gsap.fromTo(msgDiv, 
-                        { opacity: 0, x: 20 },
-                        { opacity: 1, x: 0, duration: 0.3, ease: "power2.out", delay: index * 0.02, overwrite: "auto" }
-                    );
+                    const msgDiv = document.createElement('div'); msgDiv.className = 'chat-message'; msgDiv.style.borderLeftColor = msg.player_color || '#ffd700';
+                    const nameSpan = document.createElement('span'); nameSpan.className = 'chat-player-name'; nameSpan.style.color = msg.player_color || '#ffd700'; nameSpan.textContent = msg.player_name + ': ';
+                    const messageSpan = document.createElement('span'); messageSpan.textContent = msg.message;
+                    const timeSpan = document.createElement('span'); timeSpan.className = 'chat-timestamp'; timeSpan.textContent = msg.formatted_time;
+                    msgDiv.appendChild(nameSpan); msgDiv.appendChild(messageSpan); msgDiv.appendChild(timeSpan); chatMessagesEl.appendChild(msgDiv);
+                    gsap.fromTo(msgDiv, { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out", delay: index * 0.02, overwrite: "auto" });
                 });
-                
-                if (shouldScroll || !chatCollapsed) { // Always scroll if chat not collapsed
-                    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-                }
+                if (shouldScroll || !chatCollapsed) { chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight; }
             }
         }
 
+        function createQuickRoom() { const name = document.getElementById('playerName').value.trim(); if (!name) { showNotification("Enter name", "warning"); return; } if (sendMessage('create_room', { player_name: name })) showLoadingScreen('Creating room...'); }
+        function createCustomRoom() { const name = document.getElementById('playerName').value.trim(); const roomName = document.getElementById('roomName').value.trim(); if (!name) { showNotification("Enter name", "warning"); return; } if (sendMessage('create_room', { player_name: name, room_name: roomName || null })) showLoadingScreen('Creating custom room...'); }
+        function joinRoomFromInput() { const code = document.getElementById('roomCodeInput').value.trim().toUpperCase(); const name = document.getElementById('playerName').value.trim(); if (!code) { showNotification("Enter room code", "warning"); return; } if (!name) { showNotification("Enter name", "warning"); return; } if (sendMessage('join_room', { room_code: code, player_name: name })) showLoadingScreen('Joining room...'); }
+        function spectateRoomFromInput() { const code = document.getElementById('roomCodeInput').value.trim().toUpperCase(); if (!code) { showNotification("Enter room code", "warning"); return; } if (sendMessage('spectate_room', { room_code: code })) showLoadingScreen('Joining as spectator...'); }
+        function leaveRoom() { if (confirm("Leave room?")) { if(sendMessage('leave_room')) showLoadingScreen('Leaving room...'); } }
+        function startGame() { if (sendMessage('start_game')) showNotification('Starting game...', 'info'); }
+        
+        const MIN_BET_DYNAMIC = () => currentGameState?.min_bet || 10;
+        const MAX_BET_DYNAMIC = () => currentGameState?.max_bet || 500;
 
-        // Enhanced Game Actions
-        function createQuickRoom() {
-            const playerName = document.getElementById('playerName').value.trim();
-            if (!playerName) {
-                showNotification("Please enter your name", "warning", 3000);
-                document.getElementById('playerName').focus();
-                return;
-            }
-            
-            if (sendMessage('create_room', { player_name: playerName })) {
-                showLoadingScreen('Creating room...');
-            }
-        }
-
-        function createCustomRoom() {
-            const playerName = document.getElementById('playerName').value.trim();
-            const roomName = document.getElementById('roomName').value.trim();
-            
-            if (!playerName) {
-                showNotification("Please enter your name", "warning", 3000);
-                document.getElementById('playerName').focus();
-                return;
-            }
-            
-            if (sendMessage('create_room', { 
-                player_name: playerName, 
-                room_name: roomName || null 
-            })) {
-                showLoadingScreen('Creating custom room...');
-            }
-        }
-
-        function joinRoomFromInput() {
-            const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
-            const playerName = document.getElementById('playerName').value.trim();
-            
-            if (!code) {
-                showNotification("Please enter a room code.", "warning", 3000);
-                document.getElementById('roomCodeInput').focus();
-                return;
-            }
-            
-            if (!playerName) {
-                showNotification("Please enter your name", "warning", 3000);
-                document.getElementById('playerName').focus();
-                return;
-            }
-            
-            if (sendMessage('join_room', { room_code: code, player_name: playerName })) {
-                showLoadingScreen('Joining room...');
-            }
-        }
-
-        function spectateRoomFromInput() {
-            const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
-            
-            if (!code) {
-                showNotification("Please enter a room code to spectate.", "warning", 3000);
-                document.getElementById('roomCodeInput').focus();
-                return;
-            }
-            
-            if (sendMessage('spectate_room', { room_code: code })) {
-                showLoadingScreen('Joining as spectator...');
-            }
-        }
-
-        function leaveRoom() {
-            if (confirm("Are you sure you want to leave the room?")) {
-                if(sendMessage('leave_room')) {
-                    showLoadingScreen('Leaving room...');
-                }
-            }
-        }
-
-        function startGame() {
-            if (sendMessage('start_game')) {
-                showNotification('Starting game...', 'info', 2000);
-                 // The loading screen for "Starting game..." is not explicitly shown here.
-                 // Game state will update, which handles UI changes.
-            }
-        }
-
-
-        function setBetAmount(amount) {
-            const input = document.getElementById('betAmountInput');
-            input.value = amount;
-            
-            // Visual feedback
-            gsap.fromTo(input, 
-                { scale: 1.1, borderColor: '#ffd700' }, // Use the actual gold color
-                { scale: 1, borderColor: 'var(--primary-gold)', duration: 0.3, ease: "power2.out", overwrite: "auto" }
-            );
-        }
-
+        function setBetAmount(amount) { const input = document.getElementById('betAmountInput'); input.value = amount; gsap.fromTo(input, { scale: 1.1, borderColor: '#ffd700' }, { scale: 1, borderColor: 'var(--primary-gold)', duration: 0.3, ease: "power2.out", overwrite: "auto" }); }
         function placeBet() {
             const amount = parseInt(document.getElementById('betAmountInput').value);
-            
-            if (isNaN(amount) || amount < MIN_BET_PLACEHOLDER || amount > MAX_BET_PLACEHOLDER) { // Replace with actual min/max if available
-                showNotification(`Bet must be between $${MIN_BET_PLACEHOLDER} and $${MAX_BET_PLACEHOLDER}`, "warning", 3000); // Use dynamic min/max
-                return;
-            }
-            
-            const myPlayerState = currentGameState.players[myPlayerId];
-            if (myPlayerState && amount > myPlayerState.money) {
-                showNotification("Insufficient funds", "error", 3000);
-                return;
-            }
-            
-            if (sendMessage('player_action', { action_type: 'place_bet', amount: amount })) {
-                showNotification(`Bet placed: $${amount}`, 'success', 2000);
-                // Optionally hide bet controls immediately after placing bet, or wait for server state
-                 hideElement('betControls'); 
-            }
+            if (isNaN(amount) || amount < MIN_BET_DYNAMIC() || amount > MAX_BET_DYNAMIC()) { showNotification(`Bet must be $${MIN_BET_DYNAMIC()}-${MAX_BET_DYNAMIC()}`, "warning"); return; }
+            const myPlayerState = currentGameState.players[myPlayerId]; if (myPlayerState && amount > myPlayerState.money) { showNotification("Insufficient funds", "error"); return; }
+            if (sendMessage('player_action', { action_type: 'place_bet', amount: amount })) { showNotification(`Bet placed: $${amount}`, 'success'); hideElement('betControls'); }
         }
-        // Placeholder for dynamic min/max bet values, if available from server state
-        const MIN_BET_PLACEHOLDER = currentGameState?.min_bet || 10;
-        const MAX_BET_PLACEHOLDER = currentGameState?.max_bet || 500;
+        function playerAction(actionType) { if (sendMessage('player_action', { action_type: actionType })) showNotification(`Action: ${actionType.replace('_', ' ').toUpperCase()}`, 'info'); }
 
-
-        function playerAction(actionType) {
-            if (sendMessage('player_action', { action_type: actionType })) {
-                showNotification(`Action: ${actionType.replace('_', ' ').toUpperCase()}`, 'info', 1500);
-                // Optionally hide action buttons immediately to prevent double clicks, or wait for server state.
-                // hideElement('actionsPanel'); 
-            }
-        }
-
-
-        // Enhanced Chat Functions
-        function sendChat() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            
-            if (!message) {
-                return;
-            }
-            
-            if (message.length > 200) {
-                showNotification("Message too long (max 200 characters)", "warning", 3000);
-                return;
-            }
-            
-            if (sendMessage('send_chat_message', { message: message })) {
-                input.value = '';
-                // Visual feedback
-                gsap.fromTo(input, 
-                    { backgroundColor: 'rgba(0, 255, 0, 0.2)' },
-                    { backgroundColor: 'rgba(255, 255, 255, 0.1)', duration: 0.5, overwrite: "auto" }
-                );
-            }
-        }
-
-        function handleChatKeyPress(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                sendChat();
-            }
-        }
-
+        function sendChat() { const input = document.getElementById('chatInput'); const message = input.value.trim(); if (!message) return; if (message.length > 200) { showNotification("Message too long", "warning"); return; } if (sendMessage('send_chat_message', { message: message })) { input.value = ''; gsap.fromTo(input, { backgroundColor: 'rgba(0, 255, 0, 0.2)' }, { backgroundColor: 'rgba(255, 255, 255, 0.1)', duration: 0.5, overwrite: "auto" }); } }
+        function handleChatKeyPress(event) { if (event.key === 'Enter') { event.preventDefault(); sendChat(); } }
         function toggleChat() {
-            chatCollapsed = !chatCollapsed;
-            const chatMessages = document.getElementById('chatMessages');
-            const chatInputContainer = document.querySelector('.chat-input-container');
-            const chatPanel = document.getElementById('chatPanel');
-            const chatToggle = document.getElementById('chatToggle');
-            
-            const originalHeight = chatPanel.style.minHeight || '250px'; // Or a sensible default like '250px'
-
-            if (chatCollapsed) {
-                gsap.to([chatMessages, chatInputContainer], { height: 0, opacity: 0, duration: 0.3, ease: "power2.inOut", onComplete: () => {
-                    chatMessages.style.display = 'none';
-                    chatInputContainer.style.display = 'none';
-                }});
-                gsap.to(chatPanel, { height: '50px', duration: 0.3, ease: "power2.inOut" }); // Collapse panel to header height
-                chatToggle.textContent = '+';
-            } else {
-                chatMessages.style.display = 'block'; // Make sure it's block before animating height
-                chatInputContainer.style.display = 'flex';
-                
-                gsap.set(chatMessages, { height: 'auto' }); // Calculate auto height
-                const targetMessagesHeight = chatMessages.offsetHeight;
-                gsap.set(chatMessages, { height: 0 }); // Reset for animation
-
-                gsap.to(chatPanel, { height: originalHeight, duration: 0.3, ease: "power2.inOut" });
-                gsap.to(chatMessages, { height: targetMessagesHeight, opacity: 1, duration: 0.3, ease: "power2.inOut" });
-                gsap.to(chatInputContainer, { height: 'auto', opacity: 1, duration: 0.3, ease: "power2.inOut" });
-                chatToggle.textContent = '−';
-                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight; // Scroll to bottom
-            }
+            chatCollapsed = !chatCollapsed; const chatP = document.getElementById('chatPanel'); const chatM = document.getElementById('chatMessages'); const chatI = document.querySelector('.chat-input-container'); const chatT = document.getElementById('chatToggle');
+            const originalHeight = chatP.dataset.originalHeight || '250px'; if(!chatP.dataset.originalHeight) chatP.dataset.originalHeight = chatP.offsetHeight + 'px';
+            if (chatCollapsed) { gsap.to([chatM, chatI], { height: 0, opacity: 0, duration: 0.3, onComplete: () => { chatM.style.display = 'none'; chatI.style.display = 'none'; }}); gsap.to(chatP, { height: '50px', duration: 0.3 }); chatT.textContent = '+'; }
+            else { chatM.style.display = 'block'; chatI.style.display = 'flex'; gsap.set(chatM, {height: 'auto'}); const targetH = chatM.offsetHeight; gsap.set(chatM, {height:0}); gsap.to(chatP, { height: originalHeight, duration: 0.3}); gsap.to(chatM, { height: targetH, opacity: 1, duration: 0.3}); gsap.to(chatI, { height: 'auto', opacity: 1, duration: 0.3}); chatT.textContent = '−'; chatM.scrollTop = chatM.scrollHeight; }
         }
-
-        // Enhanced Room List Modal Functions
-        function showRoomList() {
-            document.getElementById('roomListModal').classList.remove('hidden');
-            gsap.fromTo('#roomListModal', 
-                { opacity: 0 },
-                { opacity: 1, duration: 0.3, ease: "power2.out" }
-            );
-            refreshRoomList();
-        }
-
-        function hideRoomList() {
-            gsap.to('#roomListModal', {
-                opacity: 0,
-                duration: 0.3,
-                ease: "power2.in",
-                onComplete: () => document.getElementById('roomListModal').classList.add('hidden')
-            });
-        }
-
-        function refreshRoomList() {
-            sendMessage('get_room_list');
-            document.getElementById('roomList').innerHTML = 
-                '<div style="text-align: center; color: #ccc; padding: 20px;">Fetching rooms...</div>';
-        }
-
+        
+        function showRoomList() { document.getElementById('roomListModal').classList.remove('hidden'); gsap.fromTo('#roomListModal', { opacity: 0 }, { opacity: 1, duration: 0.3 }); refreshRoomList(); }
+        function hideRoomList() { gsap.to('#roomListModal', { opacity: 0, duration: 0.3, onComplete: () => document.getElementById('roomListModal').classList.add('hidden') }); }
+        function refreshRoomList() { sendMessage('get_room_list'); document.getElementById('roomList').innerHTML = '<div style="text-align: center; color: #ccc; padding: 20px;">Fetching...</div>'; }
         function updateRoomList(rooms) {
             const listEl = document.getElementById('roomList');
-            
-            if (!rooms || rooms.length === 0) {
-                listEl.innerHTML = '<div style="text-align: center; color: #ccc; padding: 20px;">No public rooms available.</div>';
-                return;
-            }
-            
-            listEl.innerHTML = rooms.map((room, index) => `
-                <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; opacity: 0;" id="room-${index}">
-                    <div>
-                        <strong style="color: #ffd700;">${room.name || room.code}</strong><br>
-                        <small style="color: #ccc;">Players: ${room.players}/${room.max_players} | Phase: ${room.phase.replace('_', ' ').toUpperCase()}</small>
-                    </div>
-                    <div>
-                        <button class="action-button" onclick="joinRoomByCode('${room.code}')" style="margin-right: 5px;">Join</button>
-                        <button class="action-button" onclick="spectateRoomByCode('${room.code}')">Spectate</button>
-                    </div>
-                </div>
-            `).join('');
-            
-            // Animate room list items
-            rooms.forEach((_, index) => {
-                gsap.fromTo(`#room-${index}`, 
-                    { opacity: 0, x: -50 },
-                    { opacity: 1, x: 0, duration: 0.4, delay: index * 0.1, ease: "power2.out", overwrite: "auto" }
-                );
-            });
+            if (!rooms || rooms.length === 0) { listEl.innerHTML = '<div style="text-align: center; color: #ccc; padding: 20px;">No public rooms.</div>'; return; }
+            listEl.innerHTML = rooms.map((room, index) => `<div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; opacity: 0;" id="room-${index}"><div><strong style="color: #ffd700;">${room.name || room.code}</strong><br><small style="color: #ccc;">Players: ${room.players}/${room.max_players} | Phase: ${room.phase.replace('_', ' ').toUpperCase()}</small></div><div><button class="action-button" onclick="joinRoomByCode('${room.code}')" style="margin-right: 5px;">Join</button><button class="action-button" onclick="spectateRoomByCode('${room.code}')">Spectate</button></div></div>`).join('');
+            rooms.forEach((_, index) => { gsap.fromTo(`#room-${index}`, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.4, delay: index * 0.1, ease: "power2.out", overwrite: "auto" }); });
         }
+        function joinRoomByCode(code) { const name = document.getElementById('playerName').value.trim() || 'Player'; hideRoomList(); if (sendMessage('join_room', { room_code: code, player_name: name })) showLoadingScreen('Joining room...'); }
+        function spectateRoomByCode(code) { hideRoomList(); if (sendMessage('spectate_room', { room_code: code })) showLoadingScreen('Joining as spectator...'); }
 
-
-        function joinRoomByCode(roomCode) {
-            const playerName = document.getElementById('playerName').value.trim() || 'Player';
-            hideRoomList();
-            if (sendMessage('join_room', { room_code: roomCode, player_name: playerName })) {
-                showLoadingScreen('Joining room...');
-            }
-        }
-
-        function spectateRoomByCode(roomCode) {
-            hideRoomList();
-            if (sendMessage('spectate_room', { room_code: roomCode })) {
-                showLoadingScreen('Joining as spectator...');
-            }
-        }
-
-        // Enhanced Notifications
         function showNotification(message, type = 'info', duration = 4000) {
-            const container = document.getElementById('notificationContainer');
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-            container.appendChild(notification);
-            
-            gsap.fromTo(notification, 
-                { y: -100, opacity: 0, scale: 0.8 },
-                { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }
-            );
-            
-            setTimeout(() => {
-                gsap.to(notification, {
-                    y: -100, opacity: 0, scale: 0.8, duration: 0.4, ease: "power2.in",
-                    onComplete: () => notification.remove() // Use .remove() modern browsers
-                });
-            }, duration);
+            const cont = document.getElementById('notificationContainer'); if(!cont) return; const notif = document.createElement('div');
+            notif.className = `notification ${type}`; notif.textContent = message; cont.appendChild(notif);
+            gsap.fromTo(notif, { y: -100, opacity: 0, scale: 0.8 }, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" });
+            setTimeout(() => { gsap.to(notif, { y: -100, opacity: 0, scale: 0.8, duration: 0.4, ease: "power2.in", onComplete: () => notif.remove() }); }, duration);
         }
 
-        // Enhanced Event Listeners
-        window.addEventListener('resize', function() {
-            if (camera && renderer) {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                consoleLog("Window resized:", window.innerWidth, window.innerHeight);
-            }
-        });
-
-        // Keyboard shortcuts
+        window.addEventListener('resize', function() { if (camera && renderer) { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); consoleLog("Resized"); } });
         document.addEventListener('keydown', function(event) {
-            if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-                return;
-            }
-            
-            if (!currentGameState || !currentGameState.can_act || !currentGameState.available_actions) {
-                return;
-            }
-            
+            if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+            if (!currentGameState || !currentGameState.can_act || !currentGameState.available_actions) return;
             const actions = currentGameState.available_actions.map(a => a.action);
-            
             switch(event.key.toLowerCase()) {
                 case 'h': if (actions.includes('hit')) playerAction('hit'); break;
                 case 's': if (actions.includes('stand')) playerAction('stand'); break;
                 case 'd': if (actions.includes('double_down')) playerAction('double_down'); break;
-                case 'p': if (actions.includes('split')) playerAction('split'); break; // Assuming 'p' for split
-                case 'r': if (actions.includes('surrender')) playerAction('surrender'); break; // Assuming 'r' for surrender/retreat
+                case 'p': if (actions.includes('split')) playerAction('split'); break;
+                case 'r': if (actions.includes('surrender')) playerAction('surrender'); break;
             }
         });
+        document.addEventListener('visibilitychange', function() { if (document.hidden) consoleLog("Page hidden"); else { consoleLog("Page visible"); if (!isConnected && !isLoadingOrReconnecting) { consoleLog("Reconnecting on visibility"); connectWebSocket(); } } });
+        window.addEventListener('error', function(event) { consoleError('Global error:', event.message, 'at', event.filename, ':', event.lineno); showNotification('Critical error. Please refresh.', 'error', 7000); });
+        window.addEventListener('unhandledrejection', function(event) { consoleError('Unhandled rejection:', event.reason); showNotification('Unexpected error.', 'error', 5000); });
 
-
-        // Focus management for better UX
-        document.addEventListener('click', function(event) {
-            // Simplified, as the original complex logic might not be needed
-            // if (event.target.tagName === 'INPUT' && event.target.type === 'text') {
-            //     gsap.to(event.target, {
-            //         borderColor: '#00ffff', // Example: cyan border on focus
-            //         duration: 0.3,
-            //         ease: "power2.out"
-            //     });
-            // }
-        });
-
-
-        // Visibility change handling (for when user switches tabs)
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                consoleLog("Page hidden - pausing non-essential animations");
-                // Consider pausing GSAP animations if intensive: gsap.globalTimeline.pause();
-            } else {
-                consoleLog("Page visible - resuming animations");
-                // gsap.globalTimeline.resume();
-                if (!isConnected && !isLoadingOrReconnecting) { 
-                    consoleLog("Attempting to reconnect after page became visible");
-                    connectWebSocket();
-                }
-            }
-        });
-
-        // Enhanced Error Handling
-        window.addEventListener('error', function(event) {
-            consoleError('Global error:', event.message, 'at', event.filename, ':', event.lineno);
-            showNotification('A critical error occurred. Please refresh.', 'error', 7000);
-        });
-
-        window.addEventListener('unhandledrejection', function(event) {
-            consoleError('Unhandled promise rejection:', event.reason);
-            showNotification('An unexpected error occurred. Please try again.', 'error', 5000);
-        });
-
-
-        // Initialize Application
         window.addEventListener('load', function() {
-            consoleLog("Window load event triggered - Starting initialization");
-            
-            const loadingTextElement = document.getElementById('loadingScreen').querySelector('.loading-text');
-            
-            if (!loadingTextElement) {
-                consoleError("Loading text element not found");
-                // Show a basic alert if notifications aren't ready
-                alert("Initialization error: UI components missing.");
-                return;
-            }
-            
+            consoleLog("Window loaded"); const loadingTextEl = document.getElementById('loadingScreen').querySelector('.loading-text');
+            if (!loadingTextEl) { consoleError("Loading text el not found"); alert("Init error."); return; }
             try {
-                loadingTextElement.textContent = "Checking libraries...";
-                if (typeof THREE === 'undefined') throw new Error("Three.js library not loaded");
-                if (typeof gsap === 'undefined') throw new Error("GSAP library not loaded");
-                
-                loadingTextElement.textContent = "Initializing 3D engine...";
-                if (!initThreeJS()) throw new Error("Failed to initialize 3D engine");
-                
-                loadingTextElement.textContent = "Connecting to server...";
-                connectWebSocket();
-                
-                consoleLog("Initialization sequence started successfully");
-                
-            } catch (e) {
-                consoleError("Error during initialization:", e);
-                loadingTextElement.textContent = "Error: " + e.message;
-                // Use showNotification if available, else alert
-                if(typeof showNotification === "function") {
-                    showNotification("Failed to initialize. Please refresh. " + e.message, "error", 10000);
-                } else {
-                    alert("Failed to initialize. Please refresh. " + e.message);
-                }
-                updateConnectionStatus('disconnected', e.message);
-            }
+                loadingTextEl.textContent = "Libs..."; if (typeof THREE === 'undefined') throw new Error("ThreeJS missing"); if (typeof gsap === 'undefined') throw new Error("GSAP missing");
+                loadingTextEl.textContent = "3D Engine..."; if (!initThreeJS()) throw new Error("3D Engine fail");
+                loadingTextEl.textContent = "Connecting..."; connectWebSocket(); consoleLog("Init sequence started.");
+            } catch (e) { consoleError("Init error:", e); loadingTextEl.textContent = "Error: " + e.message; if(typeof showNotification === "function") showNotification("Init failed: " + e.message, "error", 10000); else alert("Init failed: " + e.message); updateConnectionStatus('disconnected', e.message); }
         });
-
-
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', function() {
-            consoleLog("Page unloading - cleaning up connections");
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.close(1000, "Page unloading"); // Graceful closure
-            }
-        });
-
+        window.addEventListener('beforeunload', function() { consoleLog("Unloading"); if (ws && ws.readyState === WebSocket.OPEN) { ws.close(1000, "Page unload"); } });
     </script>
 </body>
 </html>
