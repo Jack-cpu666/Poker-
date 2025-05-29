@@ -127,7 +127,7 @@
             box-shadow: 0 10px 30px var(--shadow);
             backdrop-filter: blur(15px); 
             transition: all 0.3s ease;
-            max-height: 90vh; /* Default max-height for panels */
+            max-height: 90vh;
             overflow-y: auto;
         }
 
@@ -198,7 +198,6 @@
             left: 20px; 
             max-width: 350px; 
             z-index: 800;
-            max-height: 45vh; /* Restrict max height for HUD */
         }
 
         .hud-item {
@@ -380,7 +379,8 @@
             top: 20px; 
             right: 20px; 
             width: 320px; 
-            min-height: 250px; 
+            max-height: 50vh; 
+            min-height: 250px;
             background: linear-gradient(135deg, var(--overlay-bg), rgba(26, 93, 58, 0.9));
             border: 2px solid var(--primary-gold); 
             border-radius: 15px; 
@@ -432,7 +432,7 @@
             padding: 10px; 
             margin-bottom: 10px; 
             border: 1px solid rgba(255, 215, 0, 0.2);
-            min-height: 150px; 
+            min-height: 150px;
         }
 
         .chat-message {
@@ -728,32 +728,122 @@
 
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
-            .menu-panel { min-width: 95vw; padding: 15px; max-height: 85vh; }
-            .menu-title { font-size: 2rem; } 
-            .chat-panel { width: 95vw; max-height: 40vh; top: auto; bottom: 180px; left: 2.5vw; right: 2.5vw; }
-            .actions-panel { bottom: 20px; gap: 10px; padding: 0 10px; }
-            .action-button { padding: 12px 18px; font-size: 0.9rem; min-width: 100px; }
-            .player-hands { bottom: 200px; gap: 10px; padding: 0 10px; }
-            .player-hand { min-width: 150px; padding: 10px; }
-            .dealer-area { min-width: 280px; padding: 15px; }
-            .game-hud { max-width: 300px; /* max-height: 45vh; still applies */ }
-            .bet-controls { flex-direction: column; align-items: center; gap: 8px; }
-            .bet-buttons { justify-content: center; }
+            .menu-panel { 
+                min-width: 95vw; 
+                padding: 15px; 
+                max-height: 85vh;
+            }
+            
+            .menu-title { 
+                font-size: 2rem; 
+            } 
+            
+            .chat-panel { 
+                width: 95vw; 
+                max-height: 40vh; 
+                top: auto; 
+                bottom: 180px; 
+                left: 2.5vw; 
+                right: 2.5vw; 
+            }
+            
+            .actions-panel { 
+                bottom: 20px; 
+                gap: 10px; 
+                padding: 0 10px;
+            }
+            
+            .action-button { 
+                padding: 12px 18px; 
+                font-size: 0.9rem; 
+                min-width: 100px;
+            }
+            
+            .player-hands { 
+                bottom: 200px; 
+                gap: 10px; 
+                padding: 0 10px;
+            }
+            
+            .player-hand { 
+                min-width: 150px; 
+                padding: 10px; 
+            }
+
+            .dealer-area {
+                min-width: 280px;
+                padding: 15px;
+            }
+
+            .game-hud {
+                max-width: 300px;
+            }
+
+            .bet-controls {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .bet-buttons {
+                justify-content: center;
+            }
         }
 
         @media (max-width: 480px) {
-            .loading-logo { font-size: 2.5rem; }
-            .menu-panel { min-width: 98vw; padding: 10px; }
-            .action-button { padding: 10px 15px; font-size: 0.8rem; min-width: 90px; }
-            .chat-panel { max-height: 35vh; bottom: 160px; }
-            .player-hand { min-width: 140px; padding: 8px; }
+            .loading-logo {
+                font-size: 2.5rem;
+            }
+
+            .menu-panel {
+                min-width: 98vw;
+                padding: 10px;
+            }
+
+            .action-button {
+                padding: 10px 15px;
+                font-size: 0.8rem;
+                min-width: 90px;
+            }
+
+            .chat-panel {
+                max-height: 35vh;
+            }
+
+            .player-hand {
+                min-width: 140px;
+                padding: 8px;
+            }
         }
 
         /* Connection Status Indicator */
-        .connection-status { position: fixed; top: 10px; left: 10px; padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: 700; z-index: 1000; transition: all 0.3s ease; }
-        .connection-status.connected { background: rgba(40, 167, 69, 0.8); color: white; }
-        .connection-status.disconnected { background: rgba(220, 20, 60, 0.8); color: white; animation: pulse 1s infinite; }
-        .connection-status.connecting { background: rgba(255, 193, 7, 0.8); color: black; }
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .connection-status.connected {
+            background: rgba(40, 167, 69, 0.8);
+            color: white;
+        }
+
+        .connection-status.disconnected {
+            background: rgba(220, 20, 60, 0.8);
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        .connection-status.connecting {
+            background: rgba(255, 193, 7, 0.8);
+            color: black;
+        }
     </style>
 </head>
 <body>
@@ -879,7 +969,7 @@
                         <button class="bet-button" onclick="setBetAmount(50)">$50</button>
                         <button class="bet-button" onclick="setBetAmount(100)">$100</button>
                     </div>
-                    <input type="number" id="betAmountInput" class="bet-input" value="25" step="5"> <!-- min/max set by JS -->
+                    <input type="number" id="betAmountInput" class="bet-input" min="10" max="500" value="25" step="5">
                     <button class="action-button" onclick="placeBet()">💰 Place Bet</button>
                 </div>
             </div>
@@ -916,7 +1006,7 @@
     <div id="notificationContainer" class="notification-container"></div>
 
     <script>
-        // Game State Management (variables as before)
+        // Game State Management
         let ws = null;
         let scene, camera, renderer;
         let blackjackTable, tableGroup;
@@ -942,113 +1032,473 @@
         let chatCollapsed = false;
         let connectionStatusEl;
 
+        // Enhanced Logging
+        function consoleLog(message, ...params) {
+            const timestamp = new Date().toISOString();
+            console.log(`[BlackjackClient] ${timestamp} - ${message}`, ...params);
+        }
 
-        // --- Start of JavaScript logic ---
-        consoleLog("SCRIPT EXECUTION STARTED");
+        function consoleError(message, ...params) {
+            const timestamp = new Date().toISOString();
+            console.error(`[BlackjackClient ERROR] ${timestamp} - ${message}`, ...params);
+        }
 
-        // Enhanced Logging (as before)
-        function consoleLog(message, ...params) { const timestamp = new Date().toISOString(); console.log(`[BlackjackClient] ${timestamp} - ${message}`, ...params); }
-        function consoleError(message, ...params) { const timestamp = new Date().toISOString(); console.error(`[BlackjackClient ERROR] ${timestamp} - ${message}`, ...params); }
-        function consoleWarn(message, ...params) { const timestamp = new Date().toISOString(); console.warn(`[BlackjackClient WARN] ${timestamp} - ${message}`, ...params); }
+        function consoleWarn(message, ...params) {
+            const timestamp = new Date().toISOString();
+            console.warn(`[BlackjackClient WARN] ${timestamp} - ${message}`, ...params);
+        }
 
-        // Connection Status Management (as before)
-        function updateConnectionStatus(status, message = '') { if (!connectionStatusEl) connectionStatusEl = document.getElementById('connectionStatus'); if (!connectionStatusEl) return; connectionStatusEl.className = `connection-status ${status}`; switch(status) { case 'connected': connectionStatusEl.textContent = '🟢 Connected'; break; case 'connecting': connectionStatusEl.textContent = '🟡 Connecting...'; break; case 'disconnected': connectionStatusEl.textContent = '🔴 Disconnected'; break; case 'reconnecting': connectionStatusEl.textContent = `🟡 Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})`; break; } if (message) connectionStatusEl.title = message; }
+        // Connection Status Management
+        function updateConnectionStatus(status, message = '') {
+            if (!connectionStatusEl) {
+                connectionStatusEl = document.getElementById('connectionStatus');
+            }
+            if (!connectionStatusEl) return; // Guard if not found
+            
+            connectionStatusEl.className = `connection-status ${status}`;
+            
+            switch(status) {
+                case 'connected':
+                    connectionStatusEl.textContent = '🟢 Connected';
+                    break;
+                case 'connecting':
+                    connectionStatusEl.textContent = '🟡 Connecting...';
+                    break;
+                case 'disconnected':
+                    connectionStatusEl.textContent = '🔴 Disconnected';
+                    break;
+                case 'reconnecting':
+                    connectionStatusEl.textContent = `🟡 Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})`;
+                    break;
+            }
+            
+            if (message) {
+                connectionStatusEl.title = message;
+            }
+        }
+
+        // Enhanced Three.js Initialization
+        function initThreeJS() {
+            consoleLog("initThreeJS START");
+            try {
+                const canvas = document.getElementById('canvas');
+                scene = new THREE.Scene();
+                scene.fog = new THREE.Fog(0x051a11, 15, 50);
+                setupLighting();
+                
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.set(0, 12, 15);
+                camera.lookAt(0, 0, 0);
+                camera.userData = { targetRotationY: 0, targetDistance: 15 };
+
+                renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                renderer.toneMappingExposure = 1.2;
+
+                createCasinoEnvironment();
+                createBlackjackTable();
+                createCardMaterials();
+                createChipMaterials();
+                addMouseControls();
+                createParticleSystem();
+                animate();
+                
+                consoleLog("initThreeJS COMPLETE");
+                return true;
+            } catch (e) {
+                consoleError("Error during initThreeJS:", e);
+                showNotification("3D Engine Error. Please refresh.", "error", 10000);
+                return false;
+            }
+        }
         
-        // Three.js and Game Logic (condensed for brevity, use full versions from previous answers)
-        function initThreeJS() { consoleLog("initThreeJS START"); try { const canvas = document.getElementById('canvas'); scene = new THREE.Scene(); scene.fog = new THREE.Fog(0x051a11, 15, 50); setupLighting(); camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.set(0, 12, 15); camera.lookAt(0, 0, 0); camera.userData = { targetRotationY: 0, targetDistance: 15 }; renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true }); renderer.setSize(window.innerWidth, window.innerHeight); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.2; createCasinoEnvironment(); createBlackjackTable(); createCardMaterials(); createChipMaterials(); addMouseControls(); createParticleSystem(); animate(); consoleLog("initThreeJS COMPLETE"); return true; } catch (e) { consoleError("Error during initThreeJS:", e); showNotification("3D Engine Error. Refresh.", "error", 10000); return false; } }
-        function setupLighting() { const al=new THREE.AmbientLight(0x404040,0.8);scene.add(al);const ml=new THREE.DirectionalLight(0xffffff,1.5);ml.position.set(15,25,15);ml.castShadow=true;ml.shadow.mapSize.width=2048;ml.shadow.mapSize.height=2048;ml.shadow.camera.near=0.5;ml.shadow.camera.far=100;ml.shadow.camera.left=-25;ml.shadow.camera.right=25;ml.shadow.camera.top=25;ml.shadow.camera.bottom=-25;ml.shadow.bias=-0.001;scene.add(ml);const tl=new THREE.SpotLight(0xffd700,2.0,35,Math.PI/3,0.2,1.8);tl.position.set(0,15,0);tl.target.position.set(0,0,0);tl.castShadow=true;tl.shadow.mapSize.width=1024;tl.shadow.mapSize.height=1024;scene.add(tl);scene.add(tl.target);const rl1=new THREE.DirectionalLight(0x4169e1,0.5);rl1.position.set(-10,5,-10);scene.add(rl1);const rl2=new THREE.DirectionalLight(0xdc143c,0.3);rl2.position.set(10,5,10);scene.add(rl2); }
-        function createCasinoEnvironment(){const fg=new THREE.PlaneGeometry(120,120);const ft=createFloorTexture();const fm=new THREE.MeshLambertMaterial({map:ft,transparent:true,opacity:0.9});const f=new THREE.Mesh(fg,fm);f.rotation.x=-Math.PI/2;f.position.y=-2.5;f.receiveShadow=true;scene.add(f);const sg=new THREE.SphereGeometry(150,32,32);const st=createSkyboxTexture();const sm=new THREE.MeshBasicMaterial({map:st,side:THREE.BackSide,fog:false});const s=new THREE.Mesh(sg,sm);scene.add(s);createAtmosphericLights();}
-        function createFloorTexture(){const c=document.createElement('canvas');const x=c.getContext('2d');c.width=512;c.height=512;const g=x.createRadialGradient(256,256,50,256,256,300);g.addColorStop(0,'#2a0a0a');g.addColorStop(0.7,'#1a0505');g.addColorStop(1,'#0f0202');x.fillStyle=g;x.fillRect(0,0,512,512);x.strokeStyle='rgba(100,50,50,0.1)';x.lineWidth=1;for(let i=0;i<512;i+=32){x.beginPath();x.moveTo(i,0);x.lineTo(i,512);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(512,i);x.stroke();}const t=new THREE.CanvasTexture(c);t.wrapS=THREE.RepeatWrapping;t.wrapT=THREE.RepeatWrapping;t.repeat.set(4,4);return t;}
-        function createSkyboxTexture(){const c=document.createElement('canvas');const x=c.getContext('2d');c.width=1024;c.height=512;const g=x.createLinearGradient(0,0,0,512);g.addColorStop(0,'#051a11');g.addColorStop(0.5,'#0a2a1f');g.addColorStop(1,'#030f0a');x.fillStyle=g;x.fillRect(0,0,1024,512);return new THREE.CanvasTexture(c);}
-        function createAtmosphericLights(){for(let i=0;i<8;i++){const o=new THREE.Mesh(new THREE.SphereGeometry(0.1,8,8),new THREE.MeshBasicMaterial({color:0xffd700,transparent:true,opacity:0.6}));const a=(i/8)*Math.PI*2;o.position.set(Math.cos(a)*12,8+Math.sin(i)*2,Math.sin(a)*12);scene.add(o);const l=new THREE.PointLight(0xffd700,0.3,10);l.position.copy(o.position);scene.add(l);}}
-        function createBlackjackTable(){tableGroup=new THREE.Group();const tg=new THREE.CylinderGeometry(6.2,6.2,0.5,64);const wt=createWoodTexture();const tm=new THREE.MeshPhongMaterial({map:wt,shininess:40,bumpMap:wt,bumpScale:0.02});blackjackTable=new THREE.Mesh(tg,tm);blackjackTable.position.y=-0.25;blackjackTable.receiveShadow=true;blackjackTable.castShadow=true;tableGroup.add(blackjackTable);const eg=new THREE.TorusGeometry(6.2,0.35,16,64);const em=new THREE.MeshPhongMaterial({color:0xb8860b,shininess:80,reflectivity:0.3});const te=new THREE.Mesh(eg,em);te.rotation.x=Math.PI/2;te.position.y=0;te.castShadow=true;tableGroup.add(te);const fg=new THREE.CylinderGeometry(5.8,5.8,0.08,64);const ft=createFeltTexture();const fm=new THREE.MeshLambertMaterial({map:ft,bumpMap:ft,bumpScale:0.005});const tf=new THREE.Mesh(fg,fm);tf.position.y=0.04;tf.receiveShadow=true;tableGroup.add(tf);createPlayerPositions();createTableMarkings();scene.add(tableGroup);}
-        function createWoodTexture(){const c=document.createElement('canvas');const x=c.getContext('2d');c.width=256;c.height=256;const g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'#8B4513');g.addColorStop(0.3,'#A0522D');g.addColorStop(0.7,'#8B4513');g.addColorStop(1,'#654321');x.fillStyle=g;x.fillRect(0,0,256,256);x.strokeStyle='rgba(101,67,33,0.5)';x.lineWidth=1;for(let i=0;i<256;i+=8){x.beginPath();x.moveTo(0,i+Math.sin(i*0.1)*3);x.lineTo(256,i+Math.sin(i*0.1)*3);x.stroke();}return new THREE.CanvasTexture(c);}
-        function createFeltTexture(){const c=document.createElement('canvas');const x=c.getContext('2d');c.width=256;c.height=256;x.fillStyle='#0d4d2a';x.fillRect(0,0,256,256);const id=x.getImageData(0,0,256,256);const d=id.data;for(let i=0;i<d.length;i+=4){const n=(Math.random()-0.5)*30;d[i]=Math.max(0,Math.min(255,d[i]+n));d[i+1]=Math.max(0,Math.min(255,d[i+1]+n));d[i+2]=Math.max(0,Math.min(255,d[i+2]+n));}x.putImageData(id,0,0);return new THREE.CanvasTexture(c);}
-        function createTableMarkings(){const dag=new THREE.RingGeometry(1.2,1.3,32);const dam=new THREE.MeshBasicMaterial({color:0xffd700,transparent:true,opacity:0.7});const da=new THREE.Mesh(dag,dam);da.rotation.x=-Math.PI/2;da.position.set(0,0.05,-3.5);tableGroup.add(da);if(playerPositions&&playerPositions.length>0){playerPositions.forEach((pos,index)=>{const bc=new THREE.Mesh(new THREE.RingGeometry(0.4,0.45,24),new THREE.MeshBasicMaterial({color:0xffd700,transparent:true,opacity:0.5}));bc.rotation.x=-Math.PI/2;bc.position.set(pos.chipX,0.051,pos.chipZ);tableGroup.add(bc);});}}
-        function createPlayerPositions(){playerPositions=[];const r=4.5;const as=Math.PI/7;const sa=Math.PI+as/2;for(let i=0;i<6;i++){const a=sa+i*as;playerPositions.push({angle:a,x:Math.cos(a)*r,z:Math.sin(a)*r,cardXOffset:0,cardSpacing:0.7,chipX:Math.cos(a)*(r-1.2),chipZ:Math.sin(a)*(r-1.2)});}}
-        function createCardMaterials(){cardMaterials.back=new THREE.MeshPhongMaterial({map:createCardTexture("?","?",true),shininess:30});}
-        function createCardTexture(rank,suitName,isBack=false){const c=document.createElement('canvas');const x=c.getContext('2d');c.width=200;c.height=280;const cr=10;x.fillStyle=isBack?'#1E3A8A':'#FFFFFF';x.beginPath();x.moveTo(cr,0);x.lineTo(c.width-cr,0);x.quadraticCurveTo(c.width,0,c.width,cr);x.lineTo(c.width,c.height-cr);x.quadraticCurveTo(c.width,c.height,c.width-cr,c.height);x.lineTo(cr,c.height);x.quadraticCurveTo(0,c.height,0,c.height-cr);x.lineTo(0,cr);x.quadraticCurveTo(0,0,cr,0);x.closePath();x.fill();if(!isBack){const ss={'hearts':'♥','diamonds':'♦','clubs':'♣','spades':'♠'};const sc=(suitName==='hearts'||suitName==='diamonds')?'#DC143C':'#000000';x.fillStyle=sc;x.font='bold 32px Arial';x.textAlign='left';x.fillText(rank,15,40);x.font='bold 28px Arial';x.fillText(ss[suitName]||'',15,70);x.save();x.translate(c.width-15,c.height-40);x.rotate(Math.PI);x.font='bold 32px Arial';x.fillText(rank,0,0);x.font='bold 28px Arial';x.fillText(ss[suitName]||'',0,30);x.restore();x.font='bold 80px Arial';x.textAlign='center';x.fillText(ss[suitName]||'',c.width/2,c.height/2+30);}else{x.strokeStyle='#FBBF24';x.lineWidth=6;x.beginPath();x.moveTo(cr+3,3);x.lineTo(c.width-cr-3,3);x.quadraticCurveTo(c.width-3,3,c.width-3,cr+3);x.lineTo(c.width-3,c.height-cr-3);x.quadraticCurveTo(c.width-3,c.height-3,c.width-cr-3,c.height-3);x.lineTo(cr+3,c.height-3);x.quadraticCurveTo(3,c.height-3,3,c.height-cr-3);x.lineTo(3,cr+3);x.quadraticCurveTo(3,3,cr+3,3);x.closePath();x.stroke();x.fillStyle='rgba(251,191,36,0.3)';x.beginPath();x.arc(c.width/2,c.height/2,60,0,Math.PI*2);x.fill();x.fillStyle='#FBBF24';x.font='bold 18px Orbitron';x.textAlign='center';x.fillText('ROYAL',c.width/2,c.height/2-15);x.fillText('BLACKJACK',c.width/2,c.height/2+5);x.fillText('3D',c.width/2,c.height/2+25);}const t=new THREE.CanvasTexture(c);t.needsUpdate=true;return t;}
-        function createChipMaterials(){const d=[10,25,50,100,500];const c=[0xFFFFFF,0x00AA00,0xFF4444,0x222222,0x800080];d.forEach((denom,index)=>{const ct=createChipTexture(denom,c[index]);chipMaterials[denom]=new THREE.MeshPhongMaterial({map:ct,shininess:60,reflectivity:0.2});});chipMaterials['default']=new THREE.MeshPhongMaterial({color:0xFFAA00,shininess:50});}
-        function createChipTexture(value,baseColor){const cv=document.createElement('canvas');const cx=cv.getContext('2d');cv.width=64;cv.height=64;const X=32;const Y=32;const r=28;cx.fillStyle=`#${baseColor.toString(16).padStart(6,'0')}`;cx.beginPath();cx.arc(X,Y,r,0,Math.PI*2);cx.fill();cx.fillStyle='rgba(255,255,255,0.2)';cx.beginPath();cx.arc(X,Y,r-6,0,Math.PI*2);cx.fill();cx.fillStyle=`#${baseColor.toString(16).padStart(6,'0')}`;cx.beginPath();cx.arc(X,Y,r-10,0,Math.PI*2);cx.fill();cx.fillStyle='#FFFFFF';cx.font='bold 12px Arial';cx.textAlign='center';cx.fillText(`$${value}`,X,Y+4);cx.strokeStyle='rgba(255,255,255,0.5)';cx.lineWidth=1;for(let i=0;i<8;i++){const a=(i/8)*Math.PI*2;cx.beginPath();cx.moveTo(X+Math.cos(a)*(r-2),Y+Math.sin(a)*(r-2));cx.lineTo(X+Math.cos(a)*(r-8),Y+Math.sin(a)*(r-8));cx.stroke();}return new THREE.CanvasTexture(cv);}
-        function createCard3D(cardData,position,rotationY=0,faceUp=true){const cg=new THREE.Group();const cw=1.0,ch=1.4,cd=0.02;const sg=new THREE.BoxGeometry(cw,ch,cd);const ft=faceUp?createCardTexture(cardData.rank,cardData.suit):createCardTexture("?","?",true);const bt=createCardTexture("?","?",true);const sm=new THREE.MeshPhongMaterial({color:0xf0f0f0,shininess:10});const cma=[sm,sm,sm,sm,new THREE.MeshPhongMaterial({map:ft,shininess:faceUp?20:40}),new THREE.MeshPhongMaterial({map:bt,shininess:40})];const cs=new THREE.Mesh(sg,cma);cs.castShadow=true;cs.receiveShadow=true;cg.add(cs);cg.position.copy(position);cg.rotation.y=rotationY;cg.userData={id:cardData.id,suit:cardData.suit,rank:cardData.rank,faceUp:faceUp,originalPosition:position.clone()};return cg;}
-        function createChip3D(value,position,stackCount=1){const cg=new THREE.Group();const cr=0.18,ch=0.06;const d=getChipDenomination(value);const cm=chipMaterials[d]||chipMaterials['default'];for(let i=0;i<Math.min(stackCount,10);i++){const cgeom=new THREE.CylinderGeometry(cr,cr,ch,24);const c=new THREE.Mesh(cgeom,cm);c.position.y=i*(ch+0.002)+ch/2;c.castShadow=true;c.receiveShadow=true;c.rotation.y=Math.random()*Math.PI*2;cg.add(c);}cg.position.copy(position);cg.userData={value:value,count:stackCount};gsap.to(cg.position,{y:position.y+0.05,duration:2+Math.random()*2,yoyo:true,repeat:-1,ease:"sine.inOut"});return cg;}
-        function getChipDenomination(totalAmount){if(totalAmount>=500)return 500;if(totalAmount>=100)return 100;if(totalAmount>=50)return 50;if(totalAmount>=25)return 25;return 10;}
-        function createParticleSystem(){const pc=300;const p=new THREE.BufferGeometry();const pp=new Float32Array(pc*3);const pcol=new Float32Array(pc*3);for(let i=0;i<pc;i++){const i3=i*3;pp[i3]=(Math.random()-0.5)*80;pp[i3+1]=Math.random()*30+5;pp[i3+2]=(Math.random()-0.5)*80;const col=new THREE.Color();col.setHSL(0.15,0.8,0.3+Math.random()*0.4);pcol[i3]=col.r;pcol[i3+1]=col.g;pcol[i3+2]=col.b;}p.setAttribute('position',new THREE.BufferAttribute(pp,3));p.setAttribute('color',new THREE.BufferAttribute(pcol,3));const pm=new THREE.PointsMaterial({size:0.1,transparent:true,opacity:0.4,blending:THREE.AdditiveBlending,fog:false,vertexColors:true});particleSystem=new THREE.Points(p,pm);scene.add(particleSystem);}
-        function addMouseControls(){let md=false,lmX=0,lmY=0;let tsX=0,tsY=0;const mp=document.getElementById('menuPanel');const ce=document.getElementById('canvas');ce.addEventListener('mousedown',(e)=>{if(mp.classList.contains('hidden')){md=true;lmX=e.clientX;lmY=e.clientY;}});document.addEventListener('mouseup',()=>{md=false;});document.addEventListener('mousemove',(e)=>{if(md&&mp.classList.contains('hidden')&&!cameraAnimating){const dX=e.clientX-lmX;const dY=e.clientY-lmY;camera.userData.targetRotationY-=dX*0.005;camera.userData.targetHeight=camera.userData.targetHeight||12;camera.userData.targetHeight+=dY*0.02;camera.userData.targetHeight=Math.max(5,Math.min(20,camera.userData.targetHeight));lmX=e.clientX;lmY=e.clientY;}});ce.addEventListener('touchstart',(e)=>{if(mp.classList.contains('hidden')&&e.touches.length===1){tsX=e.touches[0].clientX;tsY=e.touches[0].clientY;e.preventDefault();}});ce.addEventListener('touchmove',(e)=>{if(mp.classList.contains('hidden')&&e.touches.length===1&&!cameraAnimating){const dX=e.touches[0].clientX-tsX;const dY=e.touches[0].clientY-tsY;camera.userData.targetRotationY-=dX*0.01;camera.userData.targetHeight=camera.userData.targetHeight||12;camera.userData.targetHeight+=dY*0.05;camera.userData.targetHeight=Math.max(5,Math.min(20,camera.userData.targetHeight));tsX=e.touches[0].clientX;tsY=e.touches[0].clientY;e.preventDefault();}});ce.addEventListener('wheel',(e)=>{if(mp.classList.contains('hidden')&&!cameraAnimating){e.preventDefault();camera.userData.targetDistance+=e.deltaY*0.02;camera.userData.targetDistance=Math.max(6,Math.min(30,camera.userData.targetDistance));}});}
-        function animate(){requestAnimationFrame(animate);const ct=Date.now()*0.001;if(!cameraAnimating){const lf=0.08;const th=camera.userData.targetHeight||12;camera.position.x=THREE.MathUtils.lerp(camera.position.x,Math.sin(camera.userData.targetRotationY)*camera.userData.targetDistance,lf);camera.position.z=THREE.MathUtils.lerp(camera.position.z,Math.cos(camera.userData.targetRotationY)*camera.userData.targetDistance,lf);camera.position.y=THREE.MathUtils.lerp(camera.position.y,th+(camera.userData.targetDistance-15)*0.15,lf);camera.lookAt(0,0,0);}if(particleSystem){particleSystem.rotation.y+=0.0003;const ps=particleSystem.geometry.attributes.position.array;for(let i=1;i<ps.length;i+=3){ps[i]=(ps[i]+Math.sin(ct+i*0.1)*0.005);if(ps[i]<5)ps[i]=5+Math.random()*20;if(ps[i]>35)ps[i]=35-Math.random()*20;}particleSystem.geometry.attributes.position.needsUpdate=true;}const aco=[...dealerCardObjects3D,...Object.values(playerCardObjects3D).flat()];aco.forEach((cm,idx)=>{if(cm&&cm.userData&&cm.userData.originalPosition){const by=cm.userData.originalPosition.y;cm.position.y=by+Math.sin(ct*1.5+idx*0.5)*0.01;}});renderer.render(scene,camera);}
-        function updateTableVisuals(){consoleLog("updateTableVisuals START");if(!currentGameState)return;const cby=0.08+0.01;clearDealerCards();if(currentGameState.dealer_hand&¤tGameState.dealer_hand.cards){currentGameState.dealer_hand.cards.forEach((cd,idx)=>{const p=new THREE.Vector3(-2.0+idx*1.1,cby,-3.8);const fu=cd.suit!=='back';const co=createCard3D(cd,p,0,fu);scene.add(co);dealerCardObjects3D.push(co);gsap.fromTo(co.position,{x:0,y:cby+2,z:0},{x:p.x,y:p.y,z:p.z,duration:0.6,ease:"back.out(1.2)",delay:idx*0.15});gsap.from(co.rotation,{y:Math.PI,duration:0.6,ease:"power2.out",delay:idx*0.15});});}Object.keys(playerCardObjects3D).forEach(pid=>clearPlayerCards(pid));Object.values(chipStackObjects).forEach(obj=>{if(obj.parent)obj.parent.remove(obj);gsap.killTweensOf(obj.position);});chipStackObjects={};Object.values(currentGameState.players).forEach((plr,pIdx)=>{if(pIdx>=playerPositions.length){consoleWarn(`Player index ${pIdx} out of bounds`);return;}const p3d=playerPositions[pIdx];if(!playerCardObjects3D[plr.id])playerCardObjects3D[plr.id]=[];let cri=0;plr.hands.forEach((h,hIdx)=>{const hcc=h.cards.length;const hw=(hcc-1)*(p3d.cardSpacing*0.5);const hsx=p3d.x+p3d.cardXOffset-hw/2+(hIdx*2.0);h.cards.forEach((cData,cihIdx)=>{const cp=new THREE.Vector3(hsx+cihIdx*(p3d.cardSpacing*0.5),cby,p3d.z);const cry=p3d.angle+Math.PI/2;const co=createCard3D(cData,cp,cry,true);scene.add(co);playerCardObjects3D[plr.id].push(co);const td=pIdx*0.1+cri*0.08;gsap.fromTo(co.position,{x:0,y:cby+2,z:0},{x:cp.x,y:cp.y,z:cp.z,duration:0.5,ease:"power2.out",delay:td});gsap.fromTo(co.rotation,{y:cry+Math.PI},{y:cry,duration:0.5,ease:"power2.out",delay:td});cri++;});if(h.bet_amount>0){const chipPos=new THREE.Vector3(p3d.chipX+hIdx*0.6,0.02,p3d.chipZ);const sc=Math.min(Math.ceil(h.bet_amount/getChipDenomination(h.bet_amount)),8);const cs=createChip3D(h.bet_amount,chipPos,sc);scene.add(cs);chipStackObjects[`player_bet_${plr.id}_${hIdx}`]=cs;gsap.from(cs.scale,{x:0,y:0,z:0,duration:0.4,ease:"back.out(1.7)",delay:pIdx*0.1});}});consoleLog("updateTableVisuals COMPLETE");}
-        function clearDealerCards(){dealerCardObjects3D.forEach(o=>{if(o.parent)o.parent.remove(o);gsap.killTweensOf(o.position);gsap.killTweensOf(o.rotation);});dealerCardObjects3D=[];}
-        function clearPlayerCards(pid){if(playerCardObjects3D[pid]){playerCardObjects3D[pid].forEach(o=>{if(o.parent)o.parent.remove(o);gsap.killTweensOf(o.position);gsap.killTweensOf(o.rotation);});playerCardObjects3D[pid]=[];}}
-        function clearAll3DObjects(){clearDealerCards();Object.keys(playerCardObjects3D).forEach(pid=>clearPlayerCards(pid));Object.values(chipStackObjects).forEach(o=>{if(o.parent)o.parent.remove(o);gsap.killTweensOf(o.position);gsap.killTweensOf(o.scale);});chipStackObjects={};}
-        
+        function setupLighting() {
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.8);
+            scene.add(ambientLight);
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            mainLight.position.set(15, 25, 15);
+            mainLight.castShadow = true;
+            mainLight.shadow.mapSize.width = 2048; mainLight.shadow.mapSize.height = 2048;
+            mainLight.shadow.camera.near = 0.5; mainLight.shadow.camera.far = 100;
+            mainLight.shadow.camera.left = -25; mainLight.shadow.camera.right = 25;
+            mainLight.shadow.camera.top = 25; mainLight.shadow.camera.bottom = -25;
+            mainLight.shadow.bias = -0.001;
+            scene.add(mainLight);
+            const tableLight = new THREE.SpotLight(0xffd700, 2.0, 35, Math.PI / 3, 0.2, 1.8);
+            tableLight.position.set(0, 15, 0); tableLight.target.position.set(0, 0, 0);
+            tableLight.castShadow = true; tableLight.shadow.mapSize.width = 1024; tableLight.shadow.mapSize.height = 1024;
+            scene.add(tableLight); scene.add(tableLight.target);
+            const rimLight1 = new THREE.DirectionalLight(0x4169e1, 0.5); rimLight1.position.set(-10, 5, -10); scene.add(rimLight1);
+            const rimLight2 = new THREE.DirectionalLight(0xdc143c, 0.3); rimLight2.position.set(10, 5, 10); scene.add(rimLight2);
+        }
+
+        function createCasinoEnvironment() {
+            const floorGeometry = new THREE.PlaneGeometry(120, 120);
+            const floorTexture = createFloorTexture();
+            const floorMaterial = new THREE.MeshLambertMaterial({ map: floorTexture, transparent: true, opacity: 0.9 });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2; floor.position.y = -2.5; floor.receiveShadow = true;
+            scene.add(floor);
+            const skyboxGeometry = new THREE.SphereGeometry(150, 32, 32);
+            const skyboxTexture = createSkyboxTexture();
+            const skyboxMaterial = new THREE.MeshBasicMaterial({ map: skyboxTexture, side: THREE.BackSide, fog: false });
+            const skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
+            scene.add(skybox);
+            createAtmosphericLights();
+        }
+
+        function createFloorTexture() {
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 512; canvas.height = 512;
+            const gradient = ctx.createRadialGradient(256, 256, 50, 256, 256, 300);
+            gradient.addColorStop(0, '#2a0a0a'); gradient.addColorStop(0.7, '#1a0505'); gradient.addColorStop(1, '#0f0202');
+            ctx.fillStyle = gradient; ctx.fillRect(0, 0, 512, 512);
+            ctx.strokeStyle = 'rgba(100, 50, 50, 0.1)'; ctx.lineWidth = 1;
+            for (let i = 0; i < 512; i += 32) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke();
+            }
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping; texture.repeat.set(4, 4);
+            return texture;
+        }
+
+        function createSkyboxTexture() {
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 1024; canvas.height = 512;
+            const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+            gradient.addColorStop(0, '#051a11'); gradient.addColorStop(0.5, '#0a2a1f'); gradient.addColorStop(1, '#030f0a');
+            ctx.fillStyle = gradient; ctx.fillRect(0, 0, 1024, 512);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createAtmosphericLights() {
+            for (let i = 0; i < 8; i++) {
+                const orb = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.6 }));
+                const angle = (i / 8) * Math.PI * 2;
+                orb.position.set(Math.cos(angle) * 12, 8 + Math.sin(i) * 2, Math.sin(angle) * 12);
+                scene.add(orb);
+                const light = new THREE.PointLight(0xffd700, 0.3, 10); light.position.copy(orb.position); scene.add(light);
+            }
+        }
+
+        function createBlackjackTable() {
+            tableGroup = new THREE.Group();
+            const tableGeometry = new THREE.CylinderGeometry(6.2, 6.2, 0.5, 64);
+            const woodTexture = createWoodTexture();
+            const tableMaterial = new THREE.MeshPhongMaterial({ map: woodTexture, shininess: 40, bumpMap: woodTexture, bumpScale: 0.02 });
+            blackjackTable = new THREE.Mesh(tableGeometry, tableMaterial);
+            blackjackTable.position.y = -0.25; blackjackTable.receiveShadow = true; blackjackTable.castShadow = true;
+            tableGroup.add(blackjackTable);
+            const edgeGeometry = new THREE.TorusGeometry(6.2, 0.35, 16, 64);
+            const edgeMaterial = new THREE.MeshPhongMaterial({ color: 0xb8860b, shininess: 80, reflectivity: 0.3 });
+            const tableEdge = new THREE.Mesh(edgeGeometry, edgeMaterial);
+            tableEdge.rotation.x = Math.PI / 2; tableEdge.position.y = 0; tableEdge.castShadow = true;
+            tableGroup.add(tableEdge);
+            const feltGeometry = new THREE.CylinderGeometry(5.8, 5.8, 0.08, 64);
+            const feltTexture = createFeltTexture();
+            const feltMaterial = new THREE.MeshLambertMaterial({ map: feltTexture, bumpMap: feltTexture, bumpScale: 0.005 });
+            const tableFelt = new THREE.Mesh(feltGeometry, feltMaterial);
+            tableFelt.position.y = 0.04; tableFelt.receiveShadow = true;
+            tableGroup.add(tableFelt);
+            createPlayerPositions(); 
+            createTableMarkings();
+            scene.add(tableGroup);
+        }
+
+        function createWoodTexture() {
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 256; canvas.height = 256;
+            const gradient = ctx.createLinearGradient(0, 0, 0, 256);
+            gradient.addColorStop(0, '#8B4513'); gradient.addColorStop(0.3, '#A0522D'); gradient.addColorStop(0.7, '#8B4513'); gradient.addColorStop(1, '#654321');
+            ctx.fillStyle = gradient; ctx.fillRect(0, 0, 256, 256);
+            ctx.strokeStyle = 'rgba(101, 67, 33, 0.5)'; ctx.lineWidth = 1;
+            for (let i = 0; i < 256; i += 8) {
+                ctx.beginPath(); ctx.moveTo(0, i + Math.sin(i * 0.1) * 3); ctx.lineTo(256, i + Math.sin(i * 0.1) * 3); ctx.stroke();
+            }
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createFeltTexture() {
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 256; canvas.height = 256;
+            ctx.fillStyle = '#0d4d2a'; ctx.fillRect(0, 0, 256, 256);
+            const imageData = ctx.getImageData(0, 0, 256, 256); const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const noise = (Math.random() - 0.5) * 30;
+                data[i] = Math.max(0, Math.min(255, data[i] + noise)); data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise)); data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise));
+            }
+            ctx.putImageData(imageData, 0, 0); return new THREE.CanvasTexture(canvas);
+        }
+
+        function createTableMarkings() {
+            const dealerAreaGeometry = new THREE.RingGeometry(1.2, 1.3, 32);
+            const dealerAreaMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.7 });
+            const dealerArea = new THREE.Mesh(dealerAreaGeometry, dealerAreaMaterial);
+            dealerArea.rotation.x = -Math.PI / 2; dealerArea.position.set(0, 0.05, -3.5);
+            tableGroup.add(dealerArea);
+            if (playerPositions && playerPositions.length > 0) {
+                playerPositions.forEach((pos, index) => {
+                    const bettingCircle = new THREE.Mesh(new THREE.RingGeometry(0.4, 0.45, 24), new THREE.MeshBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.5 }));
+                    bettingCircle.rotation.x = -Math.PI / 2; bettingCircle.position.set(pos.chipX, 0.051, pos.chipZ);
+                    tableGroup.add(bettingCircle);
+                });
+            }
+        }
+
+        function createPlayerPositions() {
+            playerPositions = []; const radius = 4.5; const angleStep = Math.PI / 7; const startAngle = Math.PI + angleStep / 2;
+            for (let i = 0; i < 6; i++) {
+                const angle = startAngle + i * angleStep;
+                playerPositions.push({ angle: angle, x: Math.cos(angle) * radius, z: Math.sin(angle) * radius, cardXOffset: 0, cardSpacing: 0.7, chipX: Math.cos(angle) * (radius - 1.2), chipZ: Math.sin(angle) * (radius - 1.2) });
+            }
+        }
+
+        function createCardMaterials() { cardMaterials.back = new THREE.MeshPhongMaterial({ map: createCardTexture("?", "?", true), shininess: 30 }); }
+
+        function createCardTexture(rank, suitName, isBack = false) {
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 200; canvas.height = 280; const cornerRadius = 10;
+            ctx.fillStyle = isBack ? '#1E3A8A' : '#FFFFFF'; ctx.beginPath();
+            ctx.moveTo(cornerRadius, 0); ctx.lineTo(canvas.width - cornerRadius, 0); ctx.quadraticCurveTo(canvas.width, 0, canvas.width, cornerRadius);
+            ctx.lineTo(canvas.width, canvas.height - cornerRadius); ctx.quadraticCurveTo(canvas.width, canvas.height, canvas.width - cornerRadius, canvas.height);
+            ctx.lineTo(cornerRadius, canvas.height); ctx.quadraticCurveTo(0, canvas.height, 0, canvas.height - cornerRadius);
+            ctx.lineTo(0, cornerRadius); ctx.quadraticCurveTo(0, 0, cornerRadius, 0); ctx.closePath(); ctx.fill();
+            if (!isBack) {
+                const suitSymbols = { 'hearts': '♥', 'diamonds': '♦', 'clubs': '♣', 'spades': '♠' };
+                const suitColor = (suitName === 'hearts' || suitName === 'diamonds') ? '#DC143C' : '#000000';
+                ctx.fillStyle = suitColor; ctx.font = 'bold 32px Arial'; ctx.textAlign = 'left';
+                ctx.fillText(rank, 15, 40); ctx.font = 'bold 28px Arial'; ctx.fillText(suitSymbols[suitName] || '', 15, 70);
+                ctx.save(); ctx.translate(canvas.width - 15, canvas.height - 40); ctx.rotate(Math.PI);
+                ctx.font = 'bold 32px Arial'; ctx.fillText(rank, 0, 0); ctx.font = 'bold 28px Arial'; ctx.fillText(suitSymbols[suitName] || '', 0, 30); ctx.restore();
+                ctx.font = 'bold 80px Arial'; ctx.textAlign = 'center'; ctx.fillText(suitSymbols[suitName] || '', canvas.width / 2, canvas.height / 2 + 30);
+            } else {
+                ctx.strokeStyle = '#FBBF24'; ctx.lineWidth = 6; ctx.beginPath();
+                ctx.moveTo(cornerRadius + 3, 3); ctx.lineTo(canvas.width - cornerRadius - 3, 3); ctx.quadraticCurveTo(canvas.width - 3, 3, canvas.width - 3, cornerRadius + 3);
+                ctx.lineTo(canvas.width - 3, canvas.height - cornerRadius - 3); ctx.quadraticCurveTo(canvas.width - 3, canvas.height - 3, canvas.width - cornerRadius - 3, canvas.height - 3);
+                ctx.lineTo(cornerRadius + 3, canvas.height - 3); ctx.quadraticCurveTo(3, canvas.height - 3, 3, canvas.height - cornerRadius - 3);
+                ctx.lineTo(3, cornerRadius + 3); ctx.quadraticCurveTo(3, 3, cornerRadius + 3, 3); ctx.closePath(); ctx.stroke();
+                ctx.fillStyle = 'rgba(251, 191, 36, 0.3)'; ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, 60, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#FBBF24'; ctx.font = 'bold 18px Orbitron'; ctx.textAlign = 'center';
+                ctx.fillText('ROYAL', canvas.width/2, canvas.height/2 - 15); ctx.fillText('BLACKJACK', canvas.width/2, canvas.height/2 + 5); ctx.fillText('3D', canvas.width/2, canvas.height/2 + 25);
+            }
+            const texture = new THREE.CanvasTexture(canvas); texture.needsUpdate = true; return texture;
+        }
+
+        function createChipMaterials() {
+            const denominations = [10, 25, 50, 100, 500]; const colors = [0xFFFFFF, 0x00AA00, 0xFF4444, 0x222222, 0x800080];
+            denominations.forEach((denom, index) => {
+                const chipTexture = createChipTexture(denom, colors[index]);
+                chipMaterials[denom] = new THREE.MeshPhongMaterial({ map: chipTexture, shininess: 60, reflectivity: 0.2 });
+            });
+            chipMaterials['default'] = new THREE.MeshPhongMaterial({ color: 0xFFAA00, shininess: 50 });
+        }
+
+        function createChipTexture(value, baseColor) {
+            const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = 64; canvas.height = 64; const centerX = 32; const centerY = 32; const radius = 28;
+            ctx.fillStyle = `#${baseColor.toString(16).padStart(6, '0')}`; ctx.beginPath(); ctx.arc(centerX, centerY, radius, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'; ctx.beginPath(); ctx.arc(centerX, centerY, radius - 6, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = `#${baseColor.toString(16).padStart(6, '0')}`; ctx.beginPath(); ctx.arc(centerX, centerY, radius - 10, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#FFFFFF'; ctx.font = 'bold 12px Arial'; ctx.textAlign = 'center'; ctx.fillText(`$${value}`, centerX, centerY + 4);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'; ctx.lineWidth = 1;
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2; ctx.beginPath();
+                ctx.moveTo(centerX + Math.cos(angle) * (radius - 2), centerY + Math.sin(angle) * (radius - 2));
+                ctx.lineTo(centerX + Math.cos(angle) * (radius - 8), centerY + Math.sin(angle) * (radius - 8)); ctx.stroke();
+            }
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createCard3D(cardData, position, rotationY = 0, faceUp = true) {
+            const cardGroup = new THREE.Group(); const cardWidth = 1.0, cardHeight = 1.4, cardDepth = 0.02;
+            const simplerCardGeom = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
+            const frontTexture = faceUp ? createCardTexture(cardData.rank, cardData.suit) : createCardTexture("?", "?", true);
+            const backTexture = createCardTexture("?", "?", true);
+            const sideMaterial = new THREE.MeshPhongMaterial({color: 0xf0f0f0, shininess: 10});
+            const cardMaterialsArray = [sideMaterial, sideMaterial, sideMaterial, sideMaterial, new THREE.MeshPhongMaterial({ map: frontTexture, shininess: faceUp ? 20 : 40 }), new THREE.MeshPhongMaterial({ map: backTexture, shininess: 40 })];
+            const cardMeshSimple = new THREE.Mesh(simplerCardGeom, cardMaterialsArray);
+            cardMeshSimple.castShadow = true; cardMeshSimple.receiveShadow = true; cardGroup.add(cardMeshSimple);
+            cardGroup.position.copy(position); cardGroup.rotation.y = rotationY;
+            cardGroup.userData = { id: cardData.id, suit: cardData.suit, rank: cardData.rank, faceUp: faceUp, originalPosition: position.clone() };
+            return cardGroup;
+        }
+
+        function createChip3D(value, position, stackCount = 1) {
+            const chipGroup = new THREE.Group(); const chipRadius = 0.18, chipHeight = 0.06;
+            const denomination = getChipDenomination(value); const chipMaterial = chipMaterials[denomination] || chipMaterials['default'];
+            for (let i = 0; i < Math.min(stackCount, 10); i++) {
+                const chipGeometry = new THREE.CylinderGeometry(chipRadius, chipRadius, chipHeight, 24);
+                const chip = new THREE.Mesh(chipGeometry, chipMaterial);
+                chip.position.y = i * (chipHeight + 0.002) + chipHeight/2; chip.castShadow = true; chip.receiveShadow = true;
+                chip.rotation.y = Math.random() * Math.PI * 2; chipGroup.add(chip);
+            }
+            chipGroup.position.copy(position); chipGroup.userData = { value: value, count: stackCount };
+            gsap.to(chipGroup.position, { y: position.y + 0.05, duration: 2 + Math.random() * 2, yoyo: true, repeat: -1, ease: "sine.inOut" });
+            return chipGroup;
+        }
+
+        function getChipDenomination(totalAmount) {
+            if (totalAmount >= 500) return 500; if (totalAmount >= 100) return 100; if (totalAmount >= 50) return 50; if (totalAmount >= 25) return 25; return 10;
+        }
+
+        function createParticleSystem() {
+            const particleCount = 300; const particles = new THREE.BufferGeometry();
+            const particlePositions = new Float32Array(particleCount * 3); const particleColors = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3; particlePositions[i3] = (Math.random() - 0.5) * 80; particlePositions[i3 + 1] = Math.random() * 30 + 5; particlePositions[i3 + 2] = (Math.random() - 0.5) * 80;
+                const color = new THREE.Color(); color.setHSL(0.15, 0.8, 0.3 + Math.random() * 0.4);
+                particleColors[i3] = color.r; particleColors[i3 + 1] = color.g; particleColors[i3 + 2] = color.b;
+            }
+            particles.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3)); particles.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+            const particleMaterial = new THREE.PointsMaterial({ size: 0.1, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, fog: false, vertexColors: true });
+            particleSystem = new THREE.Points(particles, particleMaterial); scene.add(particleSystem);
+        }
+
+        function addMouseControls() {
+            let mouseDown = false, lastMouseX = 0, lastMouseY = 0; let touchStartX = 0, touchStartY = 0;
+            const menuPanel = document.getElementById('menuPanel'); const canvasEl = document.getElementById('canvas');
+            canvasEl.addEventListener('mousedown', (event) => { if (menuPanel.classList.contains('hidden')) { mouseDown = true; lastMouseX = event.clientX; lastMouseY = event.clientY; } });
+            document.addEventListener('mouseup', () => { mouseDown = false; });
+            document.addEventListener('mousemove', (event) => {
+                if (mouseDown && menuPanel.classList.contains('hidden') && !cameraAnimating) {
+                    const deltaX = event.clientX - lastMouseX; const deltaY = event.clientY - lastMouseY;
+                    camera.userData.targetRotationY -= deltaX * 0.005;
+                    camera.userData.targetHeight = camera.userData.targetHeight || 12; camera.userData.targetHeight += deltaY * 0.02; camera.userData.targetHeight = Math.max(5, Math.min(20, camera.userData.targetHeight));
+                    lastMouseX = event.clientX; lastMouseY = event.clientY;
+                }
+            });
+            canvasEl.addEventListener('touchstart', (event) => { if (menuPanel.classList.contains('hidden') && event.touches.length === 1) { touchStartX = event.touches[0].clientX; touchStartY = event.touches[0].clientY; event.preventDefault(); } });
+            canvasEl.addEventListener('touchmove', (event) => {
+                if (menuPanel.classList.contains('hidden') && event.touches.length === 1 && !cameraAnimating) {
+                    const deltaX = event.touches[0].clientX - touchStartX; const deltaY = event.touches[0].clientY - touchStartY;
+                    camera.userData.targetRotationY -= deltaX * 0.01;
+                    camera.userData.targetHeight = camera.userData.targetHeight || 12; camera.userData.targetHeight += deltaY * 0.05; camera.userData.targetHeight = Math.max(5, Math.min(20, camera.userData.targetHeight));
+                    touchStartX = event.touches[0].clientX; touchStartY = event.touches[0].clientY; event.preventDefault();
+                }
+            });
+            canvasEl.addEventListener('wheel', (event) => { if (menuPanel.classList.contains('hidden') && !cameraAnimating) { event.preventDefault(); camera.userData.targetDistance += event.deltaY * 0.02; camera.userData.targetDistance = Math.max(6, Math.min(30, camera.userData.targetDistance)); } });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate); const currentTime = Date.now() * 0.001;
+            if (!cameraAnimating) {
+                const lerpFactor = 0.08; const targetHeight = camera.userData.targetHeight || 12;
+                camera.position.x = THREE.MathUtils.lerp(camera.position.x, Math.sin(camera.userData.targetRotationY) * camera.userData.targetDistance, lerpFactor);
+                camera.position.z = THREE.MathUtils.lerp(camera.position.z, Math.cos(camera.userData.targetRotationY) * camera.userData.targetDistance, lerpFactor);
+                camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetHeight + (camera.userData.targetDistance - 15) * 0.15, lerpFactor);
+                camera.lookAt(0, 0, 0);
+            }
+            if (particleSystem) {
+                particleSystem.rotation.y += 0.0003; const positions = particleSystem.geometry.attributes.position.array;
+                for (let i = 1; i < positions.length; i += 3) { positions[i] = (positions[i] + Math.sin(currentTime + i*0.1) * 0.005); if (positions[i] < 5) positions[i] = 5 + Math.random()*20; if (positions[i] > 35) positions[i] = 35 - Math.random()*20; }
+                particleSystem.geometry.attributes.position.needsUpdate = true;
+            }
+            const allCardObjects = [...dealerCardObjects3D, ...Object.values(playerCardObjects3D).flat()];
+            allCardObjects.forEach((cardMesh, index) => { if (cardMesh && cardMesh.userData && cardMesh.userData.originalPosition) { const baseY = cardMesh.userData.originalPosition.y; cardMesh.position.y = baseY + Math.sin(currentTime * 1.5 + index * 0.5) * 0.01; } });
+            renderer.render(scene, camera);
+        }
+
+        function updateTableVisuals() {
+            consoleLog("updateTableVisuals START"); if (!currentGameState) return;
+            const cardBaseY = 0.08 + 0.01; clearDealerCards();
+            if (currentGameState.dealer_hand && currentGameState.dealer_hand.cards) {
+                currentGameState.dealer_hand.cards.forEach((cardData, index) => {
+                    const position = new THREE.Vector3(-2.0 + index * 1.1, cardBaseY, -3.8); const faceUp = cardData.suit !== 'back';
+                    const cardObj = createCard3D(cardData, position, 0, faceUp); scene.add(cardObj); dealerCardObjects3D.push(cardObj);
+                    gsap.fromTo(cardObj.position, { x: 0, y: cardBaseY + 2, z: 0 }, { x: position.x, y: position.y, z: position.z, duration: 0.6, ease: "back.out(1.2)", delay: index * 0.15 });
+                    gsap.from(cardObj.rotation, { y: Math.PI, duration: 0.6, ease: "power2.out", delay: index * 0.15 });
+                });
+            }
+            Object.keys(playerCardObjects3D).forEach(pid => clearPlayerCards(pid));
+            Object.values(chipStackObjects).forEach(obj => { if (obj.parent) obj.parent.remove(obj); gsap.killTweensOf(obj.position); });
+            chipStackObjects = {};
+            Object.values(currentGameState.players).forEach((player, pIndex) => {
+                if (pIndex >= playerPositions.length) { consoleWarn(`Player index ${pIndex} out of bounds`); return; }
+                const pos3D = playerPositions[pIndex]; if (!playerCardObjects3D[player.id]) playerCardObjects3D[player.id] = [];
+                let cardRenderIndex = 0;
+                player.hands.forEach((hand, handIndex) => {
+                    const handCardCount = hand.cards.length; const handWidth = (handCardCount -1) * (pos3D.cardSpacing * 0.5);
+                    const handStartX = pos3D.x + pos3D.cardXOffset - handWidth / 2 + (handIndex * 2.0);
+                    hand.cards.forEach((cardData, cardInHandIndex) => {
+                        const cardPosition = new THREE.Vector3(handStartX + cardInHandIndex * (pos3D.cardSpacing * 0.5), cardBaseY, pos3D.z);
+                        const cardRotationY = pos3D.angle + Math.PI / 2; const cardObj = createCard3D(cardData, cardPosition, cardRotationY, true);
+                        scene.add(cardObj); playerCardObjects3D[player.id].push(cardObj);
+                        const totalDelay = pIndex * 0.1 + cardRenderIndex * 0.08;
+                        gsap.fromTo(cardObj.position, { x: 0, y: cardBaseY + 2, z: 0 }, { x: cardPosition.x, y: cardPosition.y, z: cardPosition.z, duration: 0.5, ease: "power2.out", delay: totalDelay });
+                        gsap.fromTo(cardObj.rotation, { y: cardRotationY + Math.PI }, { y: cardRotationY, duration: 0.5, ease: "power2.out", delay: totalDelay });
+                        cardRenderIndex++;
+                    });
+                    if (hand.bet_amount > 0) {
+                        const chipPosition = new THREE.Vector3(pos3D.chipX + handIndex * 0.6, 0.02, pos3D.chipZ);
+                        const stackCount = Math.min(Math.ceil(hand.bet_amount / getChipDenomination(hand.bet_amount)), 8);
+                        const chipStack = createChip3D(hand.bet_amount, chipPosition, stackCount); scene.add(chipStack);
+                        chipStackObjects[`player_bet_${player.id}_${handIndex}`] = chipStack;
+                        gsap.from(chipStack.scale, { x: 0, y: 0, z: 0, duration: 0.4, ease: "back.out(1.7)", delay: pIndex * 0.1 });
+                    }
+                });
+            });
+            consoleLog("updateTableVisuals COMPLETE");
+        }
+
+        function clearDealerCards() { dealerCardObjects3D.forEach(obj => { if (obj.parent) obj.parent.remove(obj); gsap.killTweensOf(obj.position); gsap.killTweensOf(obj.rotation); }); dealerCardObjects3D = []; }
+        function clearPlayerCards(playerId) { if (playerCardObjects3D[playerId]) { playerCardObjects3D[playerId].forEach(obj => { if (obj.parent) obj.parent.remove(obj); gsap.killTweensOf(obj.position); gsap.killTweensOf(obj.rotation); }); playerCardObjects3D[playerId] = []; } }
+        function clearAll3DObjects() { clearDealerCards(); Object.keys(playerCardObjects3D).forEach(playerId => clearPlayerCards(playerId)); Object.values(chipStackObjects).forEach(obj => { if (obj.parent) obj.parent.remove(obj); gsap.killTweensOf(obj.position); gsap.killTweensOf(obj.scale); }); chipStackObjects = {}; }
+
         function connectWebSocket() {
-            consoleLog(">>> Attempting to connect WebSocket...");
-            if (isLoadingOrReconnecting && ws && ws.readyState === WebSocket.CONNECTING) { consoleLog("Already connecting"); return; }
+            consoleLog("connectWebSocket START"); if (isLoadingOrReconnecting && ws && ws.readyState === WebSocket.CONNECTING) { consoleLog("Already connecting"); return; }
             isLoadingOrReconnecting = true; updateConnectionStatus('connecting');
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'; const wsUrl = `${protocol}//${window.location.host}/ws`;
             if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) { ws.close(); }
             ws = new WebSocket(wsUrl);
-
-            ws.onopen = function() {
-                consoleLog('>>> WS: onopen FIRED! Connection established.');
-                isConnected = true; isLoadingOrReconnecting = false; reconnectAttempts = 0;
-                updateConnectionStatus('connected');
-                try { showNotification('Connection established!', 'success', 2000); } catch(e) { consoleError("Error in showNotification during ws.onopen:", e); }
-                consoleLog('>>> WS: onopen finished. Waiting for server "connected" message.');
-            };
-            ws.onmessage = function(event) {
-                consoleLog('>>> WS: onmessage RECEIVED RAW DATA:', event.data);
-                try { const message = JSON.parse(event.data); consoleLog('>>> WS: onmessage PARSED MESSAGE TYPE:', message.type); handleServerMessage(message); }
-                catch (e) { consoleError(">>> WS: Error parsing server message in onmessage:", e, event.data); showNotification('Invalid server message format', 'error', 3000); }
-            };
+            ws.onopen = function() { consoleLog('WebSocket connected'); isConnected = true; isLoadingOrReconnecting = false; reconnectAttempts = 0; hideLoadingScreen(); updateConnectionStatus('connected'); showNotification('Connected!', 'success', 3000); };
+            ws.onmessage = function(event) { try { const message = JSON.parse(event.data); consoleLog('WS recv:', message.type); handleServerMessage(message); } catch (e) { consoleError("Error parsing server message:", e, event.data); showNotification('Invalid server message', 'error'); } };
             ws.onclose = function(event) {
-                consoleLog(`>>> WS: onclose. Code:${event.code}, Reason:${event.reason}`); isConnected = false; updateConnectionStatus('disconnected', `Code:${event.code}`);
+                consoleLog(`WS disconnected. Code: ${event.code}, Reason: ${event.reason}`); isConnected = false; updateConnectionStatus('disconnected', `Code: ${event.code}`);
                 clearAll3DObjects(); if (!isLoadingOrReconnecting) { showMainMenu(); animateCameraToMenu(); }
                 if (reconnectAttempts < maxReconnectAttempts && !isLoadingOrReconnecting) {
-                    reconnectAttempts++; const d = Math.min(reconnectDelay * Math.pow(2, reconnectAttempts - 1), 30000);
-                    updateConnectionStatus('reconnecting'); showLoadingScreen(`Reconnecting...(${reconnectAttempts}/${maxReconnectAttempts})`); showNotification(`Reconnecting... Attempt ${reconnectAttempts}`, 'warning');
-                    setTimeout(() => { if (!isConnected) { connectWebSocket(); } }, d);
-                } else if (reconnectAttempts >= maxReconnectAttempts) { updateConnectionStatus('disconnected', 'Max reconnect attempts'); showNotification('Connection lost. Refresh.', 'error', 10000); }
+                    reconnectAttempts++; const delay = Math.min(reconnectDelay * Math.pow(2, reconnectAttempts - 1), 30000);
+                    updateConnectionStatus('reconnecting'); showLoadingScreen(`Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})`); showNotification(`Reconnecting... Attempt ${reconnectAttempts}`, 'warning');
+                    setTimeout(() => { if (!isConnected) { connectWebSocket(); } }, delay);
+                } else if (reconnectAttempts >= maxReconnectAttempts) { updateConnectionStatus('disconnected', 'Max reconnect attempts'); showNotification('Connection lost. Please refresh.', 'error', 10000); }
             };
-            ws.onerror = function(error) { consoleError('>>> WS: onerror:', error); updateConnectionStatus('disconnected', 'Connection error'); showNotification('WebSocket Connection Error', 'error'); isLoadingOrReconnecting = false; /* Allow re-connection attempts through onclose */ };
+            ws.onerror = function(error) { consoleError('WS error:', error); updateConnectionStatus('disconnected', 'Connection error'); showNotification('Connection error', 'error'); };
         }
 
-        function sendMessage(action, payload = {}) { /* ... as before ... */ if (ws && ws.readyState === WebSocket.OPEN) { const message = { action, payload }; consoleLog('WS send:', action, payload); try { ws.send(JSON.stringify(message)); return true; } catch (e) { consoleError('Error sending WS message:', e); showNotification('Failed to send', 'error'); return false; } } else { consoleError('WS not open:', ws ? ws.readyState : 'null'); showNotification('Not connected.', 'warning'); return false; } }
-        
+        function sendMessage(action, payload = {}) {
+            if (ws && ws.readyState === WebSocket.OPEN) { const message = { action, payload }; consoleLog('WS send:', action, payload); try { ws.send(JSON.stringify(message)); return true; } catch (e) { consoleError('Error sending WS message:', e); showNotification('Failed to send', 'error'); return false; } }
+            else { consoleError('WS not open:', ws ? ws.readyState : 'null'); showNotification('Not connected.', 'warning'); return false; }
+        }
+
         function handleServerMessage(message) {
-            consoleLog('>>> handleServerMessage received type:', message.type);
             try {
                 switch (message.type) {
-                    case 'connected':
-                        myPlayerId = message.data.player_id;
-                        consoleLog(`>>> handleServerMessage: PROCESSING "connected" message. Player ID: ${myPlayerId}`);
-                        hideLoadingScreen(); 
-                        consoleLog('>>> handleServerMessage: "connected" - hideLoadingScreen CALLED.');
-                        showMainMenu();
-                        consoleLog('>>> handleServerMessage: "connected" - showMainMenu CALLED.');
-                        break;
+                    case 'connected': myPlayerId = message.data.player_id; consoleLog(`Player ID: ${myPlayerId}`); hideLoadingScreen(); showMainMenu(); break;
                     case 'room_created': case 'room_joined': currentRoomCode = message.data.room_code; isPlayerInGame = true; hideLoadingScreen(); showGameInterface(); showNotification(`Joined: ${currentRoomCode}`, 'success'); animateCameraToTable(); break;
                     case 'spectating': currentRoomCode = message.data.room_code; isPlayerInGame = false; hideLoadingScreen(); showGameInterface(); showNotification(`Spectating: ${currentRoomCode}`, 'info'); animateCameraToTable(); break;
                     case 'room_left': hideLoadingScreen(); handleRoomLeft(); break;
                     case 'game_state': currentGameState = message.data; updateGameInterface(); break;
                     case 'room_list': updateRoomList(message.data.rooms); break;
                     case 'error': consoleError('Server error:', message.message); showNotification('Error: ' + message.message, 'error'); hideLoadingScreen(); break;
-                    default: consoleWarn('Unknown msg type:', message.type);
+                    default: consoleWarn('Unknown message type:', message.type);
                 }
-            } catch (e) { consoleError('>>> handleServerMessage: Error processing message:', e, message); showNotification('Error processing server data', 'error', 3000); }
+            } catch (e) { consoleError('Error handling server message:', e, message); showNotification('Error processing message', 'error'); }
         }
 
-        function hideLoadingScreen() { /* ... as before, with logs ... */ consoleLog('>>> hideLoadingScreen FUNCTION CALLED'); const loadingScreen = document.getElementById('loadingScreen'); if (loadingScreen && loadingScreen.style.display !== 'none') { gsap.to(loadingScreen, { duration: 0.8, opacity: 0, ease: "power2.out", onComplete: () => { loadingScreen.style.display = 'none'; consoleLog(">>> hideLoadingScreen: GSAP onComplete - Loading screen display set to none."); } }); } else { consoleLog(">>> hideLoadingScreen: Screen already hidden or not found."); } }
+        function handleRoomLeft() { showMainMenu(); showNotification('Left room.', 'info'); animateCameraToMenu(); currentRoomCode = null; currentGameState = null; isPlayerInGame = false; clearAll3DObjects(); }
+        function animateCameraToTable() { consoleLog("Cam to table"); cameraAnimating = true; camera.userData.targetRotationY = 0; camera.userData.targetDistance = 15; camera.userData.targetHeight = 12; gsap.to(camera.position, { duration: 1.5, x: 0, y: 12, z: 15, ease: "power2.inOut", onUpdate: () => camera.lookAt(0, 0, 0), onComplete: () => { cameraAnimating = false; } }); if (particleSystem) gsap.to(particleSystem.material, { opacity: 0.6, duration: 1.5, ease: "power2.inOut" }); }
+        function animateCameraToMenu() { consoleLog("Cam to menu"); cameraAnimating = true; camera.userData.targetRotationY = Math.PI / 6; camera.userData.targetDistance = 22; camera.userData.targetHeight = 16; gsap.to(camera.position, { duration: 1.5, x: 8, y: 16, z: 22, ease: "power2.inOut", onUpdate: () => camera.lookAt(0, 0, 0), onComplete: () => { cameraAnimating = false; } }); if (particleSystem) gsap.to(particleSystem.material, { opacity: 0.3, duration: 1.5, ease: "power2.inOut" }); }
         
-        // Other UI and game functions (showMainMenu, showGameInterface, updateGameInterface, etc. as before, including diagnostic logs)
-        // ... (Full JS from previous answer, starting from handleRoomLeft) ...
-        function handleRoomLeft(){showMainMenu();showNotification('Left room.','info');animateCameraToMenu();currentRoomCode=null;currentGameState=null;isPlayerInGame=false;clearAll3DObjects();}
-        function animateCameraToTable(){consoleLog("Cam to table");cameraAnimating=true;camera.userData.targetRotationY=0;camera.userData.targetDistance=15;camera.userData.targetHeight=12;gsap.to(camera.position,{duration:1.5,x:0,y:12,z:15,ease:"power2.inOut",onUpdate:()=>camera.lookAt(0,0,0),onComplete:()=>{cameraAnimating=false;}});if(particleSystem)gsap.to(particleSystem.material,{opacity:0.6,duration:1.5,ease:"power2.inOut"});}
-        function animateCameraToMenu(){consoleLog("Cam to menu");cameraAnimating=true;camera.userData.targetRotationY=Math.PI/6;camera.userData.targetDistance=22;camera.userData.targetHeight=16;gsap.to(camera.position,{duration:1.5,x:8,y:16,z:22,ease:"power2.inOut",onUpdate:()=>camera.lookAt(0,0,0),onComplete:()=>{cameraAnimating=false;}});if(particleSystem)gsap.to(particleSystem.material,{opacity:0.3,duration:1.5,ease:"power2.inOut"});}
-        function showLoadingScreen(text='Loading...'){const ls=document.getElementById('loadingScreen');const txtEl=ls.querySelector('.loading-text');if(txtEl)txtEl.textContent=text;ls.style.display='flex';ls.style.opacity='0';gsap.to(ls,{duration:0.5,opacity:1,ease:"power2.out"});consoleLog("Loading screen shown:",text);}
-        function showMainMenu(){consoleLog("Show main menu");document.getElementById('menuPanel').classList.remove('hidden');['gameHUD','dealerArea','betControls','actionsPanel','chatPanel','playerHandsDisplay'].forEach(id=>document.getElementById(id).classList.add('hidden'));clearAll3DObjects();gsap.fromTo('#menuPanel',{opacity:0,scale:0.8},{opacity:1,scale:1,duration:0.6,ease:"back.out(1.2)"});}
-        function showGameInterface(){consoleLog("Show game interface");document.getElementById('menuPanel').classList.add('hidden');['gameHUD','dealerArea','chatPanel','playerHandsDisplay'].forEach(id=>document.getElementById(id).classList.remove('hidden'));gsap.fromTo(['#gameHUD','#dealerArea','#chatPanel'],{opacity:0,y:-20},{opacity:1,y:0,duration:0.5,ease:"power2.out",stagger:0.1});}
+        function hideLoadingScreen() { const ls = document.getElementById('loadingScreen'); if (ls && ls.style.display !== 'none') { gsap.to(ls, { duration: 0.8, opacity: 0, ease: "power2.out", onComplete: () => { ls.style.display = 'none'; consoleLog("Loading screen hidden"); } }); } else { consoleLog("hideLoadingScreen: already hidden/not found."); } }
+        function showLoadingScreen(text = 'Loading...') { const ls = document.getElementById('loadingScreen'); const txtEl = ls.querySelector('.loading-text'); if (txtEl) txtEl.textContent = text; ls.style.display = 'flex'; ls.style.opacity = '0'; gsap.to(ls, { duration: 0.5, opacity: 1, ease: "power2.out" }); consoleLog("Loading screen shown:", text); }
         
+        function showMainMenu() { consoleLog("Show main menu"); document.getElementById('menuPanel').classList.remove('hidden'); ['gameHUD', 'dealerArea', 'betControls', 'actionsPanel', 'chatPanel', 'playerHandsDisplay'].forEach(id => document.getElementById(id).classList.add('hidden')); clearAll3DObjects(); gsap.fromTo('#menuPanel', { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.2)" }); }
+        function showGameInterface() { consoleLog("Show game interface"); document.getElementById('menuPanel').classList.add('hidden'); ['gameHUD', 'dealerArea', 'chatPanel', 'playerHandsDisplay'].forEach(id => document.getElementById(id).classList.remove('hidden')); gsap.fromTo(['#gameHUD', '#dealerArea', '#chatPanel'], { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.1 }); }
+
         function updateGameInterface() {
             if (!currentGameState) return;
             consoleLog("updateGameInterface: Phase:", currentGameState.phase, "Owner:", currentGameState.owner_id, "MyID:", myPlayerId);
@@ -1064,12 +1514,6 @@
                 document.getElementById('moneyAmount').textContent = 'N/A (Spectator)';
             }
 
-            const betAmountInput = document.getElementById('betAmountInput');
-            if (betAmountInput) { 
-                betAmountInput.min = currentGameState.min_bet || 10;
-                betAmountInput.max = currentGameState.max_bet || 500;
-            }
-
             if (currentGameState.phase === 'waiting' && myPlayerState && isPlayerInGame && myPlayerState.hands[0]?.bet_amount === 0) {
                 showElement('betControls'); hideElement('actionsPanel');
             } else if (currentGameState.can_act && currentGameState.available_actions && isPlayerInGame) {
@@ -1080,6 +1524,7 @@
 
             updateDealerDisplay(); updatePlayerHandsUI(); updateChat(); updateTableVisuals();
 
+            // ---- START DIAGNOSTIC LOGS FOR START BUTTON ----
             consoleLog("--- Start Game Button Logic Check ---");
             consoleLog("Phase OK?", currentGameState.phase === 'waiting');
             consoleLog("myPlayerState exists?", !!myPlayerState);
@@ -1089,12 +1534,13 @@
             }
             const anyBetsPlaced = Object.values(currentGameState.players).some(p => p.hands[0]?.bet_amount > 0);
             consoleLog("Any player has bet?", anyBetsPlaced);
-            
+            // ---- END DIAGNOSTIC LOGS ----
+
             const startBtn = document.getElementById('startGameBtn');
             const canStartGame = currentGameState.phase === 'waiting' &&
                                  myPlayerState &&
                                  myPlayerState.id === currentGameState.owner_id &&
-                                 anyBetsPlaced;
+                                 Object.values(currentGameState.players).some(p => p.hands[0]?.bet_amount > 0);
             
             consoleLog("Final canStartGame evaluation:", canStartGame);
 
@@ -1106,72 +1552,152 @@
             }
         }
 
-        function showElement(elementId){const el=document.getElementById(elementId);if(el&&el.classList.contains('hidden')){el.classList.remove('hidden');gsap.fromTo(el,{opacity:0,y:20},{opacity:1,y:0,duration:0.4,ease:"power2.out"});}}
-        function hideElement(elementId){const el=document.getElementById(elementId);if(el&&!el.classList.contains('hidden')){gsap.to(el,{opacity:0,y:-20,duration:0.3,ease:"power2.in",onComplete:()=>el.classList.add('hidden')});}}
-        function updateDealerDisplay(){const dhEl=document.getElementById('dealerHand');const dvEl=document.getElementById('dealerValue');if(!currentGameState.dealer_hand||!currentGameState.dealer_hand.cards){dhEl.innerHTML='';dvEl.textContent='No cards';return;}dhEl.innerHTML='';currentGameState.dealer_hand.cards.forEach((card,index)=>{const cDiv=document.createElement('div');cDiv.className='card-mini';if(card.suit==='back'){cDiv.classList.add('back');cDiv.textContent='?';}else{if(card.suit==='hearts'||card.suit==='diamonds')cDiv.classList.add('red');cDiv.textContent=card.rank;}dhEl.appendChild(cDiv);gsap.fromTo(cDiv,{opacity:0,scale:0,rotationY:180},{opacity:1,scale:1,rotationY:0,duration:0.5,delay:index*0.1,ease:"back.out(1.7)"});});if(currentGameState.dealer_hand.value!==null&¤tGameState.dealer_hand.value!==undefined){const nv=`Value: ${currentGameState.dealer_hand.value}`;if(dvEl.textContent!==nv)gsap.fromTo(dvEl,{scale:1.2,color:'#ffd700'},{scale:1,color:'#ffffff',duration:0.5,ease:"power2.out",overwrite:"auto"});dvEl.textContent=nv;}else{dvEl.textContent='Hidden';}}
-        function updateActionButtons(){if(!currentGameState.available_actions)return;const acts=currentGameState.available_actions;const bIds=['hitBtn','standBtn','doubleBtn','splitBtn','surrenderBtn'];bIds.forEach(id=>{const b=document.getElementById(id);if(b){b.style.display='none';b.disabled=true;}});acts.forEach((ad,idx)=>{const bId=ad.action+'Btn';const b=document.getElementById(bId);if(b){b.style.display='inline-block';b.disabled=false;gsap.fromTo(b,{opacity:0,scale:0.8,y:20},{opacity:1,scale:1,y:0,duration:0.4,delay:idx*0.1,ease:"back.out(1.7)",overwrite:"auto"});}});}
-        function updatePlayerHandsUI(){const cont=document.getElementById('playerHandsDisplay');cont.innerHTML='';if(!currentGameState.players)return;Object.values(currentGameState.players).forEach((plr,idx)=>{const pDiv=document.createElement('div');pDiv.className='player-hand';if(plr.is_current_player)pDiv.classList.add('current-player');if(plr.status==='bust')pDiv.classList.add('bust');if(plr.status==='blackjack')pDiv.classList.add('blackjack');if(plr.id===myPlayerId)pDiv.style.borderColor='#00ffff';let hHtml='';plr.hands.forEach((h,hIdx)=>{const cHtml=h.cards.map(c=>`<div class="${(c.suit==='hearts'||c.suit==='diamonds')?'card-mini red':c.suit==='back'?'card-mini back':'card-mini'}">${c.suit==='back'?'?':c.rank}</div>`).join('');hHtml+=`<div class="hand-info" style="border-top:${hIdx>0?'1px solid rgba(255,215,0,0.3)':'none'};margin-top:${hIdx>0?'10px':'0'};padding-top:${hIdx>0?'10px':'0'};"><div class="hand-cards">${cHtml}</div><div>Value:${h.value!==undefined?h.value:'N/A'}</div><div>Bet:$${h.bet_amount}</div>${h.result?`<div style="color:${getResultColor(h.result)};font-weight:bold;">${h.result.toUpperCase()}</div>`:''}${h.payout>0&&h.result!=='push'?`<div style="color:#00ffaa;">Won:$${h.payout-h.bet_amount}</div>`:''}${h.payout>0&&h.result==='push'?`<div style="color:#ffaa00;">Push:$${h.bet_amount} returned</div>`:''}</div>`;});pDiv.innerHTML=`<div class="player-name">${plr.name}</div><div class="player-money">💰 $${plr.money.toLocaleString()}</div>${hHtml}`;cont.appendChild(pDiv);gsap.fromTo(pDiv,{opacity:0,scale:0.9,y:10},{opacity:1,scale:1,y:0,duration:0.4,delay:idx*0.05,ease:"power2.out",overwrite:"auto"});});}
-        function getResultColor(res){switch(res){case'win':case'blackjack':return'#00ff00';case'lose':case'bust':return'#ff4444';case'push':return'#ffaa00';default:return'#ffffff';}}
-        function updateChat(){if(!currentGameState||!currentGameState.chat_messages)return;const cmEl=document.getElementById('chatMessages');const sScroll=cmEl.scrollHeight-cmEl.clientHeight<=cmEl.scrollTop+20;const cMc=cmEl.children.length;const nMsgs=currentGameState.chat_messages;if(cMc!==nMsgs.length||(nMsgs.length>0&&cmEl.lastChild?.textContent!==nMsgs[nMsgs.length-1].message)){cmEl.innerHTML='';nMsgs.forEach((m,idx)=>{const mDiv=document.createElement('div');mDiv.className='chat-message';mDiv.style.borderLeftColor=m.player_color||'#ffd700';const nSpan=document.createElement('span');nSpan.className='chat-player-name';nSpan.style.color=m.player_color||'#ffd700';nSpan.textContent=m.player_name+': ';const msgSpan=document.createElement('span');msgSpan.textContent=m.message;const tSpan=document.createElement('span');tSpan.className='chat-timestamp';tSpan.textContent=m.formatted_time;mDiv.appendChild(nSpan);mDiv.appendChild(msgSpan);mDiv.appendChild(tSpan);cmEl.appendChild(mDiv);gsap.fromTo(mDiv,{opacity:0,x:20},{opacity:1,x:0,duration:0.3,ease:"power2.out",delay:idx*0.02,overwrite:"auto"});});if(sScroll||!chatCollapsed){cmEl.scrollTop=cmEl.scrollHeight;}}}
-        function createQuickRoom(){const n=document.getElementById('playerName').value.trim();if(!n){showNotification("Enter name","warning");return;}if(sendMessage('create_room',{player_name:n}))showLoadingScreen('Creating room...');}
-        function createCustomRoom(){const n=document.getElementById('playerName').value.trim();const rn=document.getElementById('roomName').value.trim();if(!n){showNotification("Enter name","warning");return;}if(sendMessage('create_room',{player_name:n,room_name:rn||null}))showLoadingScreen('Creating custom room...');}
-        function joinRoomFromInput(){const c=document.getElementById('roomCodeInput').value.trim().toUpperCase();const n=document.getElementById('playerName').value.trim();if(!c){showNotification("Enter room code","warning");return;}if(!n){showNotification("Enter name","warning");return;}if(sendMessage('join_room',{room_code:c,player_name:n}))showLoadingScreen('Joining room...');}
-        function spectateRoomFromInput(){const c=document.getElementById('roomCodeInput').value.trim().toUpperCase();if(!c){showNotification("Enter room code","warning");return;}if(sendMessage('spectate_room',{room_code:c}))showLoadingScreen('Joining as spectator...');}
-        function leaveRoom(){if(confirm("Leave room?")){if(sendMessage('leave_room'))showLoadingScreen('Leaving room...');}}
-        function startGame(){if(sendMessage('start_game'))showNotification('Starting game...','info');}
-        const MIN_BET_DYNAMIC=()=>currentGameState?.min_bet||10;const MAX_BET_DYNAMIC=()=>currentGameState?.max_bet||500;
-        function setBetAmount(amt){const inp=document.getElementById('betAmountInput');inp.value=amt;gsap.fromTo(inp,{scale:1.1,borderColor:'#ffd700'},{scale:1,borderColor:'var(--primary-gold)',duration:0.3,ease:"power2.out",overwrite:"auto"});}
-        function placeBet(){const amt=parseInt(document.getElementById('betAmountInput').value);if(isNaN(amt)||amt<MIN_BET_DYNAMIC()||amt>MAX_BET_DYNAMIC()){showNotification(`Bet must be $${MIN_BET_DYNAMIC()}-${MAX_BET_DYNAMIC()}`,"warning");return;}const mps=currentGameState.players[myPlayerId];if(mps&&amt>mps.money){showNotification("Insufficient funds","error");return;}if(sendMessage('player_action',{action_type:'place_bet',amount:amt})){showNotification(`Bet placed: $${amt}`,'success');hideElement('betControls');}}
-        function playerAction(actType){if(sendMessage('player_action',{action_type:actType}))showNotification(`Action: ${actType.replace('_',' ').toUpperCase()}`,'info');}
-        function sendChat(){const inp=document.getElementById('chatInput');const msg=inp.value.trim();if(!msg)return;if(msg.length>200){showNotification("Message too long","warning");return;}if(sendMessage('send_chat_message',{message:msg})){inp.value='';gsap.fromTo(inp,{backgroundColor:'rgba(0,255,0,0.2)'},{backgroundColor:'rgba(255,255,255,0.1)',duration:0.5,overwrite:"auto"});}}
-        function handleChatKeyPress(event){if(event.key==='Enter'){event.preventDefault();sendChat();}}
-        function toggleChat(){chatCollapsed=!chatCollapsed;const cp=document.getElementById('chatPanel');const cm=document.getElementById('chatMessages');const ci=document.querySelector('.chat-input-container');const ct=document.getElementById('chatToggle');const oh=cp.dataset.originalHeight||cp.offsetHeight+'px';if(!cp.dataset.originalHeight)cp.dataset.originalHeight=oh;if(chatCollapsed){gsap.to([cm,ci],{height:0,opacity:0,duration:0.3,onComplete:()=>{cm.style.display='none';ci.style.display='none';}});gsap.to(cp,{height:'50px',duration:0.3});ct.textContent='+';}else{cm.style.display='block';ci.style.display='flex';gsap.set(cm,{height:'auto'});const th=cm.offsetHeight;gsap.set(cm,{height:0});gsap.to(cp,{height:oh,duration:0.3});gsap.to(cm,{height:th,opacity:1,duration:0.3});gsap.to(ci,{height:'auto',opacity:1,duration:0.3});ct.textContent='−';cm.scrollTop=cm.scrollHeight;}}
-        function showRoomList(){document.getElementById('roomListModal').classList.remove('hidden');gsap.fromTo('#roomListModal',{opacity:0},{opacity:1,duration:0.3});refreshRoomList();}
-        function hideRoomList(){gsap.to('#roomListModal',{opacity:0,duration:0.3,onComplete:()=>document.getElementById('roomListModal').classList.add('hidden')});}
-        function refreshRoomList(){sendMessage('get_room_list');document.getElementById('roomList').innerHTML='<div style="text-align:center;color:#ccc;padding:20px;">Fetching...</div>';}
-        function updateRoomList(rooms){const le=document.getElementById('roomList');if(!rooms||rooms.length===0){le.innerHTML='<div style="text-align:center;color:#ccc;padding:20px;">No public rooms.</div>';return;}le.innerHTML=rooms.map((r,idx)=>`<div style="background:rgba(255,255,255,0.1);border-radius:8px;padding:15px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;opacity:0;" id="room-${idx}"><div><strong style="color:#ffd700;">${r.name||r.code}</strong><br><small style="color:#ccc;">Players:${r.players}/${r.max_players} | Phase:${r.phase.replace('_',' ').toUpperCase()}</small></div><div><button class="action-button" onclick="joinRoomByCode('${r.code}')" style="margin-right:5px;">Join</button><button class="action-button" onclick="spectateRoomByCode('${r.code}')">Spectate</button></div></div>`).join('');rooms.forEach((_,idx)=>{gsap.fromTo(`#room-${idx}`,{opacity:0,x:-50},{opacity:1,x:0,duration:0.4,delay:idx*0.1,ease:"power2.out",overwrite:"auto"});});}
-        function joinRoomByCode(code){const n=document.getElementById('playerName').value.trim()||'Player';hideRoomList();if(sendMessage('join_room',{room_code:code,player_name:n}))showLoadingScreen('Joining room...');}
-        function spectateRoomByCode(code){hideRoomList();if(sendMessage('spectate_room',{room_code:code}))showLoadingScreen('Joining as spectator...');}
-        function showNotification(message,type='info',duration=4000){const cont=document.getElementById('notificationContainer');if(!cont)return;const notif=document.createElement('div');notif.className=`notification ${type}`;notif.textContent=message;cont.appendChild(notif);gsap.fromTo(notif,{y:-100,opacity:0,scale:0.8},{y:0,opacity:1,scale:1,duration:0.5,ease:"back.out(1.7)"});setTimeout(()=>{gsap.to(notif,{y:-100,opacity:0,scale:0.8,duration:0.4,ease:"power2.in",onComplete:()=>notif.remove()});},duration);}
-        window.addEventListener('resize',()=>{if(camera&&renderer){camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);consoleLog("Resized");}});
-        document.addEventListener('keydown',(event)=>{if(document.activeElement&&['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;if(!currentGameState||!currentGameState.can_act||!currentGameState.available_actions)return;const acts=currentGameState.available_actions.map(a=>a.action);switch(event.key.toLowerCase()){case'h':if(acts.includes('hit'))playerAction('hit');break;case's':if(acts.includes('stand'))playerAction('stand');break;case'd':if(acts.includes('double_down'))playerAction('double_down');break;case'p':if(acts.includes('split'))playerAction('split');break;case'r':if(acts.includes('surrender'))playerAction('surrender');break;}});
-        document.addEventListener('visibilitychange',()=>{if(document.hidden)consoleLog("Page hidden");else{consoleLog("Page visible");if(!isConnected&&!isLoadingOrReconnecting){consoleLog("Reconnecting on visibility");connectWebSocket();}}});
-        window.addEventListener('error',(event)=>{consoleError('Global error:',event.message,'at',event.filename,':',event.lineno);showNotification('Critical error. Refresh.','error',7000);});
-        window.addEventListener('unhandledrejection',(event)=>{consoleError('Unhandled rejection:',event.reason);showNotification('Unexpected error.','error',5000);});
+        function showElement(elementId) { const el = document.getElementById(elementId); if (el && el.classList.contains('hidden')) { el.classList.remove('hidden'); gsap.fromTo(el, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }); } }
+        function hideElement(elementId) { const el = document.getElementById(elementId); if (el && !el.classList.contains('hidden')) { gsap.to(el, { opacity: 0, y: -20, duration: 0.3, ease: "power2.in", onComplete: () => el.classList.add('hidden') }); } }
+
+        function updateDealerDisplay() {
+            const dhEl = document.getElementById('dealerHand'); const dvEl = document.getElementById('dealerValue');
+            if (!currentGameState.dealer_hand || !currentGameState.dealer_hand.cards) { dhEl.innerHTML = ''; dvEl.textContent = 'No cards'; return; }
+            dhEl.innerHTML = '';
+            currentGameState.dealer_hand.cards.forEach((card, index) => {
+                const cardDiv = document.createElement('div'); cardDiv.className = 'card-mini';
+                if (card.suit === 'back') { cardDiv.classList.add('back'); cardDiv.textContent = '?'; }
+                else { if (card.suit === 'hearts' || card.suit === 'diamonds') cardDiv.classList.add('red'); cardDiv.textContent = card.rank; }
+                dhEl.appendChild(cardDiv);
+                gsap.fromTo(cardDiv, { opacity: 0, scale: 0, rotationY: 180 }, { opacity: 1, scale: 1, rotationY: 0, duration: 0.5, delay: index * 0.1, ease: "back.out(1.7)" });
+            });
+            if (currentGameState.dealer_hand.value !== null && currentGameState.dealer_hand.value !== undefined) {
+                const newVal = `Value: ${currentGameState.dealer_hand.value}`;
+                if (dvEl.textContent !== newVal) gsap.fromTo(dvEl, { scale: 1.2, color: '#ffd700' }, { scale: 1, color: '#ffffff', duration: 0.5, ease: "power2.out", overwrite: "auto" });
+                dvEl.textContent = newVal;
+            } else { dvEl.textContent = 'Hidden'; }
+        }
+
+        function updateActionButtons() {
+            if (!currentGameState.available_actions) return;
+            const actions = currentGameState.available_actions; const btnIds = ['hitBtn', 'standBtn', 'doubleBtn', 'splitBtn', 'surrenderBtn'];
+            btnIds.forEach(id => { const btn = document.getElementById(id); if (btn) { btn.style.display = 'none'; btn.disabled = true; } });
+            actions.forEach((actionData, index) => {
+                const btnId = actionData.action + 'Btn'; const btn = document.getElementById(btnId);
+                if (btn) { btn.style.display = 'inline-block'; btn.disabled = false; gsap.fromTo(btn, { opacity: 0, scale: 0.8, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.4, delay: index * 0.1, ease: "back.out(1.7)", overwrite: "auto" }); }
+            });
+        }
+
+        function updatePlayerHandsUI() {
+            const container = document.getElementById('playerHandsDisplay'); container.innerHTML = '';
+            if (!currentGameState.players) return;
+            Object.values(currentGameState.players).forEach((player, index) => {
+                const playerDiv = document.createElement('div'); playerDiv.className = 'player-hand';
+                if (player.is_current_player) playerDiv.classList.add('current-player'); if (player.status === 'bust') playerDiv.classList.add('bust'); if (player.status === 'blackjack') playerDiv.classList.add('blackjack'); if (player.id === myPlayerId) playerDiv.style.borderColor = '#00ffff';
+                let handsHtml = '';
+                player.hands.forEach((hand, handIndex) => {
+                    const cardsHtml = hand.cards.map(card => `<div class="${(card.suit === 'hearts' || card.suit === 'diamonds') ? 'card-mini red' : card.suit === 'back' ? 'card-mini back' : 'card-mini'}">${card.suit === 'back' ? '?' : card.rank}</div>`).join('');
+                    handsHtml += `<div class="hand-info" style="border-top: ${handIndex > 0 ? '1px solid rgba(255,215,0,0.3)' : 'none'}; margin-top: ${handIndex > 0 ? '10px' : '0'}; padding-top: ${handIndex > 0 ? '10px' : '0'};">
+                        <div class="hand-cards">${cardsHtml}</div><div>Value: ${hand.value !== undefined ? hand.value : 'N/A'}</div><div>Bet: $${hand.bet_amount}</div>
+                        ${hand.result ? `<div style="color: ${getResultColor(hand.result)}; font-weight: bold;">${hand.result.toUpperCase()}</div>` : ''}
+                        ${hand.payout > 0 && hand.result !== 'push' ? `<div style="color: #00ffaa;">Won: $${hand.payout - hand.bet_amount}</div>` : ''}
+                        ${hand.payout > 0 && hand.result === 'push' ? `<div style="color: #ffaa00;">Push: $${hand.bet_amount} returned</div>` : ''}</div>`;
+                });
+                playerDiv.innerHTML = `<div class="player-name">${player.name}</div><div class="player-money">💰 $${player.money.toLocaleString()}</div>${handsHtml}`;
+                container.appendChild(playerDiv);
+                gsap.fromTo(playerDiv, { opacity: 0, scale: 0.9, y: 10 }, { opacity: 1, scale: 1, y: 0, duration: 0.4, delay: index * 0.05, ease: "power2.out", overwrite: "auto" });
+            });
+        }
+
+        function getResultColor(result) { switch(result) { case 'win': case 'blackjack': return '#00ff00'; case 'lose': case 'bust': return '#ff4444'; case 'push': return '#ffaa00'; default: return '#ffffff'; } }
         
-        window.addEventListener('load', function() {
-            consoleLog("Window loaded. Starting initialization sequence.");
-            const loadingTextEl = document.getElementById('loadingScreen').querySelector('.loading-text');
-            
-            if (!loadingTextEl) { consoleError("Loading text element not found for initial load messages."); alert("Initialization Critical Error: UI Missing."); return; }
-            
-            try {
-                loadingTextEl.textContent = "Checking libraries...";
-                if (typeof THREE === 'undefined') throw new Error("Three.js library not loaded");
-                if (typeof gsap === 'undefined') throw new Error("GSAP library not loaded");
-                
-                loadingTextEl.textContent = "Initializing 3D engine...";
-                if (!initThreeJS()) throw new Error("Failed to initialize 3D engine");
-                
-                loadingTextEl.textContent = "Connecting to server...";
-                connectWebSocket();
-                consoleLog("Initial setup sequence started successfully.");
-                
-            } catch (e) {
-                consoleError("Critical error during initial window.onload setup:", e);
-                loadingTextEl.textContent = "Error: " + e.message;
-                if(typeof showNotification === "function") {
-                    showNotification("Initialization failed: " + e.message, "error", 10000);
-                } else {
-                    alert("Initialization failed. Please refresh. Details: " + e.message);
-                }
-                updateConnectionStatus('disconnected', e.message);
-                // Do not hide loading screen here, as init failed.
+        function updateChat() {
+            if (!currentGameState || !currentGameState.chat_messages) return;
+            const chatMessagesEl = document.getElementById('chatMessages'); const shouldScroll = chatMessagesEl.scrollHeight - chatMessagesEl.clientHeight <= chatMessagesEl.scrollTop + 20;
+            const currentMessageCount = chatMessagesEl.children.length; const newMessages = currentGameState.chat_messages;
+            if (currentMessageCount !== newMessages.length || (newMessages.length > 0 && chatMessagesEl.lastChild?.textContent !== newMessages[newMessages.length-1].message)) {
+                chatMessagesEl.innerHTML = '';
+                newMessages.forEach((msg, index) => {
+                    const msgDiv = document.createElement('div'); msgDiv.className = 'chat-message'; msgDiv.style.borderLeftColor = msg.player_color || '#ffd700';
+                    const nameSpan = document.createElement('span'); nameSpan.className = 'chat-player-name'; nameSpan.style.color = msg.player_color || '#ffd700'; nameSpan.textContent = msg.player_name + ': ';
+                    const messageSpan = document.createElement('span'); messageSpan.textContent = msg.message;
+                    const timeSpan = document.createElement('span'); timeSpan.className = 'chat-timestamp'; timeSpan.textContent = msg.formatted_time;
+                    msgDiv.appendChild(nameSpan); msgDiv.appendChild(messageSpan); msgDiv.appendChild(timeSpan); chatMessagesEl.appendChild(msgDiv);
+                    gsap.fromTo(msgDiv, { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.3, ease: "power2.out", delay: index * 0.02, overwrite: "auto" });
+                });
+                if (shouldScroll || !chatCollapsed) { chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight; }
+            }
+        }
+
+        function createQuickRoom() { const name = document.getElementById('playerName').value.trim(); if (!name) { showNotification("Enter name", "warning"); return; } if (sendMessage('create_room', { player_name: name })) showLoadingScreen('Creating room...'); }
+        function createCustomRoom() { const name = document.getElementById('playerName').value.trim(); const roomName = document.getElementById('roomName').value.trim(); if (!name) { showNotification("Enter name", "warning"); return; } if (sendMessage('create_room', { player_name: name, room_name: roomName || null })) showLoadingScreen('Creating custom room...'); }
+        function joinRoomFromInput() { const code = document.getElementById('roomCodeInput').value.trim().toUpperCase(); const name = document.getElementById('playerName').value.trim(); if (!code) { showNotification("Enter room code", "warning"); return; } if (!name) { showNotification("Enter name", "warning"); return; } if (sendMessage('join_room', { room_code: code, player_name: name })) showLoadingScreen('Joining room...'); }
+        function spectateRoomFromInput() { const code = document.getElementById('roomCodeInput').value.trim().toUpperCase(); if (!code) { showNotification("Enter room code", "warning"); return; } if (sendMessage('spectate_room', { room_code: code })) showLoadingScreen('Joining as spectator...'); }
+        function leaveRoom() { if (confirm("Leave room?")) { if(sendMessage('leave_room')) showLoadingScreen('Leaving room...'); } }
+        function startGame() { if (sendMessage('start_game')) showNotification('Starting game...', 'info'); }
+        
+        const MIN_BET_DYNAMIC = () => currentGameState?.min_bet || 10;
+        const MAX_BET_DYNAMIC = () => currentGameState?.max_bet || 500;
+
+        function setBetAmount(amount) { const input = document.getElementById('betAmountInput'); input.value = amount; gsap.fromTo(input, { scale: 1.1, borderColor: '#ffd700' }, { scale: 1, borderColor: 'var(--primary-gold)', duration: 0.3, ease: "power2.out", overwrite: "auto" }); }
+        function placeBet() {
+            const amount = parseInt(document.getElementById('betAmountInput').value);
+            if (isNaN(amount) || amount < MIN_BET_DYNAMIC() || amount > MAX_BET_DYNAMIC()) { showNotification(`Bet must be $${MIN_BET_DYNAMIC()}-${MAX_BET_DYNAMIC()}`, "warning"); return; }
+            const myPlayerState = currentGameState.players[myPlayerId]; if (myPlayerState && amount > myPlayerState.money) { showNotification("Insufficient funds", "error"); return; }
+            if (sendMessage('player_action', { action_type: 'place_bet', amount: amount })) { showNotification(`Bet placed: $${amount}`, 'success'); hideElement('betControls'); }
+        }
+        function playerAction(actionType) { if (sendMessage('player_action', { action_type: actionType })) showNotification(`Action: ${actionType.replace('_', ' ').toUpperCase()}`, 'info'); }
+
+        function sendChat() { const input = document.getElementById('chatInput'); const message = input.value.trim(); if (!message) return; if (message.length > 200) { showNotification("Message too long", "warning"); return; } if (sendMessage('send_chat_message', { message: message })) { input.value = ''; gsap.fromTo(input, { backgroundColor: 'rgba(0, 255, 0, 0.2)' }, { backgroundColor: 'rgba(255, 255, 255, 0.1)', duration: 0.5, overwrite: "auto" }); } }
+        function handleChatKeyPress(event) { if (event.key === 'Enter') { event.preventDefault(); sendChat(); } }
+        function toggleChat() {
+            chatCollapsed = !chatCollapsed; const chatP = document.getElementById('chatPanel'); const chatM = document.getElementById('chatMessages'); const chatI = document.querySelector('.chat-input-container'); const chatT = document.getElementById('chatToggle');
+            const originalHeight = chatP.dataset.originalHeight || '250px'; if(!chatP.dataset.originalHeight) chatP.dataset.originalHeight = chatP.offsetHeight + 'px';
+            if (chatCollapsed) { gsap.to([chatM, chatI], { height: 0, opacity: 0, duration: 0.3, onComplete: () => { chatM.style.display = 'none'; chatI.style.display = 'none'; }}); gsap.to(chatP, { height: '50px', duration: 0.3 }); chatT.textContent = '+'; }
+            else { chatM.style.display = 'block'; chatI.style.display = 'flex'; gsap.set(chatM, {height: 'auto'}); const targetH = chatM.offsetHeight; gsap.set(chatM, {height:0}); gsap.to(chatP, { height: originalHeight, duration: 0.3}); gsap.to(chatM, { height: targetH, opacity: 1, duration: 0.3}); gsap.to(chatI, { height: 'auto', opacity: 1, duration: 0.3}); chatT.textContent = '−'; chatM.scrollTop = chatM.scrollHeight; }
+        }
+        
+        function showRoomList() { document.getElementById('roomListModal').classList.remove('hidden'); gsap.fromTo('#roomListModal', { opacity: 0 }, { opacity: 1, duration: 0.3 }); refreshRoomList(); }
+        function hideRoomList() { gsap.to('#roomListModal', { opacity: 0, duration: 0.3, onComplete: () => document.getElementById('roomListModal').classList.add('hidden') }); }
+        function refreshRoomList() { sendMessage('get_room_list'); document.getElementById('roomList').innerHTML = '<div style="text-align: center; color: #ccc; padding: 20px;">Fetching...</div>'; }
+        function updateRoomList(rooms) {
+            const listEl = document.getElementById('roomList');
+            if (!rooms || rooms.length === 0) { listEl.innerHTML = '<div style="text-align: center; color: #ccc; padding: 20px;">No public rooms.</div>'; return; }
+            listEl.innerHTML = rooms.map((room, index) => `<div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; opacity: 0;" id="room-${index}"><div><strong style="color: #ffd700;">${room.name || room.code}</strong><br><small style="color: #ccc;">Players: ${room.players}/${room.max_players} | Phase: ${room.phase.replace('_', ' ').toUpperCase()}</small></div><div><button class="action-button" onclick="joinRoomByCode('${room.code}')" style="margin-right: 5px;">Join</button><button class="action-button" onclick="spectateRoomByCode('${room.code}')">Spectate</button></div></div>`).join('');
+            rooms.forEach((_, index) => { gsap.fromTo(`#room-${index}`, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.4, delay: index * 0.1, ease: "power2.out", overwrite: "auto" }); });
+        }
+        function joinRoomByCode(code) { const name = document.getElementById('playerName').value.trim() || 'Player'; hideRoomList(); if (sendMessage('join_room', { room_code: code, player_name: name })) showLoadingScreen('Joining room...'); }
+        function spectateRoomByCode(code) { hideRoomList(); if (sendMessage('spectate_room', { room_code: code })) showLoadingScreen('Joining as spectator...'); }
+
+        function showNotification(message, type = 'info', duration = 4000) {
+            const cont = document.getElementById('notificationContainer'); if(!cont) return; const notif = document.createElement('div');
+            notif.className = `notification ${type}`; notif.textContent = message; cont.appendChild(notif);
+            gsap.fromTo(notif, { y: -100, opacity: 0, scale: 0.8 }, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" });
+            setTimeout(() => { gsap.to(notif, { y: -100, opacity: 0, scale: 0.8, duration: 0.4, ease: "power2.in", onComplete: () => notif.remove() }); }, duration);
+        }
+
+        window.addEventListener('resize', function() { if (camera && renderer) { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); consoleLog("Resized"); } });
+        document.addEventListener('keydown', function(event) {
+            if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+            if (!currentGameState || !currentGameState.can_act || !currentGameState.available_actions) return;
+            const actions = currentGameState.available_actions.map(a => a.action);
+            switch(event.key.toLowerCase()) {
+                case 'h': if (actions.includes('hit')) playerAction('hit'); break;
+                case 's': if (actions.includes('stand')) playerAction('stand'); break;
+                case 'd': if (actions.includes('double_down')) playerAction('double_down'); break;
+                case 'p': if (actions.includes('split')) playerAction('split'); break;
+                case 'r': if (actions.includes('surrender')) playerAction('surrender'); break;
             }
         });
+        document.addEventListener('visibilitychange', function() { if (document.hidden) consoleLog("Page hidden"); else { consoleLog("Page visible"); if (!isConnected && !isLoadingOrReconnecting) { consoleLog("Reconnecting on visibility"); connectWebSocket(); } } });
+        window.addEventListener('error', function(event) { consoleError('Global error:', event.message, 'at', event.filename, ':', event.lineno); showNotification('Critical error. Please refresh.', 'error', 7000); });
+        window.addEventListener('unhandledrejection', function(event) { consoleError('Unhandled rejection:', event.reason); showNotification('Unexpected error.', 'error', 5000); });
 
+        window.addEventListener('load', function() {
+            consoleLog("Window loaded"); const loadingTextEl = document.getElementById('loadingScreen').querySelector('.loading-text');
+            if (!loadingTextEl) { consoleError("Loading text el not found"); alert("Init error."); return; }
+            try {
+                loadingTextEl.textContent = "Libs..."; if (typeof THREE === 'undefined') throw new Error("ThreeJS missing"); if (typeof gsap === 'undefined') throw new Error("GSAP missing");
+                loadingTextEl.textContent = "3D Engine..."; if (!initThreeJS()) throw new Error("3D Engine fail");
+                loadingTextEl.textContent = "Connecting..."; connectWebSocket(); consoleLog("Init sequence started.");
+            } catch (e) { consoleError("Init error:", e); loadingTextEl.textContent = "Error: " + e.message; if(typeof showNotification === "function") showNotification("Init failed: " + e.message, "error", 10000); else alert("Init failed: " + e.message); updateConnectionStatus('disconnected', e.message); }
+        });
         window.addEventListener('beforeunload', function() { consoleLog("Unloading"); if (ws && ws.readyState === WebSocket.OPEN) { ws.close(1000, "Page unload"); } });
-        // --- End of JavaScript logic ---
     </script>
 </body>
 </html>
