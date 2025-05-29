@@ -18,305 +18,893 @@
             --text-light: #ffffff;
             --text-dark: #333333;
             --shadow: rgba(0, 0, 0, 0.3);
+            --overlay-bg: rgba(0, 0, 0, 0.85);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: 'Roboto', sans-serif;
             background: radial-gradient(ellipse at center, #0a2a1f 0%, #051a11 100%);
             color: var(--text-light);
             overflow: hidden;
             user-select: none;
+            height: 100vh;
+            width: 100vw;
         }
-        #gameContainer { position: relative; width: 100vw; height: 100vh; }
-        #canvas { display: block; cursor: grab; }
+
+        #gameContainer { 
+            position: relative; 
+            width: 100vw; 
+            height: 100vh; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        #canvas { 
+            display: block; 
+            cursor: grab; 
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
         #canvas:active { cursor: grabbing; }
 
+        /* Loading Screen - Highest Z-Index */
         #loadingScreen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
             background: linear-gradient(135deg, #0a2a1f, #051a11);
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 10000; transition: opacity 1s ease-out;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            z-index: 10000; 
+            transition: opacity 1s ease-out;
         }
+
         .loading-logo {
-            font-family: 'Orbitron', monospace; font-size: 3.5rem; font-weight: 900;
-            color: var(--primary-gold); text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
-            margin-bottom: 30px; animation: pulse 2s infinite;
+            font-family: 'Orbitron', monospace; 
+            font-size: 3.5rem; 
+            font-weight: 900;
+            color: var(--primary-gold); 
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            margin-bottom: 30px; 
+            animation: pulse 2s infinite;
+            text-align: center;
         }
+
         .loading-spinner {
-            width: 80px; height: 80px; border: 4px solid rgba(255, 215, 0, 0.3);
-            border-top: 4px solid var(--primary-gold); border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 20px;
+            width: 80px; 
+            height: 80px; 
+            border: 4px solid rgba(255, 215, 0, 0.3);
+            border-top: 4px solid var(--primary-gold); 
+            border-radius: 50%;
+            animation: spin 1s linear infinite; 
+            margin-bottom: 20px;
         }
-        .loading-text { font-size: 1.2rem; color: var(--text-light); opacity: 0.8; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .ui-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
+        .loading-text { 
+            font-size: 1.2rem; 
+            color: var(--text-light); 
+            opacity: 0.8; 
+            text-align: center;
+        }
+
+        @keyframes pulse { 
+            0%, 100% { transform: scale(1); } 
+            50% { transform: scale(1.05); } 
+        }
+
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+
+        /* UI Overlay System with Proper Z-Index Management */
+        .ui-overlay { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            pointer-events: none; 
+            z-index: 100; 
+        }
+
         .ui-panel {
-            position: absolute; background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(26, 93, 58, 0.8));
-            border-radius: 15px; padding: 20px; color: var(--text-light); pointer-events: auto;
-            border: 2px solid var(--primary-gold); box-shadow: 0 10px 30px var(--shadow);
-            backdrop-filter: blur(10px); transition: all 0.3s ease;
+            position: absolute; 
+            background: linear-gradient(135deg, var(--overlay-bg), rgba(26, 93, 58, 0.9));
+            border-radius: 15px; 
+            padding: 20px; 
+            color: var(--text-light); 
+            pointer-events: auto;
+            border: 2px solid var(--primary-gold); 
+            box-shadow: 0 10px 30px var(--shadow);
+            backdrop-filter: blur(15px); 
+            transition: all 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
         }
-        .menu-panel {
-            top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: left;
-            min-width: 450px; max-width: 90vw;
-        }
-        .menu-title {
-            font-family: 'Orbitron', monospace; font-size: 2.5rem; font-weight: 900;
-            color: var(--primary-gold); text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
-            margin-bottom: 25px; animation: glow 2s ease-in-out infinite alternate; text-align: center;
-        }
-        .menu-title .card-icon { font-size: 2rem; vertical-align: middle; }
-        @keyframes glow { from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); } to { text-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 0 40px rgba(255, 215, 0, 0.8); } }
-        .menu-section {
-            margin-bottom: 20px; padding: 15px; background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px; border: 1px solid rgba(255, 215, 0, 0.3);
-        }
-        .menu-section h3 {
-            color: var(--secondary-gold); margin-bottom: 12px; font-size: 1.1rem;
-            border-bottom: 1px solid rgba(255,215,0,0.2); padding-bottom: 8px;
-        }
-        .menu-section label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: rgba(255,255,255,0.8); }
-        .menu-section input[type="text"], .menu-section input[type="number"] { width: 100%; margin-bottom: 10px; }
 
-        .game-hud { top: 20px; left: 20px; max-width: 350px; }
+        /* Menu Panel - Z-Index 9000 */
+        .menu-panel {
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            text-align: left;
+            min-width: 450px; 
+            max-width: 90vw;
+            z-index: 9000;
+        }
+
+        .menu-title {
+            font-family: 'Orbitron', monospace; 
+            font-size: 2.5rem; 
+            font-weight: 900;
+            color: var(--primary-gold); 
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            margin-bottom: 25px; 
+            animation: glow 2s ease-in-out infinite alternate; 
+            text-align: center;
+        }
+
+        .menu-title .card-icon { 
+            font-size: 2rem; 
+            vertical-align: middle; 
+        }
+
+        @keyframes glow { 
+            from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); } 
+            to { text-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 0 40px rgba(255, 215, 0, 0.8); } 
+        }
+
+        .menu-section {
+            margin-bottom: 20px; 
+            padding: 15px; 
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px; 
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .menu-section h3 {
+            color: var(--secondary-gold); 
+            margin-bottom: 12px; 
+            font-size: 1.1rem;
+            border-bottom: 1px solid rgba(255,215,0,0.2); 
+            padding-bottom: 8px;
+        }
+
+        .menu-section label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-size: 0.9rem; 
+            color: rgba(255,255,255,0.8); 
+        }
+
+        .menu-section input[type="text"], 
+        .menu-section input[type="number"] { 
+            width: 100%; 
+            margin-bottom: 10px; 
+        }
+
+        /* Game HUD - Z-Index 800 */
+        .game-hud { 
+            top: 20px; 
+            left: 20px; 
+            max-width: 350px; 
+            z-index: 800;
+        }
+
         .hud-item {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
-            padding: 8px 12px; background: rgba(255, 255, 255, 0.1); border-radius: 8px;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 10px;
+            padding: 8px 12px; 
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 8px;
             border-left: 4px solid var(--primary-gold);
         }
-        .hud-label { font-weight: 500; color: var(--secondary-gold); }
-        .hud-value { font-weight: 700; color: var(--text-light); }
 
+        .hud-label { 
+            font-weight: 500; 
+            color: var(--secondary-gold); 
+        }
+
+        .hud-value { 
+            font-weight: 700; 
+            color: var(--text-light); 
+        }
+
+        /* Dealer Area - Z-Index 700 */
         .dealer-area {
-            position: absolute; top: 10%; left: 50%; transform: translateX(-50%);
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(26, 93, 58, 0.6));
-            border: 2px solid var(--primary-gold); border-radius: 15px; padding: 20px;
-            text-align: center; min-width: 300px; backdrop-filter: blur(10px);
+            position: absolute; 
+            top: 10%; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--overlay-bg), rgba(26, 93, 58, 0.8));
+            border: 2px solid var(--primary-gold); 
+            border-radius: 15px; 
+            padding: 20px;
+            text-align: center; 
+            min-width: 300px; 
+            backdrop-filter: blur(15px);
+            z-index: 700;
         }
+
         .dealer-title {
-            font-family: 'Orbitron', monospace; font-size: 1.4rem; font-weight: 700;
-            color: var(--primary-gold); margin-bottom: 15px;
+            font-family: 'Orbitron', monospace; 
+            font-size: 1.4rem; 
+            font-weight: 700;
+            color: var(--primary-gold); 
+            margin-bottom: 15px;
         }
-        .dealer-hand { display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; }
+
+        .dealer-hand { 
+            display: flex; 
+            gap: 10px; 
+            justify-content: center; 
+            margin-bottom: 10px; 
+            flex-wrap: wrap;
+        }
+
         .dealer-value {
-            font-size: 1.2rem; font-weight: 700; color: var(--text-light);
+            font-size: 1.2rem; 
+            font-weight: 700; 
+            color: var(--text-light);
             font-family: 'Orbitron', monospace;
         }
 
+        /* Action Panels - Z-Index 600 */
         .actions-panel {
-            bottom: 30px; left: 50%; transform: translateX(-50%); display: flex;
-            gap: 15px; flex-wrap: wrap; justify-content: center; max-width: 90vw;
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            display: flex;
+            gap: 15px; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            max-width: 90vw;
+            z-index: 600;
         }
+
         .action-button {
             background: linear-gradient(135deg, var(--primary-gold), var(--secondary-gold));
-            border: none; border-radius: 12px; padding: 15px 25px; color: var(--text-dark);
-            font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3); position: relative; overflow: hidden;
+            border: none; 
+            border-radius: 12px; 
+            padding: 15px 25px; 
+            color: var(--text-dark);
+            font-weight: 700; 
+            font-size: 1rem; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3); 
+            position: relative; 
+            overflow: hidden;
+            min-width: 120px;
+            text-align: center;
         }
-        .action-button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5); }
-        .action-button:active { transform: translateY(-1px); }
+
+        .action-button:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5); 
+        }
+
+        .action-button:active { 
+            transform: translateY(-1px); 
+        }
+
         .action-button:disabled {
-            background: linear-gradient(135deg, #666, #888); cursor: not-allowed;
-            transform: none; opacity: 0.5;
+            background: linear-gradient(135deg, #666, #888); 
+            cursor: not-allowed;
+            transform: none; 
+            opacity: 0.5;
         }
-        .action-button.hit { background: linear-gradient(135deg, #28a745, #20c997); color: var(--text-light); }
-        .action-button.stand { background: linear-gradient(135deg, var(--casino-red), #ff6b6b); color: var(--text-light); }
-        .action-button.double { background: linear-gradient(135deg, var(--casino-blue), #6c5ce7); color: var(--text-light); }
-        .action-button.split { background: linear-gradient(135deg, #ff4757, #ff3742); color: var(--text-light); }
 
+        .action-button.hit { 
+            background: linear-gradient(135deg, #28a745, #20c997); 
+            color: var(--text-light); 
+        }
+
+        .action-button.stand { 
+            background: linear-gradient(135deg, var(--casino-red), #ff6b6b); 
+            color: var(--text-light); 
+        }
+
+        .action-button.double { 
+            background: linear-gradient(135deg, var(--casino-blue), #6c5ce7); 
+            color: var(--text-light); 
+        }
+
+        .action-button.split { 
+            background: linear-gradient(135deg, #ff4757, #ff3742); 
+            color: var(--text-light); 
+        }
+
+        /* Betting Controls */
         .bet-controls {
-            display: flex; align-items: center; gap: 10px; 
-            background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 12px;
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            background: rgba(255, 255, 255, 0.1); 
+            padding: 15px; 
+            border-radius: 12px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
+
         .bet-input {
-            padding: 10px; border: 2px solid var(--primary-gold); border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1); color: var(--text-light);
-            font-size: 1rem; text-align: center; width: 100px;
+            padding: 10px; 
+            border: 2px solid var(--primary-gold); 
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1); 
+            color: var(--text-light);
+            font-size: 1rem; 
+            text-align: center; 
+            width: 100px;
+            min-width: 80px;
         }
-        .bet-buttons { display: flex; gap: 5px; }
+
+        .bet-buttons { 
+            display: flex; 
+            gap: 5px; 
+            flex-wrap: wrap;
+        }
+
         .bet-button {
-            background: var(--primary-gold); color: var(--text-dark); border: none;
-            padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 700;
+            background: var(--primary-gold); 
+            color: var(--text-dark); 
+            border: none;
+            padding: 8px 12px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: 700;
+            transition: all 0.2s ease;
         }
 
+        .bet-button:hover {
+            background: var(--secondary-gold);
+            transform: scale(1.05);
+        }
+
+        /* Chat Panel - Z-Index 500 */
         .chat-panel {
-            position: absolute; top: 20px; right: 20px; width: 320px; max-height: 40vh; min-height: 200px;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(26, 93, 58, 0.8));
-            border: 2px solid var(--primary-gold); border-radius: 15px; padding: 15px;
-            display: flex; flex-direction: column; backdrop-filter: blur(10px);
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+            width: 320px; 
+            max-height: 50vh; 
+            min-height: 250px;
+            background: linear-gradient(135deg, var(--overlay-bg), rgba(26, 93, 58, 0.9));
+            border: 2px solid var(--primary-gold); 
+            border-radius: 15px; 
+            padding: 15px;
+            display: flex; 
+            flex-direction: column; 
+            backdrop-filter: blur(15px);
+            z-index: 500;
         }
-        .chat-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--primary-gold);
-        }
-        .chat-title { font-family: 'Orbitron', monospace; font-weight: 700; color: var(--primary-gold); }
-        .chat-toggle {
-            background: none; border: 2px solid var(--primary-gold); color: var(--primary-gold);
-            border-radius: 6px; padding: 5px 10px; cursor: pointer; transition: all 0.3s ease;
-        }
-        .chat-toggle:hover { background: var(--primary-gold); color: var(--text-dark); }
-        #chatMessages {
-            flex: 1; overflow-y: auto; background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px; padding: 10px; margin-bottom: 10px; border: 1px solid rgba(255, 215, 0, 0.2);
-        }
-        .chat-message {
-            margin-bottom: 8px; padding: 6px 10px; border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1); border-left: 3px solid;
-            animation: slideInChat 0.3s ease-out; word-wrap: break-word;
-        }
-        @keyframes slideInChat { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-        .chat-player-name { font-weight: 700; margin-right: 8px; }
-        .chat-timestamp { font-size: 0.8rem; opacity: 0.6; float: right; }
-        .chat-input-container { display: flex; gap: 10px; margin-top: auto; }
-        .chat-input-container input { 
-            flex: 1; padding: 10px 12px; border: 2px solid var(--primary-gold); border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1); color: var(--text-light);
-        }
-        .chat-input-container button { padding: 10px 15px; }
 
-        .player-hands {
-            position: absolute; bottom: 150px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 90vw;
+        .chat-header {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            margin-bottom: 10px; 
+            padding-bottom: 8px; 
+            border-bottom: 2px solid var(--primary-gold);
+            flex-shrink: 0;
         }
+
+        .chat-title { 
+            font-family: 'Orbitron', monospace; 
+            font-weight: 700; 
+            color: var(--primary-gold); 
+        }
+
+        .chat-toggle {
+            background: none; 
+            border: 2px solid var(--primary-gold); 
+            color: var(--primary-gold);
+            border-radius: 6px; 
+            padding: 5px 10px; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .chat-toggle:hover { 
+            background: var(--primary-gold); 
+            color: var(--text-dark); 
+        }
+
+        #chatMessages {
+            flex: 1; 
+            overflow-y: auto; 
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px; 
+            padding: 10px; 
+            margin-bottom: 10px; 
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            min-height: 150px;
+        }
+
+        .chat-message {
+            margin-bottom: 8px; 
+            padding: 6px 10px; 
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1); 
+            border-left: 3px solid;
+            animation: slideInChat 0.3s ease-out; 
+            word-wrap: break-word;
+            font-size: 0.9rem;
+        }
+
+        @keyframes slideInChat { 
+            from { opacity: 0; transform: translateX(20px); } 
+            to { opacity: 1; transform: translateX(0); } 
+        }
+
+        .chat-player-name { 
+            font-weight: 700; 
+            margin-right: 8px; 
+        }
+
+        .chat-timestamp { 
+            font-size: 0.8rem; 
+            opacity: 0.6; 
+            float: right; 
+        }
+
+        .chat-input-container { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: auto; 
+            flex-shrink: 0;
+        }
+
+        .chat-input-container input { 
+            flex: 1; 
+            padding: 10px 12px; 
+            border: 2px solid var(--primary-gold); 
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1); 
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .chat-input-container button { 
+            padding: 10px 15px; 
+            font-size: 0.9rem;
+            min-width: 60px;
+        }
+
+        /* Player Hands Display - Z-Index 400 */
+        .player-hands {
+            position: absolute; 
+            bottom: 150px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            display: flex; 
+            gap: 20px; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            max-width: 90vw;
+            z-index: 400;
+        }
+
         .player-hand {
             background: linear-gradient(135deg, rgba(26, 93, 58, 0.9), rgba(10, 42, 31, 0.9));
-            border: 2px solid var(--primary-gold); border-radius: 15px; padding: 15px;
-            text-align: center; min-width: 200px; position: relative; transition: all 0.3s ease;
+            border: 2px solid var(--primary-gold); 
+            border-radius: 15px; 
+            padding: 15px;
+            text-align: center; 
+            min-width: 200px; 
+            position: relative; 
+            transition: all 0.3s ease;
             backdrop-filter: blur(10px);
         }
+
         .player-hand.current-player {
-            border-color: var(--casino-red); box-shadow: 0 0 30px rgba(220, 20, 60, 0.6);
+            border-color: var(--casino-red); 
+            box-shadow: 0 0 30px rgba(220, 20, 60, 0.6);
             animation: currentPlayerGlow 2s ease-in-out infinite;
         }
-        @keyframes currentPlayerGlow { 0%, 100% { box-shadow: 0 0 30px rgba(220, 20, 60, 0.6); } 50% { box-shadow: 0 0 40px rgba(220, 20, 60, 0.9); } }
-        .player-hand.bust { opacity: 0.4; filter: grayscale(80%); }
-        .player-hand.blackjack { border-color: var(--primary-gold); animation: blackjackGlow 1s ease-in-out infinite; }
-        @keyframes blackjackGlow { 0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); } 50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); } }
+
+        @keyframes currentPlayerGlow { 
+            0%, 100% { box-shadow: 0 0 30px rgba(220, 20, 60, 0.6); } 
+            50% { box-shadow: 0 0 40px rgba(220, 20, 60, 0.9); } 
+        }
+
+        .player-hand.bust { 
+            opacity: 0.4; 
+            filter: grayscale(80%); 
+        }
+
+        .player-hand.blackjack { 
+            border-color: var(--primary-gold); 
+            animation: blackjackGlow 1s ease-in-out infinite; 
+        }
+
+        @keyframes blackjackGlow { 
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); } 
+            50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.7); } 
+        }
+
         .player-name {
-            font-weight: 700; color: var(--text-light); margin-bottom: 10px; font-size: 1.1rem;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            font-weight: 700; 
+            color: var(--text-light); 
+            margin-bottom: 10px; 
+            font-size: 1.1rem;
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis;
         }
+
         .player-money { 
-            color: var(--primary-gold); font-weight: 700; font-family: 'Orbitron', monospace; 
-            margin-bottom: 10px; font-size: 1rem;
+            color: var(--primary-gold); 
+            font-weight: 700; 
+            font-family: 'Orbitron', monospace; 
+            margin-bottom: 10px; 
+            font-size: 1rem;
         }
-        .hand-info { margin: 5px 0; font-size: 0.9rem; }
-        .hand-cards { display: flex; gap: 5px; justify-content: center; margin: 10px 0; }
+
+        .hand-info { 
+            margin: 5px 0; 
+            font-size: 0.9rem; 
+        }
+
+        .hand-cards { 
+            display: flex; 
+            gap: 5px; 
+            justify-content: center; 
+            margin: 10px 0; 
+            flex-wrap: wrap;
+        }
+
         .card-mini {
-            width: 30px; height: 42px; background: white; border-radius: 4px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.8rem; font-weight: bold; color: black;
+            width: 30px; 
+            height: 42px; 
+            background: white; 
+            border-radius: 4px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 0.8rem; 
+            font-weight: bold; 
+            color: black;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
+
         .card-mini.red { color: red; }
         .card-mini.back { background: #2E4BC6; color: white; }
 
+        /* Form Elements */
         input, select {
-            padding: 12px 15px; border: 2px solid var(--primary-gold); border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1); color: var(--text-light); font-size: 1rem;
-            transition: all 0.3s ease; backdrop-filter: blur(10px); font-family: 'Roboto', sans-serif;
+            padding: 12px 15px; 
+            border: 2px solid var(--primary-gold); 
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1); 
+            color: var(--text-light); 
+            font-size: 1rem;
+            transition: all 0.3s ease; 
+            backdrop-filter: blur(10px); 
+            font-family: 'Roboto', sans-serif;
         }
-        input:focus, select:focus { outline: none; border-color: var(--secondary-gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
-        input::placeholder { color: rgba(255, 255, 255, 0.6); }
 
+        input:focus, select:focus { 
+            outline: none; 
+            border-color: var(--secondary-gold); 
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); 
+        }
+
+        input::placeholder { 
+            color: rgba(255, 255, 255, 0.6); 
+        }
+
+        /* Scrollbar Styling */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--primary-gold); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--secondary-gold); }
 
+        /* Utility Classes */
         .hidden { display: none !important; }
         .fade-in { animation: fadeIn 0.5s ease-out; } 
         .fade-out { animation: fadeOut 0.5s ease-out; }
+        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } 
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
+        /* Notifications - Z-Index 10000 */
         .notification-container {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; 
-            display: flex; flex-direction: column; gap: 10px; align-items: center;
+            position: fixed; 
+            top: 20px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            z-index: 10000; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            align-items: center;
+            pointer-events: none;
         }
-        .notification {
-            background: linear-gradient(135deg, rgba(40, 167, 69, 0.9), rgba(32, 201, 151, 0.9));
-            color: var(--text-light); padding: 15px 20px; border-radius: 8px;
-            border-left: 4px solid var(--primary-gold); box-shadow: 0 5px 15px var(--shadow);
-            animation: slideInNotification 0.5s ease-out; min-width: 250px; max-width: 350px;
-            text-align: center;
-        }
-        .notification.error { background: linear-gradient(135deg, rgba(220, 20, 60, 0.9), rgba(255, 107, 107, 0.9)); }
-        .notification.warning { background: linear-gradient(135deg, rgba(255, 193, 7, 0.9), rgba(255, 235, 59, 0.9)); color: var(--text-dark); }
-        .notification.info { background: linear-gradient(135deg, rgba(25, 25, 112, 0.9), rgba(108, 92, 231, 0.9)); }
-        @keyframes slideInNotification { from { transform: translateX(-50%) translateY(-100%); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
 
+        .notification {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.95), rgba(32, 201, 151, 0.95));
+            color: var(--text-light); 
+            padding: 15px 20px; 
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-gold); 
+            box-shadow: 0 5px 15px var(--shadow);
+            animation: slideInNotification 0.5s ease-out; 
+            min-width: 250px; 
+            max-width: 350px;
+            text-align: center;
+            pointer-events: auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .notification.error { 
+            background: linear-gradient(135deg, rgba(220, 20, 60, 0.95), rgba(255, 107, 107, 0.95)); 
+        }
+
+        .notification.warning { 
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.95), rgba(255, 235, 59, 0.95)); 
+            color: var(--text-dark); 
+        }
+
+        .notification.info { 
+            background: linear-gradient(135deg, rgba(25, 25, 112, 0.95), rgba(108, 92, 231, 0.95)); 
+        }
+
+        @keyframes slideInNotification { 
+            from { transform: translateX(-50%) translateY(-100%); opacity: 0; } 
+            to { transform: translateX(-50%) translateY(0); opacity: 1; } 
+        }
+
+        /* Modal - Z-Index 9999 */
         .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8);
-            display: flex; justify-content: center; align-items: center; z-index: 9999;
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0, 0, 0, 0.9);
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 9999;
         }
+
         .modal-content {
-            background: linear-gradient(135deg, rgba(10, 42, 31, 0.95), rgba(26, 93, 58, 0.95));
-            border: 2px solid var(--primary-gold); border-radius: 15px; padding: 30px;
-            max-width: 80vw; max-height: 80vh; overflow-y: auto; backdrop-filter: blur(15px);
+            background: linear-gradient(135deg, rgba(10, 42, 31, 0.98), rgba(26, 93, 58, 0.98));
+            border: 2px solid var(--primary-gold); 
+            border-radius: 15px; 
+            padding: 30px;
+            max-width: 80vw; 
+            max-height: 80vh; 
+            overflow-y: auto; 
+            backdrop-filter: blur(20px);
         }
+
         .modal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--primary-gold);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            margin-bottom: 20px; 
+            padding-bottom: 15px; 
+            border-bottom: 2px solid var(--primary-gold);
         }
-        .modal-title { font-family: 'Orbitron', monospace; font-size: 1.5rem; font-weight: 700; color: var(--primary-gold); }
+
+        .modal-title { 
+            font-family: 'Orbitron', monospace; 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            color: var(--primary-gold); 
+        }
+
         .modal-close {
-            background: none; border: 2px solid var(--casino-red); color: var(--casino-red);
-            border-radius: 6px; padding: 8px 15px; cursor: pointer; font-weight: 700;
+            background: none; 
+            border: 2px solid var(--casino-red); 
+            color: var(--casino-red);
+            border-radius: 6px; 
+            padding: 8px 15px; 
+            cursor: pointer; 
+            font-weight: 700;
             transition: all 0.3s ease;
         }
-        .modal-close:hover { background: var(--casino-red); color: var(--text-light); }
 
+        .modal-close:hover { 
+            background: var(--casino-red); 
+            color: var(--text-light); 
+        }
+
+        /* Mobile Responsiveness */
         @media (max-width: 768px) {
-            .menu-panel { min-width: 90vw; padding: 15px; }
-            .menu-title { font-size: 2rem; } 
-            .chat-panel { width: 90vw; max-height: 30vh; top: auto; bottom: 20px; left: 5vw; right: 5vw; }
-            .actions-panel { bottom: 20px; gap: 10px; }
-            .action-button { padding: 12px 18px; font-size: 0.9rem; }
-            .player-hands { bottom: 180px; gap: 10px; }
-            .player-hand { min-width: 150px; padding: 10px; }
+            .menu-panel { 
+                min-width: 95vw; 
+                padding: 15px; 
+                max-height: 85vh;
+            }
+            
+            .menu-title { 
+                font-size: 2rem; 
+            } 
+            
+            .chat-panel { 
+                width: 95vw; 
+                max-height: 40vh; 
+                top: auto; 
+                bottom: 180px; 
+                left: 2.5vw; 
+                right: 2.5vw; 
+            }
+            
+            .actions-panel { 
+                bottom: 20px; 
+                gap: 10px; 
+                padding: 0 10px;
+            }
+            
+            .action-button { 
+                padding: 12px 18px; 
+                font-size: 0.9rem; 
+                min-width: 100px;
+            }
+            
+            .player-hands { 
+                bottom: 200px; 
+                gap: 10px; 
+                padding: 0 10px;
+            }
+            
+            .player-hand { 
+                min-width: 150px; 
+                padding: 10px; 
+            }
+
+            .dealer-area {
+                min-width: 280px;
+                padding: 15px;
+            }
+
+            .game-hud {
+                max-width: 300px;
+            }
+
+            .bet-controls {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .bet-buttons {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .loading-logo {
+                font-size: 2.5rem;
+            }
+
+            .menu-panel {
+                min-width: 98vw;
+                padding: 10px;
+            }
+
+            .action-button {
+                padding: 10px 15px;
+                font-size: 0.8rem;
+                min-width: 90px;
+            }
+
+            .chat-panel {
+                max-height: 35vh;
+            }
+
+            .player-hand {
+                min-width: 140px;
+                padding: 8px;
+            }
+        }
+
+        /* Connection Status Indicator */
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .connection-status.connected {
+            background: rgba(40, 167, 69, 0.8);
+            color: white;
+        }
+
+        .connection-status.disconnected {
+            background: rgba(220, 20, 60, 0.8);
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        .connection-status.connecting {
+            background: rgba(255, 193, 7, 0.8);
+            color: black;
         }
     </style>
 </head>
 <body>
+    <!-- Connection Status -->
+    <div id="connectionStatus" class="connection-status disconnected">Connecting...</div>
+
+    <!-- Loading Screen -->
     <div id="loadingScreen">
-        <div class="loading-logo"><span class="card-icon">🃏</span> ROYAL BLACKJACK 3D <span class="card-icon">🃏</span></div>
+        <div class="loading-logo">
+            <span class="card-icon">🃏</span> ROYAL BLACKJACK 3D <span class="card-icon">🃏</span>
+        </div>
         <div class="loading-spinner"></div>
         <div class="loading-text">Loading casino experience...</div>
     </div>
 
+    <!-- Main Game Container -->
     <div id="gameContainer">
         <canvas id="canvas"></canvas>
+        
+        <!-- UI Overlay -->
         <div class="ui-overlay">
             <!-- Main Menu -->
             <div id="menuPanel" class="ui-panel menu-panel hidden">
-                <h1 class="menu-title"><span class="card-icon">🃏</span> ROYAL BLACKJACK 3D <span class="card-icon">🃏</span></h1>
+                <h1 class="menu-title">
+                    <span class="card-icon">🃏</span> ROYAL BLACKJACK 3D <span class="card-icon">🃏</span>
+                </h1>
+                
                 <div class="menu-section">
                     <h3>Player Setup</h3>
                     <label for="playerName">Player Name:</label>
-                    <input type="text" id="playerName" placeholder="Enter your name" value="Player">
+                    <input type="text" id="playerName" placeholder="Enter your name" value="Player" maxlength="20">
                 </div>
+                
                 <div class="menu-section">
                     <h3>Quick Play</h3>
-                    <button class="action-button" onclick="createQuickRoom()" style="width: 100%; margin-bottom: 10px;">🎯 Create Quick Room</button>
+                    <button class="action-button" onclick="createQuickRoom()" style="width: 100%; margin-bottom: 10px;">
+                        🎯 Create Quick Room
+                    </button>
                     <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                        <input type="text" id="roomCodeInput" placeholder="Room Code" style="flex: 1; margin-bottom: 0;">
+                        <input type="text" id="roomCodeInput" placeholder="Room Code" style="flex: 1; margin-bottom: 0;" maxlength="6">
                         <button class="action-button" onclick="joinRoomFromInput()">🚪 Join</button>
                     </div>
-                    <button class="action-button" onclick="spectateRoomFromInput()" style="width: 100%;">👁️ Spectate Room</button>
+                    <button class="action-button" onclick="spectateRoomFromInput()" style="width: 100%;">
+                        👁️ Spectate Room
+                    </button>
                 </div>
+                
                 <div class="menu-section">
                     <h3>Custom Game</h3>
                     <label for="roomName">Room Name (Optional):</label>
-                    <input type="text" id="roomName" placeholder="My Blackjack Table">
-                    <button class="action-button" onclick="createCustomRoom()" style="width: 100%; margin-top: 15px;">🎪 Create Custom Room</button>
+                    <input type="text" id="roomName" placeholder="My Blackjack Table" maxlength="30">
+                    <button class="action-button" onclick="createCustomRoom()" style="width: 100%; margin-top: 15px;">
+                        🎪 Create Custom Room
+                    </button>
                 </div>
+                
                 <div class="menu-section">
                     <h3>Browse Rooms</h3>
-                    <button class="action-button" onclick="showRoomList()" style="width: 100%;">🏛️ Browse Public Rooms</button>
+                    <button class="action-button" onclick="showRoomList()" style="width: 100%;">
+                        🏛️ Browse Public Rooms
+                    </button>
                 </div>
             </div>
 
@@ -338,13 +926,29 @@
 
             <!-- Game HUD -->
             <div id="gameHUD" class="ui-panel game-hud hidden">
-                <div class="hud-item"><span class="hud-label">🏠 Room:</span><span class="hud-value" id="currentRoomCodeDisplay">-</span></div>
-                <div class="hud-item"><span class="hud-label">🎮 Phase:</span><span class="hud-value" id="phaseText">Waiting</span></div>
-                <div class="hud-item"><span class="hud-label">💰 My Money:</span><span class="hud-value">$<span id="moneyAmount">0</span></span></div>
-                <div class="hud-item"><span class="hud-label">✋ Hand #:</span><span class="hud-value" id="handNumber">0</span></div>
+                <div class="hud-item">
+                    <span class="hud-label">🏠 Room:</span>
+                    <span class="hud-value" id="currentRoomCodeDisplay">-</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">🎮 Phase:</span>
+                    <span class="hud-value" id="phaseText">Waiting</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">💰 My Money:</span>
+                    <span class="hud-value">$<span id="moneyAmount">0</span></span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">✋ Hand #:</span>
+                    <span class="hud-value" id="handNumber">0</span>
+                </div>
                 <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
-                    <button class="action-button" onclick="startGame()" id="startGameBtn" style="width: 100%;">🚀 Start Game</button>
-                    <button class="action-button" onclick="leaveRoom()" style="width: 100%;">🚪 Leave Room</button>
+                    <button class="action-button" onclick="startGame()" id="startGameBtn" style="width: 100%;">
+                        🚀 Start Game
+                    </button>
+                    <button class="action-button" onclick="leaveRoom()" style="width: 100%;">
+                        🚪 Leave Room
+                    </button>
                 </div>
             </div>
 
@@ -352,7 +956,7 @@
             <div id="dealerArea" class="dealer-area hidden">
                 <div class="dealer-title">🎩 DEALER</div>
                 <div class="dealer-hand" id="dealerHand"></div>
-                <div class="dealer-value" id="dealerValue"></div>
+                <div class="dealer-value" id="dealerValue">Hidden</div>
             </div>
 
             <!-- Betting Controls -->
@@ -388,7 +992,7 @@
                 <div id="chatMessages"></div>
                 <div class="chat-input-container">
                     <input type="text" id="chatInput" placeholder="Type message..." 
-                           onkeypress="if(event.key==='Enter') sendChat()" maxlength="200">
+                           onkeypress="handleChatKeyPress(event)" maxlength="200">
                     <button class="action-button" onclick="sendChat()">Send</button>
                 </div>
             </div>
@@ -398,6 +1002,7 @@
         </div>
     </div>
 
+    <!-- Notifications Container -->
     <div id="notificationContainer" class="notification-container"></div>
 
     <script>
@@ -414,6 +1019,9 @@
         let currentRoomCode = null;
         let cameraAnimating = false;
         let isLoadingOrReconnecting = false;
+        let reconnectAttempts = 0;
+        let maxReconnectAttempts = 5;
+        let reconnectDelay = 1000;
         
         let communityCardObjects = [];
         let playerCardObjects3D = {};
@@ -422,16 +1030,53 @@
         let particleSystem;
         
         let chatCollapsed = false;
+        let connectionStatusEl;
 
-        // Logging
+        // Enhanced Logging
         function consoleLog(message, ...params) {
-            console.log(`[BlackjackClient] ${new Date().toLocaleTimeString()} - ${message}`, ...params);
-        }
-        function consoleError(message, ...params) {
-            console.error(`[BlackjackClient ERROR] ${new Date().toLocaleTimeString()} - ${message}`, ...params);
+            const timestamp = new Date().toISOString();
+            console.log(`[BlackjackClient] ${timestamp} - ${message}`, ...params);
         }
 
-        // Three.js Initialization
+        function consoleError(message, ...params) {
+            const timestamp = new Date().toISOString();
+            console.error(`[BlackjackClient ERROR] ${timestamp} - ${message}`, ...params);
+        }
+
+        function consoleWarn(message, ...params) {
+            const timestamp = new Date().toISOString();
+            console.warn(`[BlackjackClient WARN] ${timestamp} - ${message}`, ...params);
+        }
+
+        // Connection Status Management
+        function updateConnectionStatus(status, message = '') {
+            if (!connectionStatusEl) {
+                connectionStatusEl = document.getElementById('connectionStatus');
+            }
+            
+            connectionStatusEl.className = `connection-status ${status}`;
+            
+            switch(status) {
+                case 'connected':
+                    connectionStatusEl.textContent = '🟢 Connected';
+                    break;
+                case 'connecting':
+                    connectionStatusEl.textContent = '🟡 Connecting...';
+                    break;
+                case 'disconnected':
+                    connectionStatusEl.textContent = '🔴 Disconnected';
+                    break;
+                case 'reconnecting':
+                    connectionStatusEl.textContent = `🟡 Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})`;
+                    break;
+            }
+            
+            if (message) {
+                connectionStatusEl.title = message;
+            }
+        }
+
+        // Enhanced Three.js Initialization
         function initThreeJS() {
             consoleLog("initThreeJS START");
             try {
@@ -460,79 +1105,208 @@
                 addMouseControls();
                 createParticleSystem();
                 animate();
+                
                 consoleLog("initThreeJS COMPLETE");
+                return true;
             } catch (e) {
                 consoleError("Error during initThreeJS:", e);
                 showNotification("3D Engine Error. Please refresh.", "error", 10000);
+                return false;
             }
         }
         
         function setupLighting() {
-            const ambientLight = new THREE.AmbientLight(0x606060, 1.0);
+            // Enhanced ambient lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.8);
             scene.add(ambientLight);
             
-            const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
-            mainLight.position.set(10, 20, 10);
+            // Main directional light with better shadows
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            mainLight.position.set(15, 25, 15);
             mainLight.castShadow = true;
-            mainLight.shadow.mapSize.width = 1024;
-            mainLight.shadow.mapSize.height = 1024;
+            mainLight.shadow.mapSize.width = 2048;
+            mainLight.shadow.mapSize.height = 2048;
             mainLight.shadow.camera.near = 0.5;
-            mainLight.shadow.camera.far = 50;
-            mainLight.shadow.camera.left = -20;
-            mainLight.shadow.camera.right = 20;
-            mainLight.shadow.camera.top = 20;
-            mainLight.shadow.camera.bottom = -20;
+            mainLight.shadow.camera.far = 100;
+            mainLight.shadow.camera.left = -25;
+            mainLight.shadow.camera.right = 25;
+            mainLight.shadow.camera.top = 25;
+            mainLight.shadow.camera.bottom = -25;
+            mainLight.shadow.bias = -0.001;
             scene.add(mainLight);
             
-            const tableLight = new THREE.SpotLight(0xffd700, 1.5, 30, Math.PI / 4, 0.3, 1.5);
-            tableLight.position.set(0, 10, 0);
+            // Spotlight for dramatic table lighting
+            const tableLight = new THREE.SpotLight(0xffd700, 2.0, 35, Math.PI / 3, 0.2, 1.8);
+            tableLight.position.set(0, 15, 0);
             tableLight.target.position.set(0, 0, 0);
             tableLight.castShadow = true;
+            tableLight.shadow.mapSize.width = 1024;
+            tableLight.shadow.mapSize.height = 1024;
             scene.add(tableLight);
             scene.add(tableLight.target);
+            
+            // Rim lighting for atmosphere
+            const rimLight1 = new THREE.DirectionalLight(0x4169e1, 0.5);
+            rimLight1.position.set(-10, 5, -10);
+            scene.add(rimLight1);
+            
+            const rimLight2 = new THREE.DirectionalLight(0xdc143c, 0.3);
+            rimLight2.position.set(10, 5, 10);
+            scene.add(rimLight2);
         }
 
         function createCasinoEnvironment() {
-            const floorGeometry = new THREE.PlaneGeometry(100, 100);
-            const floorMaterial = new THREE.MeshLambertMaterial({ color: 0x2a0a0a, transparent: true, opacity: 0.8 });
+            // Enhanced floor with pattern
+            const floorGeometry = new THREE.PlaneGeometry(120, 120);
+            const floorTexture = createFloorTexture();
+            const floorMaterial = new THREE.MeshLambertMaterial({ 
+                map: floorTexture, 
+                transparent: true, 
+                opacity: 0.9 
+            });
             const floor = new THREE.Mesh(floorGeometry, floorMaterial);
             floor.rotation.x = -Math.PI / 2;
-            floor.position.y = -2;
+            floor.position.y = -2.5;
             floor.receiveShadow = true;
             scene.add(floor);
             
-            const backgroundSphere = new THREE.SphereGeometry(100, 32, 32);
-            const backgroundMaterial = new THREE.MeshBasicMaterial({ color: 0x030f0a, side: THREE.BackSide, fog: false });
-            const skybox = new THREE.Mesh(backgroundSphere, backgroundMaterial);
+            // Enhanced skybox with gradient
+            const skyboxGeometry = new THREE.SphereGeometry(150, 32, 32);
+            const skyboxTexture = createSkyboxTexture();
+            const skyboxMaterial = new THREE.MeshBasicMaterial({ 
+                map: skyboxTexture, 
+                side: THREE.BackSide, 
+                fog: false 
+            });
+            const skybox = new THREE.Mesh(skyboxGeometry, skyboxMaterial);
             scene.add(skybox);
+            
+            // Add atmospheric elements
+            createAtmosphericLights();
+        }
+
+        function createFloorTexture() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 512;
+            canvas.height = 512;
+            
+            // Create carpet-like pattern
+            const gradient = ctx.createRadialGradient(256, 256, 50, 256, 256, 300);
+            gradient.addColorStop(0, '#2a0a0a');
+            gradient.addColorStop(0.7, '#1a0505');
+            gradient.addColorStop(1, '#0f0202');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 512, 512);
+            
+            // Add subtle pattern
+            ctx.strokeStyle = 'rgba(100, 50, 50, 0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 512; i += 32) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, 512);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(512, i);
+                ctx.stroke();
+            }
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(4, 4);
+            return texture;
+        }
+
+        function createSkyboxTexture() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 1024;
+            canvas.height = 512;
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+            gradient.addColorStop(0, '#051a11');
+            gradient.addColorStop(0.5, '#0a2a1f');
+            gradient.addColorStop(1, '#030f0a');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1024, 512);
+            
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createAtmosphericLights() {
+            // Create floating light orbs
+            for (let i = 0; i < 8; i++) {
+                const orb = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.1, 8, 8),
+                    new THREE.MeshBasicMaterial({ 
+                        color: 0xffd700, 
+                        transparent: true, 
+                        opacity: 0.6 
+                    })
+                );
+                
+                const angle = (i / 8) * Math.PI * 2;
+                orb.position.set(
+                    Math.cos(angle) * 12,
+                    8 + Math.sin(i) * 2,
+                    Math.sin(angle) * 12
+                );
+                
+                scene.add(orb);
+                
+                // Add point light for each orb
+                const light = new THREE.PointLight(0xffd700, 0.3, 10);
+                light.position.copy(orb.position);
+                scene.add(light);
+            }
         }
 
         function createBlackjackTable() {
             tableGroup = new THREE.Group();
             
-            // Main table
-            const tableGeometry = new THREE.CylinderGeometry(6, 6, 0.4, 64);
-            const tableMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513, shininess: 30 });
+            // Enhanced main table with better materials
+            const tableGeometry = new THREE.CylinderGeometry(6.2, 6.2, 0.5, 64);
+            const woodTexture = createWoodTexture();
+            const tableMaterial = new THREE.MeshPhongMaterial({ 
+                map: woodTexture,
+                shininess: 40,
+                bumpMap: woodTexture,
+                bumpScale: 0.02
+            });
             blackjackTable = new THREE.Mesh(tableGeometry, tableMaterial);
-            blackjackTable.position.y = -0.2;
+            blackjackTable.position.y = -0.25;
             blackjackTable.receiveShadow = true;
             blackjackTable.castShadow = true;
             tableGroup.add(blackjackTable);
             
-            // Table edge
-            const edgeGeometry = new THREE.TorusGeometry(6, 0.3, 16, 64);
-            const edgeMaterial = new THREE.MeshPhongMaterial({ color: 0x654321, shininess: 50 });
+            // Enhanced table edge with brass-like material
+            const edgeGeometry = new THREE.TorusGeometry(6.2, 0.35, 16, 64);
+            const edgeMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xb8860b, 
+                shininess: 80,
+                reflectivity: 0.3
+            });
             const tableEdge = new THREE.Mesh(edgeGeometry, edgeMaterial);
             tableEdge.rotation.x = Math.PI / 2;
-            tableEdge.position.y = -0.05;
+            tableEdge.position.y = 0;
             tableEdge.castShadow = true;
             tableGroup.add(tableEdge);
             
-            // Felt surface
-            const feltGeometry = new THREE.CylinderGeometry(5.5, 5.5, 0.05, 64);
-            const feltMaterial = new THREE.MeshLambertMaterial({ color: 0x0d4d2a });
+            // Enhanced felt surface with texture
+            const feltGeometry = new THREE.CylinderGeometry(5.8, 5.8, 0.08, 64);
+            const feltTexture = createFeltTexture();
+            const feltMaterial = new THREE.MeshLambertMaterial({ 
+                map: feltTexture,
+                bumpMap: feltTexture,
+                bumpScale: 0.005
+            });
             const tableFelt = new THREE.Mesh(feltGeometry, feltMaterial);
-            tableFelt.position.y = 0.025;
+            tableFelt.position.y = 0.04;
             tableFelt.receiveShadow = true;
             tableGroup.add(tableFelt);
             
@@ -541,29 +1315,104 @@
             createPlayerPositions();
         }
 
+        function createWoodTexture() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 256;
+            
+            // Create wood grain pattern
+            const gradient = ctx.createLinearGradient(0, 0, 0, 256);
+            gradient.addColorStop(0, '#8B4513');
+            gradient.addColorStop(0.3, '#A0522D');
+            gradient.addColorStop(0.7, '#8B4513');
+            gradient.addColorStop(1, '#654321');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 256, 256);
+            
+            // Add wood grain lines
+            ctx.strokeStyle = 'rgba(101, 67, 33, 0.5)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 256; i += 8) {
+                ctx.beginPath();
+                ctx.moveTo(0, i + Math.sin(i * 0.1) * 3);
+                ctx.lineTo(256, i + Math.sin(i * 0.1) * 3);
+                ctx.stroke();
+            }
+            
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createFeltTexture() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 256;
+            
+            ctx.fillStyle = '#0d4d2a';
+            ctx.fillRect(0, 0, 256, 256);
+            
+            // Add felt texture noise
+            const imageData = ctx.getImageData(0, 0, 256, 256);
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                const noise = (Math.random() - 0.5) * 30;
+                data[i] = Math.max(0, Math.min(255, data[i] + noise));     // R
+                data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise)); // G
+                data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise)); // B
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            return new THREE.CanvasTexture(canvas);
+        }
+
         function createTableMarkings() {
-            // Dealer area marking
-            const dealerAreaGeometry = new THREE.RingGeometry(1, 1.05, 32);
-            const dealerAreaMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.5 });
+            // Enhanced dealer area marking
+            const dealerAreaGeometry = new THREE.RingGeometry(1.2, 1.3, 32);
+            const dealerAreaMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xffd700, 
+                transparent: true, 
+                opacity: 0.7 
+            });
             const dealerArea = new THREE.Mesh(dealerAreaGeometry, dealerAreaMaterial);
             dealerArea.rotation.x = -Math.PI / 2;
-            dealerArea.position.set(0, 0.03, -3);
+            dealerArea.position.set(0, 0.05, -3.5);
             tableGroup.add(dealerArea);
+            
+            // Add betting circles for each player position
+            playerPositions.forEach((pos, index) => {
+                const bettingCircle = new THREE.Mesh(
+                    new THREE.RingGeometry(0.4, 0.45, 24),
+                    new THREE.MeshBasicMaterial({ 
+                        color: 0xffd700, 
+                        transparent: true, 
+                        opacity: 0.5 
+                    })
+                );
+                bettingCircle.rotation.x = -Math.PI / 2;
+                bettingCircle.position.set(pos.chipX, 0.05, pos.chipZ);
+                tableGroup.add(bettingCircle);
+            });
         }
 
         function createPlayerPositions() {
             playerPositions = [];
-            const radius = 4;
+            const radius = 4.5;
+            const angleStep = Math.PI / 7;
+            const startAngle = Math.PI + angleStep;
+            
             for (let i = 0; i < 6; i++) {
-                const angle = (i / 6) * Math.PI + Math.PI / 6;
+                const angle = startAngle + i * angleStep;
                 playerPositions.push({
                     angle: angle,
                     x: Math.cos(angle) * radius,
                     z: Math.sin(angle) * radius,
-                    cardXOffset: -0.3,
-                    cardSpacing: 0.6,
-                    chipX: Math.cos(angle) * (radius - 0.8),
-                    chipZ: Math.sin(angle) * (radius - 0.8)
+                    cardXOffset: -0.4,
+                    cardSpacing: 0.7,
+                    chipX: Math.cos(angle) * (radius - 1.0),
+                    chipZ: Math.sin(angle) * (radius - 1.0)
                 });
             }
         }
@@ -578,53 +1427,91 @@
         function createCardTexture(rank, suitName, isBack = false) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 180;
-            canvas.height = 260;
-            
-            ctx.fillStyle = isBack ? '#2E4BC6' : '#FFFFFF';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = isBack ? '#FFFFFF' : '#AAAAAA';
-            ctx.lineWidth = 8;
-            ctx.strokeRect(0, 0, canvas.width, canvas.height);
+            canvas.width = 200;
+            canvas.height = 280;
             
             if (!isBack) {
+                // Card front
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Card border
+                ctx.strokeStyle = '#DDDDDD';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+                
+                // Inner border
+                ctx.strokeStyle = '#CCCCCC';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
+                
                 const suitSymbols = { 'hearts': '♥', 'diamonds': '♦', 'clubs': '♣', 'spades': '♠' };
-                const suitColor = (suitName === 'hearts' || suitName === 'diamonds') ? '#DD0000' : '#000000';
+                const suitColor = (suitName === 'hearts' || suitName === 'diamonds') ? '#DC143C' : '#000000';
+                
                 ctx.fillStyle = suitColor;
-                ctx.font = 'bold 48px Arial';
-                ctx.textAlign = 'center';
+                ctx.font = 'bold 32px Arial';
+                ctx.textAlign = 'left';
                 
                 // Top left corner
-                ctx.fillText(rank, 30, 50);
-                ctx.fillText(suitSymbols[suitName] || '', 30, 100);
+                ctx.fillText(rank, 15, 40);
+                ctx.font = 'bold 28px Arial';
+                ctx.fillText(suitSymbols[suitName] || '', 15, 70);
                 
                 // Bottom right corner (rotated)
                 ctx.save();
-                ctx.translate(canvas.width - 30, canvas.height - 50);
+                ctx.translate(canvas.width - 15, canvas.height - 40);
                 ctx.rotate(Math.PI);
+                ctx.font = 'bold 32px Arial';
                 ctx.fillText(rank, 0, 0);
+                ctx.font = 'bold 28px Arial';
+                ctx.fillText(suitSymbols[suitName] || '', 0, 30);
                 ctx.restore();
                 
-                ctx.save();
-                ctx.translate(canvas.width - 30, canvas.height - 100);
-                ctx.rotate(Math.PI);
-                ctx.fillText(suitSymbols[suitName] || '', 0, 0);
-                ctx.restore();
-                
-                // Center
-                ctx.font = 'bold 96px Arial';
+                // Center symbol
+                ctx.font = 'bold 80px Arial';
+                ctx.textAlign = 'center';
                 ctx.fillText(suitSymbols[suitName] || '', canvas.width / 2, canvas.height / 2 + 20);
+                
             } else {
-                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                // Card back
+                ctx.fillStyle = '#1E3A8A';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Border
+                ctx.strokeStyle = '#FBBF24';
+                ctx.lineWidth = 6;
+                ctx.strokeRect(3, 3, canvas.width - 6, canvas.height - 6);
+                
+                // Inner decorative border
+                ctx.strokeStyle = '#FDE047';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(12, 12, canvas.width - 24, canvas.height - 24);
+                
+                // Center design
+                ctx.fillStyle = 'rgba(251, 191, 36, 0.3)';
                 ctx.beginPath();
-                ctx.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2);
+                ctx.arc(canvas.width / 2, canvas.height / 2, 60, 0, Math.PI * 2);
                 ctx.fill();
                 
-                ctx.font = 'bold 20px Orbitron';
-                ctx.fillStyle = '#FFFFFF';
+                ctx.fillStyle = '#FBBF24';
+                ctx.font = 'bold 18px Orbitron';
                 ctx.textAlign = 'center';
-                ctx.fillText('ROYAL', canvas.width/2, canvas.height/2 - 10);
-                ctx.fillText('BLACKJACK', canvas.width/2, canvas.height/2 + 20);
+                ctx.fillText('ROYAL', canvas.width/2, canvas.height/2 - 15);
+                ctx.fillText('BLACKJACK', canvas.width/2, canvas.height/2 + 5);
+                ctx.fillText('3D', canvas.width/2, canvas.height/2 + 25);
+                
+                // Corner decorations
+                const corners = [
+                    [30, 30], [canvas.width - 30, 30], 
+                    [30, canvas.height - 30], [canvas.width - 30, canvas.height - 30]
+                ];
+                
+                corners.forEach(([x, y]) => {
+                    ctx.fillStyle = '#FDE047';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                });
             }
             
             const texture = new THREE.CanvasTexture(canvas);
@@ -633,42 +1520,114 @@
         }
 
         function createChipMaterials() {
-            chipMaterials = {
-                10: new THREE.MeshPhongMaterial({ color: 0xFFFFFF, shininess: 50 }),
-                25: new THREE.MeshPhongMaterial({ color: 0x00AA00, shininess: 50 }),
-                50: new THREE.MeshPhongMaterial({ color: 0xFF0000, shininess: 50 }),
-                100: new THREE.MeshPhongMaterial({ color: 0x000000, shininess: 50 }),
-                500: new THREE.MeshPhongMaterial({ color: 0x800080, shininess: 50 }),
-                'default': new THREE.MeshPhongMaterial({ color: 0xFFAA00, shininess: 50 })
-            };
+            const denominations = [10, 25, 50, 100, 500];
+            const colors = [0xFFFFFF, 0x00AA00, 0xFF4444, 0x222222, 0x800080];
+            
+            denominations.forEach((denom, index) => {
+                const chipTexture = createChipTexture(denom, colors[index]);
+                chipMaterials[denom] = new THREE.MeshPhongMaterial({ 
+                    map: chipTexture,
+                    shininess: 60,
+                    reflectivity: 0.2
+                });
+            });
+            
+            chipMaterials['default'] = new THREE.MeshPhongMaterial({ 
+                color: 0xFFAA00, 
+                shininess: 50 
+            });
+        }
+
+        function createChipTexture(value, baseColor) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 64;
+            canvas.height = 64;
+            
+            const centerX = 32;
+            const centerY = 32;
+            const radius = 28;
+            
+            // Outer ring
+            ctx.fillStyle = `#${baseColor.toString(16).padStart(6, '0')}`;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Inner circle
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius - 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Center circle
+            ctx.fillStyle = `#${baseColor.toString(16).padStart(6, '0')}`;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius - 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Value text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`$${value}`, centerX, centerY + 4);
+            
+            // Edge pattern
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(
+                    centerX + Math.cos(angle) * (radius - 2),
+                    centerY + Math.sin(angle) * (radius - 2)
+                );
+                ctx.lineTo(
+                    centerX + Math.cos(angle) * (radius - 8),
+                    centerY + Math.sin(angle) * (radius - 8)
+                );
+                ctx.stroke();
+            }
+            
+            return new THREE.CanvasTexture(canvas);
         }
 
         function createCard3D(cardData, position, rotationY = 0, faceUp = true) {
             const cardGroup = new THREE.Group();
-            const cardWidth = 0.9, cardHeight = 1.3, cardDepth = 0.02;
+            const cardWidth = 1.0, cardHeight = 1.4, cardDepth = 0.02;
+            
+            // Enhanced card geometry with rounded edges
             const cardGeometry = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
+            
+            // Apply slight rounding to edges
+            const edges = new THREE.EdgesGeometry(cardGeometry);
+            const edgeMaterial = new THREE.LineBasicMaterial({ color: 0xcccccc, opacity: 0.3, transparent: true });
+            const edgeLines = new THREE.LineSegments(edges, edgeMaterial);
+            cardGroup.add(edgeLines);
             
             const frontTexture = faceUp ? createCardTexture(cardData.rank, cardData.suit) : createCardTexture("?", "?", true);
             const backTexture = createCardTexture("?", "?", true);
-            const sideMaterial = new THREE.MeshPhongMaterial({color: 0xcccccc, shininess: 5});
+            const sideMaterial = new THREE.MeshPhongMaterial({color: 0xf0f0f0, shininess: 10});
             
             const materials = [
                 sideMaterial, sideMaterial, sideMaterial, sideMaterial,
-                new THREE.MeshPhongMaterial({ map: frontTexture, shininess: faceUp ? 10 : 30 }),
-                new THREE.MeshPhongMaterial({ map: backTexture, shininess: 30 })
+                new THREE.MeshPhongMaterial({ map: frontTexture, shininess: faceUp ? 20 : 40 }),
+                new THREE.MeshPhongMaterial({ map: backTexture, shininess: 40 })
             ];
             
             const cardMesh = new THREE.Mesh(cardGeometry, materials);
             cardMesh.castShadow = true;
             cardMesh.receiveShadow = true;
             cardGroup.add(cardMesh);
+            
             cardGroup.position.copy(position);
             cardGroup.rotation.y = rotationY;
             cardGroup.userData = { 
                 id: cardData.id, 
                 suit: cardData.suit, 
                 rank: cardData.rank, 
-                faceUp: faceUp 
+                faceUp: faceUp,
+                originalPosition: position.clone()
             };
             
             return cardGroup;
@@ -676,23 +1635,35 @@
 
         function createChip3D(value, position, stackCount = 1) {
             const chipGroup = new THREE.Group();
-            const chipRadius = 0.15, chipHeight = 0.05;
+            const chipRadius = 0.18, chipHeight = 0.06;
             const denomination = getChipDenomination(value);
             const chipMaterial = chipMaterials[denomination] || chipMaterials['default'];
             
-            for (let i = 0; i < stackCount; i++) {
-                const chip = new THREE.Mesh(
-                    new THREE.CylinderGeometry(chipRadius, chipRadius, chipHeight, 16), 
-                    chipMaterial
-                );
-                chip.position.y = i * (chipHeight + 0.005) + chipHeight/2;
+            for (let i = 0; i < Math.min(stackCount, 10); i++) {
+                const chipGeometry = new THREE.CylinderGeometry(chipRadius, chipRadius, chipHeight, 24);
+                const chip = new THREE.Mesh(chipGeometry, chipMaterial);
+                chip.position.y = i * (chipHeight + 0.002) + chipHeight/2;
                 chip.castShadow = true;
                 chip.receiveShadow = true;
+                
+                // Add subtle rotation for realism
+                chip.rotation.y = Math.random() * Math.PI * 2;
+                
                 chipGroup.add(chip);
             }
             
             chipGroup.position.copy(position);
             chipGroup.userData = { value: value, count: stackCount };
+            
+            // Add gentle floating animation
+            gsap.to(chipGroup.position, {
+                y: position.y + 0.05,
+                duration: 2 + Math.random() * 2,
+                yoyo: true,
+                repeat: -1,
+                ease: "sine.inOut"
+            });
+            
             return chipGroup;
         }
 
@@ -705,20 +1676,35 @@
         }
 
         function createParticleSystem() {
-            const particleCount = 200;
+            const particleCount = 300;
             const particles = new THREE.BufferGeometry();
             const particlePositions = new Float32Array(particleCount * 3);
+            const particleColors = new Float32Array(particleCount * 3);
             
-            for (let i = 0; i < particleCount * 3; i += 3) {
-                particlePositions[i] = (Math.random() - 0.5) * 60;
-                particlePositions[i + 1] = Math.random() * 25 + 2;
-                particlePositions[i + 2] = (Math.random() - 0.5) * 60;
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                particlePositions[i3] = (Math.random() - 0.5) * 80;
+                particlePositions[i3 + 1] = Math.random() * 30 + 5;
+                particlePositions[i3 + 2] = (Math.random() - 0.5) * 80;
+                
+                // Varying particle colors
+                const color = new THREE.Color();
+                color.setHSL(0.15, 0.8, 0.3 + Math.random() * 0.4);
+                particleColors[i3] = color.r;
+                particleColors[i3 + 1] = color.g;
+                particleColors[i3 + 2] = color.b;
             }
             
             particles.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+            particles.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+            
             const particleMaterial = new THREE.PointsMaterial({
-                color: 0xFFD700, size: 0.08, transparent: true, opacity: 0.2, 
-                blending: THREE.AdditiveBlending, fog: false
+                size: 0.1, 
+                transparent: true, 
+                opacity: 0.4, 
+                blending: THREE.AdditiveBlending, 
+                fog: false,
+                vertexColors: true
             });
             
             particleSystem = new THREE.Points(particles, particleMaterial);
@@ -726,14 +1712,17 @@
         }
 
         function addMouseControls() {
-            let mouseDown = false, lastMouseX = 0;
+            let mouseDown = false, lastMouseX = 0, lastMouseY = 0;
+            let touchStartX = 0, touchStartY = 0;
             const menuPanel = document.getElementById('menuPanel');
             const canvasEl = document.getElementById('canvas');
 
+            // Mouse controls
             canvasEl.addEventListener('mousedown', (event) => {
                 if (menuPanel.classList.contains('hidden')) {
                     mouseDown = true;
                     lastMouseX = event.clientX;
+                    lastMouseY = event.clientY;
                 }
             });
             
@@ -741,16 +1730,53 @@
             
             document.addEventListener('mousemove', (event) => {
                 if (mouseDown && menuPanel.classList.contains('hidden') && !cameraAnimating) {
-                    camera.userData.targetRotationY -= (event.clientX - lastMouseX) * 0.005;
+                    const deltaX = event.clientX - lastMouseX;
+                    const deltaY = event.clientY - lastMouseY;
+                    
+                    camera.userData.targetRotationY -= deltaX * 0.005;
+                    
+                    // Vertical camera movement
+                    camera.userData.targetHeight = camera.userData.targetHeight || 12;
+                    camera.userData.targetHeight += deltaY * 0.02;
+                    camera.userData.targetHeight = Math.max(5, Math.min(20, camera.userData.targetHeight));
+                    
                     lastMouseX = event.clientX;
+                    lastMouseY = event.clientY;
+                }
+            });
+
+            // Touch controls for mobile
+            canvasEl.addEventListener('touchstart', (event) => {
+                if (menuPanel.classList.contains('hidden') && event.touches.length === 1) {
+                    touchStartX = event.touches[0].clientX;
+                    touchStartY = event.touches[0].clientY;
+                    event.preventDefault();
+                }
+            });
+
+            canvasEl.addEventListener('touchmove', (event) => {
+                if (menuPanel.classList.contains('hidden') && event.touches.length === 1 && !cameraAnimating) {
+                    const deltaX = event.touches[0].clientX - touchStartX;
+                    const deltaY = event.touches[0].clientY - touchStartY;
+                    
+                    camera.userData.targetRotationY -= deltaX * 0.01;
+                    
+                    camera.userData.targetHeight = camera.userData.targetHeight || 12;
+                    camera.userData.targetHeight += deltaY * 0.05;
+                    camera.userData.targetHeight = Math.max(5, Math.min(20, camera.userData.targetHeight));
+                    
+                    touchStartX = event.touches[0].clientX;
+                    touchStartY = event.touches[0].clientY;
+                    event.preventDefault();
                 }
             });
             
+            // Enhanced wheel controls with zoom limits
             canvasEl.addEventListener('wheel', (event) => {
                 if (menuPanel.classList.contains('hidden') && !cameraAnimating) {
                     event.preventDefault();
-                    camera.userData.targetDistance += event.deltaY * 0.01;
-                    camera.userData.targetDistance = Math.max(8, Math.min(25, camera.userData.targetDistance));
+                    camera.userData.targetDistance += event.deltaY * 0.02;
+                    camera.userData.targetDistance = Math.max(6, Math.min(30, camera.userData.targetDistance));
                 }
             });
         }
@@ -758,27 +1784,61 @@
         function animate() {
             requestAnimationFrame(animate);
             
+            const currentTime = Date.now() * 0.001;
+            
             if (!cameraAnimating) {
-                camera.position.x = THREE.MathUtils.lerp(camera.position.x, Math.sin(camera.userData.targetRotationY) * camera.userData.targetDistance, 0.1);
-                camera.position.z = THREE.MathUtils.lerp(camera.position.z, Math.cos(camera.userData.targetRotationY) * camera.userData.targetDistance, 0.1);
-                camera.position.y = THREE.MathUtils.lerp(camera.position.y, 12 + (camera.userData.targetDistance - 15) * 0.2, 0.1);
+                // Smooth camera interpolation
+                const lerpFactor = 0.08;
+                
+                const targetHeight = camera.userData.targetHeight || 12;
+                camera.position.x = THREE.MathUtils.lerp(
+                    camera.position.x, 
+                    Math.sin(camera.userData.targetRotationY) * camera.userData.targetDistance, 
+                    lerpFactor
+                );
+                camera.position.z = THREE.MathUtils.lerp(
+                    camera.position.z, 
+                    Math.cos(camera.userData.targetRotationY) * camera.userData.targetDistance, 
+                    lerpFactor
+                );
+                camera.position.y = THREE.MathUtils.lerp(
+                    camera.position.y, 
+                    targetHeight + (camera.userData.targetDistance - 15) * 0.15, 
+                    lerpFactor
+                );
                 camera.lookAt(0, 0, 0);
             }
             
-            if (tableGroup) tableGroup.rotation.y += 0.0003;
-            if (particleSystem) particleSystem.rotation.y += 0.0005;
+            // Enhanced table rotation
+            if (tableGroup) {
+                tableGroup.rotation.y += 0.0002;
+            }
             
-            // Animate cards
+            // Enhanced particle animation
+            if (particleSystem) {
+                particleSystem.rotation.y += 0.0003;
+                const positions = particleSystem.geometry.attributes.position.array;
+                for (let i = 1; i < positions.length; i += 3) {
+                    positions[i] += Math.sin(currentTime + i) * 0.002;
+                }
+                particleSystem.geometry.attributes.position.needsUpdate = true;
+            }
+            
+            // Enhanced card animations
             dealerCardObjects3D.forEach((cardMesh, index) => {
                 if (cardMesh) {
-                    cardMesh.position.y = 0.05 + Math.sin(Date.now() * 0.001 + index * 0.5) * 0.02;
+                    const baseY = cardMesh.userData.originalPosition ? cardMesh.userData.originalPosition.y : 0.05;
+                    cardMesh.position.y = baseY + Math.sin(currentTime * 2 + index * 0.8) * 0.015;
+                    cardMesh.rotation.z = Math.sin(currentTime * 1.5 + index) * 0.02;
                 }
             });
             
             Object.values(playerCardObjects3D).forEach(playerCards => {
                 playerCards.forEach((cardMesh, index) => {
                     if (cardMesh) {
-                        cardMesh.position.y = 0.05 + Math.sin(Date.now() * 0.001 + index * 0.5) * 0.02;
+                        const baseY = cardMesh.userData.originalPosition ? cardMesh.userData.originalPosition.y : 0.05;
+                        cardMesh.position.y = baseY + Math.sin(currentTime * 2 + index * 0.8) * 0.015;
+                        cardMesh.rotation.z = Math.sin(currentTime * 1.5 + index) * 0.02;
                     }
                 });
             });
@@ -786,31 +1846,46 @@
             renderer.render(scene, camera);
         }
 
-        // 3D Object Management
+        // Enhanced 3D Object Management
         function updateTableVisuals() {
             consoleLog("updateTableVisuals START");
             if (!currentGameState) return;
             
-            const cardBaseY = 0.05;
+            const cardBaseY = 0.08;
 
-            // Update dealer cards
+            // Update dealer cards with enhanced animations
             clearDealerCards();
             if (currentGameState.dealer_hand && currentGameState.dealer_hand.cards) {
                 currentGameState.dealer_hand.cards.forEach((cardData, index) => {
-                    const position = new THREE.Vector3(-1.5 + index * 0.8, cardBaseY, -3);
+                    const position = new THREE.Vector3(-2.0 + index * 1.0, cardBaseY, -3.8);
                     const faceUp = cardData.suit !== 'back';
                     const cardObj = createCard3D(cardData, position, 0, faceUp);
                     scene.add(cardObj);
                     dealerCardObjects3D.push(cardObj);
                     
-                    gsap.from(cardObj.scale, { 
-                        duration: 0.5, x: 0, y: 0, z: 0, 
-                        ease: "back.out(1.7)", delay: index * 0.1 
+                    // Enhanced card dealing animation
+                    gsap.fromTo(cardObj.position, 
+                        { x: 0, y: cardBaseY + 5, z: 0 },
+                        { 
+                            x: position.x, 
+                            y: position.y, 
+                            z: position.z,
+                            duration: 0.8, 
+                            ease: "back.out(1.2)", 
+                            delay: index * 0.2 
+                        }
+                    );
+                    
+                    gsap.from(cardObj.rotation, {
+                        x: Math.PI * 2,
+                        duration: 0.8,
+                        ease: "power2.out",
+                        delay: index * 0.2
                     });
                 });
             }
 
-            // Update player cards
+            // Update player cards with enhanced positioning and animations
             Object.values(currentGameState.players).forEach((player, pIndex) => {
                 if (pIndex >= playerPositions.length) return;
                 
@@ -821,10 +1896,11 @@
                     playerCardObjects3D[player.id] = [];
                 }
 
+                let cardIndex = 0;
                 player.hands.forEach((hand, handIndex) => {
-                    hand.cards.forEach((cardData, cardIndex) => {
+                    hand.cards.forEach((cardData, cardInHandIndex) => {
                         const cardPosition = new THREE.Vector3(
-                            pos3D.x + pos3D.cardXOffset + (handIndex * 2 + cardIndex) * pos3D.cardSpacing,
+                            pos3D.x + pos3D.cardXOffset + (handIndex * 2.5 + cardInHandIndex) * pos3D.cardSpacing,
                             cardBaseY,
                             pos3D.z
                         );
@@ -833,35 +1909,78 @@
                         scene.add(cardObj);
                         playerCardObjects3D[player.id].push(cardObj);
                         
-                        const dealDelay = pIndex * 0.1 + cardIndex * 0.05;
-                        gsap.from(cardObj.position, { 
-                            duration: 0.6, x: 0, y: cardBaseY + 3, z: 0, 
-                            ease: "circ.out", delay: dealDelay 
-                        });
+                        const totalDelay = pIndex * 0.15 + cardIndex * 0.1;
+                        
+                        // Enhanced dealing animation
+                        gsap.fromTo(cardObj.position, 
+                            { x: 0, y: cardBaseY + 4, z: 0 },
+                            { 
+                                x: cardPosition.x, 
+                                y: cardPosition.y, 
+                                z: cardPosition.z,
+                                duration: 0.7, 
+                                ease: "power2.out", 
+                                delay: totalDelay 
+                            }
+                        );
+                        
+                        gsap.fromTo(cardObj.rotation, 
+                            { x: Math.PI, y: cardRotationY },
+                            {
+                                x: 0,
+                                duration: 0.7,
+                                ease: "power2.out",
+                                delay: totalDelay
+                            }
+                        );
+                        
+                        cardIndex++;
                     });
                 });
 
-                // Add bet chips
-                if (hand.bet_amount > 0) {
-                    const chipPosition = new THREE.Vector3(pos3D.chipX, 0, pos3D.chipZ);
-                    const stackCount = Math.min(Math.ceil(hand.bet_amount / getChipDenomination(hand.bet_amount)), 10);
-                    const chipStack = createChip3D(hand.bet_amount, chipPosition, stackCount);
-                    scene.add(chipStack);
-                    chipStackObjects[`player_bet_${player.id}`] = chipStack;
-                }
+                // Add enhanced bet chips with better stacking
+                player.hands.forEach((hand, handIndex) => {
+                    if (hand.bet_amount > 0) {
+                        const chipPosition = new THREE.Vector3(
+                            pos3D.chipX + handIndex * 0.8, 
+                            0.02, 
+                            pos3D.chipZ
+                        );
+                        const stackCount = Math.min(Math.ceil(hand.bet_amount / getChipDenomination(hand.bet_amount)), 8);
+                        const chipStack = createChip3D(hand.bet_amount, chipPosition, stackCount);
+                        scene.add(chipStack);
+                        chipStackObjects[`player_bet_${player.id}_${handIndex}`] = chipStack;
+                        
+                        // Chip placement animation
+                        gsap.from(chipStack.scale, {
+                            x: 0, y: 0, z: 0,
+                            duration: 0.5,
+                            ease: "back.out(1.7)",
+                            delay: pIndex * 0.1
+                        });
+                    }
+                });
             });
             
             consoleLog("updateTableVisuals COMPLETE");
         }
 
         function clearDealerCards() {
-            dealerCardObjects3D.forEach(obj => scene.remove(obj));
+            dealerCardObjects3D.forEach(obj => {
+                if (obj.parent) {
+                    obj.parent.remove(obj);
+                }
+            });
             dealerCardObjects3D = [];
         }
 
         function clearPlayerCards(playerId) {
             if (playerCardObjects3D[playerId]) {
-                playerCardObjects3D[playerId].forEach(obj => scene.remove(obj));
+                playerCardObjects3D[playerId].forEach(obj => {
+                    if (obj.parent) {
+                        obj.parent.remove(obj);
+                    }
+                });
                 playerCardObjects3D[playerId] = [];
             }
         }
@@ -869,20 +1988,26 @@
         function clearAll3DObjects() {
             clearDealerCards();
             Object.keys(playerCardObjects3D).forEach(playerId => clearPlayerCards(playerId));
-            Object.values(chipStackObjects).forEach(obj => scene.remove(obj));
+            Object.values(chipStackObjects).forEach(obj => {
+                if (obj.parent) {
+                    obj.parent.remove(obj);
+                }
+            });
             chipStackObjects = {};
         }
 
-        // WebSocket Connection
+        // Enhanced WebSocket Connection with Reconnection Logic
         function connectWebSocket() {
             consoleLog("connectWebSocket START");
+            
             if (isLoadingOrReconnecting && ws && ws.readyState === WebSocket.CONNECTING) {
+                consoleLog("Already connecting, skipping duplicate connection attempt");
                 return;
             }
             
             isLoadingOrReconnecting = true;
-            showLoadingScreen('Connecting to Royal Blackjack 3D...');
-
+            updateConnectionStatus('connecting');
+            
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/ws`;
             
@@ -893,152 +2018,222 @@
             ws = new WebSocket(wsUrl);
             
             ws.onopen = function() {
-                consoleLog('WebSocket connected');
+                consoleLog('WebSocket connected successfully');
                 isConnected = true;
                 isLoadingOrReconnecting = false;
+                reconnectAttempts = 0;
                 hideLoadingScreen();
+                updateConnectionStatus('connected');
+                showNotification('Connected to Royal Blackjack 3D!', 'success', 3000);
             };
             
             ws.onmessage = function(event) {
                 try {
                     const message = JSON.parse(event.data);
-                    consoleLog('WebSocket message:', message.type, message.data);
+                    consoleLog('WebSocket message received:', message.type);
                     handleServerMessage(message);
                 } catch (e) {
-                    consoleError("Error parsing server message:", e);
+                    consoleError("Error parsing server message:", e, event.data);
+                    showNotification('Received invalid message from server', 'error', 3000);
                 }
             };
             
             ws.onclose = function(event) {
-                consoleLog(`WebSocket disconnected. Code: ${event.code}`);
+                consoleLog(`WebSocket disconnected. Code: ${event.code}, Reason: ${event.reason}`);
                 isConnected = false;
+                updateConnectionStatus('disconnected', `Code: ${event.code}`);
+                
                 clearAll3DObjects();
-                showMainMenu();
-                animateCameraToMenu();
-
+                
                 if (!isLoadingOrReconnecting) {
-                    showLoadingScreen('Connection lost. Reconnecting in 5s...');
-                    showNotification('Connection lost. Attempting to reconnect...', 'error');
+                    showMainMenu();
+                    animateCameraToMenu();
                 }
                 
-                isLoadingOrReconnecting = true;
-                
-                setTimeout(() => {
-                    if (!isConnected) {
-                        isLoadingOrReconnecting = false;
-                        connectWebSocket();
-                    } else {
-                        isLoadingOrReconnecting = false;
-                        hideLoadingScreen();
-                    }
-                }, 5000);
+                // Enhanced reconnection logic
+                if (reconnectAttempts < maxReconnectAttempts && !isLoadingOrReconnecting) {
+                    reconnectAttempts++;
+                    const delay = Math.min(reconnectDelay * Math.pow(2, reconnectAttempts - 1), 30000);
+                    
+                    updateConnectionStatus('reconnecting');
+                    showLoadingScreen(`Connection lost. Reconnecting in ${Math.ceil(delay/1000)}s... (${reconnectAttempts}/${maxReconnectAttempts})`);
+                    showNotification(`Reconnecting... Attempt ${reconnectAttempts}/${maxReconnectAttempts}`, 'warning', 3000);
+                    
+                    setTimeout(() => {
+                        if (!isConnected) {
+                            connectWebSocket();
+                        }
+                    }, delay);
+                } else if (reconnectAttempts >= maxReconnectAttempts) {
+                    updateConnectionStatus('disconnected', 'Max reconnect attempts reached');
+                    showNotification('Connection lost. Please refresh the page.', 'error', 10000);
+                    hideLoadingScreen();
+                }
             };
             
             ws.onerror = function(error) {
                 consoleError('WebSocket error:', error);
+                updateConnectionStatus('disconnected', 'Connection error');
+                showNotification('Connection error occurred', 'error', 5000);
             };
         }
 
         function sendMessage(action, payload = {}) {
             if (ws && ws.readyState === WebSocket.OPEN) {
                 const message = { action, payload };
-                consoleLog('WebSocket send:', message);
-                ws.send(JSON.stringify(message));
+                consoleLog('WebSocket send:', action, payload);
+                try {
+                    ws.send(JSON.stringify(message));
+                    return true;
+                } catch (e) {
+                    consoleError('Error sending WebSocket message:', e);
+                    showNotification('Failed to send message', 'error', 3000);
+                    return false;
+                }
             } else {
-                consoleError('WebSocket not open');
-                showNotification('Not connected. Please wait or refresh.', 'error');
+                consoleError('WebSocket not open, current state:', ws ? ws.readyState : 'null');
+                showNotification('Not connected. Please wait for reconnection.', 'warning', 3000);
+                return false;
             }
         }
 
-        // Server Message Handling
+        // Enhanced Server Message Handling
         function handleServerMessage(message) {
-            switch (message.type) {
-                case 'connected':
-                    myPlayerId = message.data.player_id;
-                    consoleLog(`Connected. Player ID: ${myPlayerId}`);
-                    hideLoadingScreen();
-                    showMainMenu();
-                    showNotification('Welcome to Royal Blackjack 3D!', 'success');
-                    break;
-                    
-                case 'room_created':
-                case 'room_joined':
-                    currentRoomCode = message.data.room_code;
-                    isPlayerInGame = true;
-                    showGameInterface();
-                    showNotification(`Joined room: ${currentRoomCode}`, 'success');
-                    animateCameraToTable();
-                    break;
-                    
-                case 'spectating':
-                    currentRoomCode = message.data.room_code;
-                    isPlayerInGame = false;
-                    showGameInterface();
-                    showNotification(`Spectating room: ${currentRoomCode}`, 'info');
-                    animateCameraToTable();
-                    break;
-                    
-                case 'room_left':
-                    showMainMenu();
-                    showNotification('You have left the room.', 'info');
-                    animateCameraToMenu();
-                    currentRoomCode = null;
-                    currentGameState = null;
-                    isPlayerInGame = false;
-                    clearAll3DObjects();
-                    break;
-                    
-                case 'game_state':
-                    currentGameState = message.data;
-                    updateGameInterface();
-                    break;
-                    
-                case 'room_list':
-                    updateRoomList(message.data.rooms);
-                    break;
-                    
-                case 'error':
-                    consoleError('Server error:', message.message);
-                    showNotification('Error: ' + message.message, 'error');
-                    break;
-                    
-                default:
-                    consoleLog('Unknown message type:', message.type);
+            try {
+                switch (message.type) {
+                    case 'connected':
+                        myPlayerId = message.data.player_id;
+                        consoleLog(`Connected successfully. Player ID: ${myPlayerId}`);
+                        hideLoadingScreen();
+                        showMainMenu();
+                        break;
+                        
+                    case 'room_created':
+                    case 'room_joined':
+                        currentRoomCode = message.data.room_code;
+                        isPlayerInGame = true;
+                        showGameInterface();
+                        showNotification(`Joined room: ${currentRoomCode}`, 'success', 4000);
+                        animateCameraToTable();
+                        break;
+                        
+                    case 'spectating':
+                        currentRoomCode = message.data.room_code;
+                        isPlayerInGame = false;
+                        showGameInterface();
+                        showNotification(`Spectating room: ${currentRoomCode}`, 'info', 4000);
+                        animateCameraToTable();
+                        break;
+                        
+                    case 'room_left':
+                        handleRoomLeft();
+                        break;
+                        
+                    case 'game_state':
+                        currentGameState = message.data;
+                        updateGameInterface();
+                        break;
+                        
+                    case 'room_list':
+                        updateRoomList(message.data.rooms);
+                        break;
+                        
+                    case 'error':
+                        consoleError('Server error:', message.message);
+                        showNotification('Error: ' + message.message, 'error', 5000);
+                        break;
+                        
+                    default:
+                        consoleWarn('Unknown message type:', message.type);
+                }
+            } catch (e) {
+                consoleError('Error handling server message:', e, message);
+                showNotification('Error processing server message', 'error', 3000);
             }
         }
 
-        // Camera Animations
+        function handleRoomLeft() {
+            showMainMenu();
+            showNotification('You have left the room.', 'info', 3000);
+            animateCameraToMenu();
+            currentRoomCode = null;
+            currentGameState = null;
+            isPlayerInGame = false;
+            clearAll3DObjects();
+        }
+
+        // Enhanced Camera Animations
         function animateCameraToTable() {
-            consoleLog("Animating camera to table");
+            consoleLog("Animating camera to table view");
             cameraAnimating = true;
             camera.userData.targetRotationY = 0;
             camera.userData.targetDistance = 15;
+            camera.userData.targetHeight = 12;
+            
             gsap.to(camera.position, {
-                duration: 1.2, x: 0, y: 12, z: 15, ease: "power2.inOut",
+                duration: 1.5, 
+                x: 0, 
+                y: 12, 
+                z: 15, 
+                ease: "power2.inOut",
                 onUpdate: () => camera.lookAt(0, 0, 0),
-                onComplete: () => cameraAnimating = false
+                onComplete: () => {
+                    cameraAnimating = false;
+                    consoleLog("Camera animation to table complete");
+                }
             });
+            
+            // Add some visual flair
+            if (particleSystem) {
+                gsap.to(particleSystem.material, {
+                    opacity: 0.6,
+                    duration: 1.5,
+                    ease: "power2.inOut"
+                });
+            }
         }
 
         function animateCameraToMenu() {
-            consoleLog("Animating camera to menu");
+            consoleLog("Animating camera to menu view");
             cameraAnimating = true;
-            camera.userData.targetRotationY = Math.PI / 8;
-            camera.userData.targetDistance = 20;
+            camera.userData.targetRotationY = Math.PI / 6;
+            camera.userData.targetDistance = 22;
+            camera.userData.targetHeight = 16;
+            
             gsap.to(camera.position, {
-                duration: 1.2, x: 5, y: 15, z: 20, ease: "power2.inOut",
+                duration: 1.5, 
+                x: 8, 
+                y: 16, 
+                z: 22, 
+                ease: "power2.inOut",
                 onUpdate: () => camera.lookAt(0, 0, 0),
-                onComplete: () => cameraAnimating = false
+                onComplete: () => {
+                    cameraAnimating = false;
+                    consoleLog("Camera animation to menu complete");
+                }
             });
+            
+            if (particleSystem) {
+                gsap.to(particleSystem.material, {
+                    opacity: 0.3,
+                    duration: 1.5,
+                    ease: "power2.inOut"
+                });
+            }
         }
 
-        // UI Management
+        // Enhanced UI Management
         function hideLoadingScreen() {
             const loadingScreen = document.getElementById('loadingScreen');
-            if (loadingScreen.style.display !== 'none') {
+            if (loadingScreen && loadingScreen.style.display !== 'none') {
                 gsap.to(loadingScreen, {
-                    duration: 0.5, opacity: 0,
-                    onComplete: () => loadingScreen.style.display = 'none'
+                    duration: 0.8, 
+                    opacity: 0,
+                    ease: "power2.out",
+                    onComplete: () => {
+                        loadingScreen.style.display = 'none';
+                        consoleLog("Loading screen hidden");
+                    }
                 });
             }
         }
@@ -1046,12 +2241,23 @@
         function showLoadingScreen(text = 'Loading casino experience...') {
             const loadingScreen = document.getElementById('loadingScreen');
             const textElement = loadingScreen.querySelector('.loading-text');
+            
             if (textElement) textElement.textContent = text;
             loadingScreen.style.display = 'flex';
-            gsap.to(loadingScreen, { duration: 0.3, opacity: 1 });
+            loadingScreen.style.opacity = '0';
+            
+            gsap.to(loadingScreen, { 
+                duration: 0.5, 
+                opacity: 1,
+                ease: "power2.out"
+            });
+            
+            consoleLog("Loading screen shown:", text);
         }
 
         function showMainMenu() {
+            consoleLog("Showing main menu");
+            
             document.getElementById('menuPanel').classList.remove('hidden');
             document.getElementById('gameHUD').classList.add('hidden');
             document.getElementById('dealerArea').classList.add('hidden');
@@ -1060,14 +2266,28 @@
             document.getElementById('chatPanel').classList.add('hidden');
             document.getElementById('playerHandsDisplay').classList.add('hidden');
             clearAll3DObjects();
+            
+            // Animate menu panel entrance
+            gsap.fromTo('#menuPanel', 
+                { opacity: 0, scale: 0.8 },
+                { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.2)" }
+            );
         }
 
         function showGameInterface() {
+            consoleLog("Showing game interface");
+            
             document.getElementById('menuPanel').classList.add('hidden');
             document.getElementById('gameHUD').classList.remove('hidden');
             document.getElementById('dealerArea').classList.remove('hidden');
             document.getElementById('chatPanel').classList.remove('hidden');
             document.getElementById('playerHandsDisplay').classList.remove('hidden');
+            
+            // Animate interface elements
+            gsap.fromTo(['#gameHUD', '#dealerArea', '#chatPanel'], 
+                { opacity: 0, y: -20 },
+                { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.1 }
+            );
         }
 
         function updateGameInterface() {
@@ -1075,24 +2295,29 @@
             
             consoleLog("updateGameInterface: Phase:", currentGameState.phase);
 
+            // Update HUD information
             document.getElementById('currentRoomCodeDisplay').textContent = currentGameState.room_code || '-';
             document.getElementById('phaseText').textContent = currentGameState.phase.replace(/_/g, ' ').toUpperCase();
             document.getElementById('handNumber').textContent = currentGameState.hand_number || '0';
             
             const myPlayerState = currentGameState.players[myPlayerId];
-            document.getElementById('moneyAmount').textContent = myPlayerState ? myPlayerState.money.toLocaleString() : 'N/A';
+            if (myPlayerState) {
+                document.getElementById('moneyAmount').textContent = myPlayerState.money.toLocaleString();
+            } else {
+                document.getElementById('moneyAmount').textContent = 'N/A';
+            }
 
-            // Show/hide betting controls
+            // Show/hide betting controls with animations
             if (currentGameState.phase === 'waiting' && myPlayerState && isPlayerInGame) {
-                document.getElementById('betControls').classList.remove('hidden');
-                document.getElementById('actionsPanel').classList.add('hidden');
+                showElement('betControls');
+                hideElement('actionsPanel');
             } else if (currentGameState.can_act && currentGameState.available_actions && isPlayerInGame) {
-                document.getElementById('betControls').classList.add('hidden');
-                document.getElementById('actionsPanel').classList.remove('hidden');
+                hideElement('betControls');
+                showElement('actionsPanel');
                 updateActionButtons();
             } else {
-                document.getElementById('betControls').classList.add('hidden');
-                document.getElementById('actionsPanel').classList.add('hidden');
+                hideElement('betControls');
+                hideElement('actionsPanel');
             }
 
             // Update dealer display
@@ -1107,24 +2332,54 @@
             // Update 3D visuals
             updateTableVisuals();
 
-            // Show start game button for room owner
+            // Show/hide start game button
             const startBtn = document.getElementById('startGameBtn');
             const canStartGame = currentGameState.phase === 'waiting' &&
                                  myPlayerState &&
                                  myPlayerState.id === currentGameState.owner_id &&
                                  Object.values(currentGameState.players).length >= 1;
-            startBtn.style.display = canStartGame ? 'block' : 'none';
+            
+            if (canStartGame) {
+                startBtn.style.display = 'block';
+                gsap.fromTo(startBtn, { scale: 0.8 }, { scale: 1, duration: 0.3, ease: "back.out(1.7)" });
+            } else {
+                startBtn.style.display = 'none';
+            }
+        }
+
+        function showElement(elementId) {
+            const element = document.getElementById(elementId);
+            if (element && element.classList.contains('hidden')) {
+                element.classList.remove('hidden');
+                gsap.fromTo(element, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" });
+            }
+        }
+
+        function hideElement(elementId) {
+            const element = document.getElementById(elementId);
+            if (element && !element.classList.contains('hidden')) {
+                gsap.to(element, { 
+                    opacity: 0, 
+                    y: -20, 
+                    duration: 0.3, 
+                    ease: "power2.in",
+                    onComplete: () => element.classList.add('hidden')
+                });
+            }
         }
 
         function updateDealerDisplay() {
             const dealerHandEl = document.getElementById('dealerHand');
             const dealerValueEl = document.getElementById('dealerValue');
             
-            if (!currentGameState.dealer_hand) return;
+            if (!currentGameState.dealer_hand || !currentGameState.dealer_hand.cards) {
+                dealerValueEl.textContent = 'No cards';
+                return;
+            }
 
-            // Show dealer cards as mini cards
+            // Show dealer cards as mini cards with animations
             dealerHandEl.innerHTML = '';
-            currentGameState.dealer_hand.cards.forEach(card => {
+            currentGameState.dealer_hand.cards.forEach((card, index) => {
                 const cardDiv = document.createElement('div');
                 cardDiv.className = 'card-mini';
                 
@@ -1139,11 +2394,24 @@
                 }
                 
                 dealerHandEl.appendChild(cardDiv);
+                
+                // Animate card appearance
+                gsap.fromTo(cardDiv, 
+                    { opacity: 0, scale: 0, rotationY: 180 },
+                    { opacity: 1, scale: 1, rotationY: 0, duration: 0.5, delay: index * 0.1, ease: "back.out(1.7)" }
+                );
             });
 
-            // Show dealer value if revealed
+            // Show dealer value with animation
             if (currentGameState.dealer_hand.value !== null && currentGameState.dealer_hand.value !== undefined) {
-                dealerValueEl.textContent = `Value: ${currentGameState.dealer_hand.value}`;
+                const newValue = `Value: ${currentGameState.dealer_hand.value}`;
+                if (dealerValueEl.textContent !== newValue) {
+                    gsap.fromTo(dealerValueEl, 
+                        { scale: 1.2, color: '#ffd700' },
+                        { scale: 1, color: '#ffffff', duration: 0.5, ease: "power2.out" }
+                    );
+                }
+                dealerValueEl.textContent = newValue;
             } else {
                 dealerValueEl.textContent = 'Hidden';
             }
@@ -1153,9 +2421,10 @@
             if (!currentGameState.available_actions) return;
 
             const actions = currentGameState.available_actions;
+            const buttonIds = ['hitBtn', 'standBtn', 'doubleBtn', 'splitBtn', 'surrenderBtn'];
             
             // Hide all buttons first
-            ['hitBtn', 'standBtn', 'doubleBtn', 'splitBtn', 'surrenderBtn'].forEach(id => {
+            buttonIds.forEach(id => {
                 const btn = document.getElementById(id);
                 if (btn) {
                     btn.style.display = 'none';
@@ -1163,13 +2432,19 @@
                 }
             });
 
-            // Show available actions
-            actions.forEach(action => {
+            // Show available actions with staggered animation
+            actions.forEach((action, index) => {
                 const btnId = action.action + 'Btn';
                 const btn = document.getElementById(btnId);
                 if (btn) {
                     btn.style.display = 'inline-block';
                     btn.disabled = false;
+                    
+                    // Animate button appearance
+                    gsap.fromTo(btn, 
+                        { opacity: 0, scale: 0.8, y: 20 },
+                        { opacity: 1, scale: 1, y: 0, duration: 0.4, delay: index * 0.1, ease: "back.out(1.7)" }
+                    );
                 }
             });
         }
@@ -1180,17 +2455,18 @@
             
             if (!currentGameState.players) return;
 
-            Object.values(currentGameState.players).forEach(player => {
+            Object.values(currentGameState.players).forEach((player, index) => {
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'player-hand';
                 
+                // Add special styling
                 if (player.is_current_player) playerDiv.classList.add('current-player');
                 if (player.status === 'bust') playerDiv.classList.add('bust');
                 if (player.status === 'blackjack') playerDiv.classList.add('blackjack');
-                if (player.id === myPlayerId) playerDiv.style.borderColor = 'cyan';
+                if (player.id === myPlayerId) playerDiv.style.borderColor = '#00ffff';
 
                 let handsHtml = '';
-                player.hands.forEach((hand, index) => {
+                player.hands.forEach((hand, handIndex) => {
                     const cardsHtml = hand.cards.map(card => {
                         const cardClass = (card.suit === 'hearts' || card.suit === 'diamonds') ? 'card-mini red' : 
                                          card.suit === 'back' ? 'card-mini back' : 'card-mini';
@@ -1201,21 +2477,38 @@
                         <div class="hand-info">
                             <div class="hand-cards">${cardsHtml}</div>
                             <div>Value: ${hand.value}</div>
-                            <div>Bet: $${hand.bet_amount}</div>
-                            ${hand.result ? `<div>Result: ${hand.result.toUpperCase()}</div>` : ''}
-                            ${hand.payout > 0 ? `<div>Won: $${hand.payout}</div>` : ''}
+                            <div>Bet: ${hand.bet_amount}</div>
+                            ${hand.result ? `<div style="color: ${getResultColor(hand.result)};">Result: ${hand.result.toUpperCase()}</div>` : ''}
+                            ${hand.payout > 0 ? `<div style="color: #00ff00;">Won: ${hand.payout}</div>` : ''}
                         </div>
                     `;
                 });
 
                 playerDiv.innerHTML = `
                     <div class="player-name">${player.name}</div>
-                    <div class="player-money">$${player.money.toLocaleString()}</div>
+                    <div class="player-money">${player.money.toLocaleString()}</div>
                     ${handsHtml}
                 `;
                 
                 container.appendChild(playerDiv);
+                
+                // Animate player hand appearance
+                gsap.fromTo(playerDiv, 
+                    { opacity: 0, scale: 0.8, y: 30 },
+                    { opacity: 1, scale: 1, y: 0, duration: 0.5, delay: index * 0.1, ease: "back.out(1.7)" }
+                );
             });
+        }
+
+        function getResultColor(result) {
+            switch(result) {
+                case 'win':
+                case 'blackjack': return '#00ff00';
+                case 'lose':
+                case 'bust': return '#ff4444';
+                case 'push': return '#ffaa00';
+                default: return '#ffffff';
+            }
         }
 
         function updateChat() {
@@ -1223,165 +2516,283 @@
             
             const chatMessagesEl = document.getElementById('chatMessages');
             const shouldScroll = chatMessagesEl.scrollHeight - chatMessagesEl.clientHeight <= chatMessagesEl.scrollTop + 10;
+            const currentMessageCount = chatMessagesEl.children.length;
 
-            chatMessagesEl.innerHTML = '';
-            currentGameState.chat_messages.forEach(msg => {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'chat-message';
-                msgDiv.style.borderLeftColor = msg.player_color || '#ffffff';
+            // Only update if message count changed
+            if (currentMessageCount !== currentGameState.chat_messages.length) {
+                chatMessagesEl.innerHTML = '';
+                currentGameState.chat_messages.forEach((msg, index) => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = 'chat-message';
+                    msgDiv.style.borderLeftColor = msg.player_color || '#ffffff';
+                    
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'chat-player-name';
+                    nameSpan.style.color = msg.player_color || '#ffffff';
+                    nameSpan.textContent = msg.player_name + ': ';
+                    
+                    const messageSpan = document.createElement('span');
+                    messageSpan.textContent = msg.message;
+                    
+                    const timeSpan = document.createElement('span');
+                    timeSpan.className = 'chat-timestamp';
+                    timeSpan.textContent = msg.formatted_time;
+                    
+                    msgDiv.appendChild(nameSpan);
+                    msgDiv.appendChild(messageSpan);
+                    msgDiv.appendChild(timeSpan);
+                    chatMessagesEl.appendChild(msgDiv);
+                    
+                    // Animate new messages
+                    if (index >= currentMessageCount) {
+                        gsap.fromTo(msgDiv, 
+                            { opacity: 0, x: 50 },
+                            { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }
+                        );
+                    }
+                });
                 
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'chat-player-name';
-                nameSpan.style.color = msg.player_color || '#ffffff';
-                nameSpan.textContent = msg.player_name + ': ';
-                
-                const messageSpan = document.createElement('span');
-                messageSpan.textContent = msg.message;
-                
-                const timeSpan = document.createElement('span');
-                timeSpan.className = 'chat-timestamp';
-                timeSpan.textContent = msg.formatted_time;
-                
-                msgDiv.appendChild(nameSpan);
-                msgDiv.appendChild(messageSpan);
-                msgDiv.appendChild(timeSpan);
-                chatMessagesEl.appendChild(msgDiv);
-            });
-            
-            if (shouldScroll) {
-                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+                if (shouldScroll) {
+                    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+                }
             }
         }
 
-        // Game Actions
+        // Enhanced Game Actions
         function createQuickRoom() {
-            sendMessage('create_room', {
-                player_name: document.getElementById('playerName').value.trim() || 'Player'
-            });
+            const playerName = document.getElementById('playerName').value.trim();
+            if (!playerName) {
+                showNotification("Please enter your name", "warning", 3000);
+                document.getElementById('playerName').focus();
+                return;
+            }
+            
+            if (sendMessage('create_room', { player_name: playerName })) {
+                showLoadingScreen('Creating room...');
+            }
         }
 
         function createCustomRoom() {
-            sendMessage('create_room', {
-                player_name: document.getElementById('playerName').value.trim() || 'Player',
-                room_name: document.getElementById('roomName').value.trim() || null
-            });
+            const playerName = document.getElementById('playerName').value.trim();
+            const roomName = document.getElementById('roomName').value.trim();
+            
+            if (!playerName) {
+                showNotification("Please enter your name", "warning", 3000);
+                document.getElementById('playerName').focus();
+                return;
+            }
+            
+            if (sendMessage('create_room', { 
+                player_name: playerName, 
+                room_name: roomName || null 
+            })) {
+                showLoadingScreen('Creating custom room...');
+            }
         }
 
         function joinRoomFromInput() {
             const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
-            if (code) {
-                sendMessage('join_room', {
-                    room_code: code,
-                    player_name: document.getElementById('playerName').value.trim() || 'Player'
-                });
-            } else {
-                showNotification("Please enter a room code.", "warning");
+            const playerName = document.getElementById('playerName').value.trim();
+            
+            if (!code) {
+                showNotification("Please enter a room code.", "warning", 3000);
+                document.getElementById('roomCodeInput').focus();
+                return;
+            }
+            
+            if (!playerName) {
+                showNotification("Please enter your name", "warning", 3000);
+                document.getElementById('playerName').focus();
+                return;
+            }
+            
+            if (sendMessage('join_room', { room_code: code, player_name: playerName })) {
+                showLoadingScreen('Joining room...');
             }
         }
 
         function spectateRoomFromInput() {
             const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
-            if (code) {
-                sendMessage('spectate_room', { room_code: code });
-            } else {
-                showNotification("Please enter a room code to spectate.", "warning");
+            
+            if (!code) {
+                showNotification("Please enter a room code to spectate.", "warning", 3000);
+                document.getElementById('roomCodeInput').focus();
+                return;
+            }
+            
+            if (sendMessage('spectate_room', { room_code: code })) {
+                showLoadingScreen('Joining as spectator...');
             }
         }
 
         function leaveRoom() {
             if (confirm("Are you sure you want to leave the room?")) {
                 sendMessage('leave_room');
+                showLoadingScreen('Leaving room...');
             }
         }
 
         function startGame() {
-            sendMessage('start_game');
+            if (sendMessage('start_game')) {
+                showNotification('Starting game...', 'info', 2000);
+            }
         }
 
         function setBetAmount(amount) {
-            document.getElementById('betAmountInput').value = amount;
+            const input = document.getElementById('betAmountInput');
+            input.value = amount;
+            
+            // Visual feedback
+            gsap.fromTo(input, 
+                { scale: 1.1, borderColor: '#ffd700' },
+                { scale: 1, borderColor: '#ffd700', duration: 0.3, ease: "power2.out" }
+            );
         }
 
         function placeBet() {
             const amount = parseInt(document.getElementById('betAmountInput').value);
-            if (amount >= 10 && amount <= 500) {
-                sendMessage('player_action', {
-                    action_type: 'place_bet',
-                    amount: amount
-                });
-            } else {
-                showNotification("Bet must be between $10 and $500", "warning");
+            
+            if (isNaN(amount) || amount < 10 || amount > 500) {
+                showNotification("Bet must be between $10 and $500", "warning", 3000);
+                return;
+            }
+            
+            const myPlayerState = currentGameState.players[myPlayerId];
+            if (myPlayerState && amount > myPlayerState.money) {
+                showNotification("Insufficient funds", "error", 3000);
+                return;
+            }
+            
+            if (sendMessage('player_action', { action_type: 'place_bet', amount: amount })) {
+                showNotification(`Bet placed: ${amount}`, 'success', 2000);
             }
         }
 
         function playerAction(actionType) {
-            sendMessage('player_action', { action_type: actionType });
+            if (sendMessage('player_action', { action_type: actionType })) {
+                showNotification(`Action: ${actionType.replace('_', ' ').toUpperCase()}`, 'info', 1500);
+            }
         }
 
+        // Enhanced Chat Functions
         function sendChat() {
             const input = document.getElementById('chatInput');
-            if (input.value.trim()) {
-                sendMessage('send_chat_message', { message: input.value.trim() });
+            const message = input.value.trim();
+            
+            if (!message) {
+                return;
+            }
+            
+            if (message.length > 200) {
+                showNotification("Message too long (max 200 characters)", "warning", 3000);
+                return;
+            }
+            
+            if (sendMessage('send_chat_message', { message: message })) {
                 input.value = '';
+                // Visual feedback
+                gsap.fromTo(input, 
+                    { backgroundColor: 'rgba(0, 255, 0, 0.2)' },
+                    { backgroundColor: 'rgba(255, 255, 255, 0.1)', duration: 0.5 }
+                );
+            }
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendChat();
             }
         }
 
         function toggleChat() {
             chatCollapsed = !chatCollapsed;
-            document.getElementById('chatMessages').style.display = chatCollapsed ? 'none' : 'block';
-            document.getElementById('chatToggle').textContent = chatCollapsed ? '+' : '−';
+            const chatMessages = document.getElementById('chatMessages');
+            const chatToggle = document.getElementById('chatToggle');
+            
+            if (chatCollapsed) {
+                gsap.to(chatMessages, { height: 0, opacity: 0, duration: 0.3, ease: "power2.inOut" });
+                chatToggle.textContent = '+';
+            } else {
+                chatMessages.style.height = 'auto';
+                const targetHeight = chatMessages.scrollHeight;
+                chatMessages.style.height = '0px';
+                gsap.to(chatMessages, { height: targetHeight, opacity: 1, duration: 0.3, ease: "power2.inOut" });
+                chatToggle.textContent = '−';
+            }
         }
 
-        // Room List Modal
+        // Enhanced Room List Modal Functions
         function showRoomList() {
             document.getElementById('roomListModal').classList.remove('hidden');
+            gsap.fromTo('#roomListModal', 
+                { opacity: 0 },
+                { opacity: 1, duration: 0.3, ease: "power2.out" }
+            );
             refreshRoomList();
         }
 
         function hideRoomList() {
-            document.getElementById('roomListModal').classList.add('hidden');
+            gsap.to('#roomListModal', {
+                opacity: 0,
+                duration: 0.3,
+                ease: "power2.in",
+                onComplete: () => document.getElementById('roomListModal').classList.add('hidden')
+            });
         }
 
         function refreshRoomList() {
             sendMessage('get_room_list');
-            document.getElementById('roomList').innerHTML = '<div style="text-align: center; color: #ccc; padding: 20px;">Fetching rooms...</div>';
+            document.getElementById('roomList').innerHTML = 
+                '<div style="text-align: center; color: #ccc; padding: 20px;">Fetching rooms...</div>';
         }
 
         function updateRoomList(rooms) {
             const listEl = document.getElementById('roomList');
+            
             if (!rooms || rooms.length === 0) {
                 listEl.innerHTML = '<div style="text-align: center; color: #ccc; padding: 20px;">No public rooms available.</div>';
                 return;
             }
             
-            listEl.innerHTML = rooms.map(room => `
-                <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            listEl.innerHTML = rooms.map((room, index) => `
+                <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; opacity: 0;" id="room-${index}">
                     <div>
-                        <strong>${room.name || room.code}</strong><br>
-                        <small>Players: ${room.players}/${room.max_players} | Phase: ${room.phase}</small>
+                        <strong style="color: #ffd700;">${room.name || room.code}</strong><br>
+                        <small style="color: #ccc;">Players: ${room.players}/${room.max_players} | Phase: ${room.phase.replace('_', ' ').toUpperCase()}</small>
                     </div>
                     <div>
-                        <button class="action-button" onclick="joinRoomByCode('${room.code}')">Join</button>
-                        <button class="action-button" onclick="spectateRoomByCode('${room.code}')" style="margin-left: 5px;">Spectate</button>
+                        <button class="action-button" onclick="joinRoomByCode('${room.code}')" style="margin-right: 5px;">Join</button>
+                        <button class="action-button" onclick="spectateRoomByCode('${room.code}')">Spectate</button>
                     </div>
                 </div>
             `).join('');
+            
+            // Animate room list items
+            rooms.forEach((_, index) => {
+                gsap.fromTo(`#room-${index}`, 
+                    { opacity: 0, x: -50 },
+                    { opacity: 1, x: 0, duration: 0.4, delay: index * 0.1, ease: "power2.out" }
+                );
+            });
         }
 
         function joinRoomByCode(roomCode) {
+            const playerName = document.getElementById('playerName').value.trim() || 'Player';
             hideRoomList();
-            sendMessage('join_room', {
-                room_code: roomCode,
-                player_name: document.getElementById('playerName').value.trim() || 'Player'
-            });
+            if (sendMessage('join_room', { room_code: roomCode, player_name: playerName })) {
+                showLoadingScreen('Joining room...');
+            }
         }
 
         function spectateRoomByCode(roomCode) {
             hideRoomList();
-            sendMessage('spectate_room', { room_code: roomCode });
+            if (sendMessage('spectate_room', { room_code: roomCode })) {
+                showLoadingScreen('Joining as spectator...');
+            }
         }
 
-        // Notifications
+        // Enhanced Notifications
         function showNotification(message, type = 'info', duration = 4000) {
             const container = document.getElementById('notificationContainer');
             const notification = document.createElement('div');
@@ -1389,13 +2800,20 @@
             notification.textContent = message;
             container.appendChild(notification);
             
-            gsap.from(notification, {
-                duration: 0.5, y: "-100%", opacity: 0, ease: "power2.out"
-            });
+            // Enhanced entrance animation
+            gsap.fromTo(notification, 
+                { y: -100, opacity: 0, scale: 0.8 },
+                { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }
+            );
             
+            // Auto-remove with enhanced exit animation
             setTimeout(() => {
                 gsap.to(notification, {
-                    duration: 0.5, y: "-100%", opacity: 0, ease: "power2.in",
+                    y: -100, 
+                    opacity: 0, 
+                    scale: 0.8,
+                    duration: 0.4, 
+                    ease: "power2.in",
                     onComplete: () => {
                         if (notification.parentNode) {
                             notification.parentNode.removeChild(notification);
@@ -1405,54 +2823,159 @@
             }, duration);
         }
 
-        // Event Listeners
+        // Enhanced Event Listeners
         window.addEventListener('resize', function() {
             if (camera && renderer) {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
+                consoleLog("Window resized:", window.innerWidth, window.innerHeight);
             }
         });
 
+        // Keyboard shortcuts
         document.addEventListener('keydown', function(event) {
-            if (document.activeElement.tagName === 'INPUT') return;
-            if (!currentGameState || !currentGameState.can_act) return;
+            // Don't trigger shortcuts when typing in input fields
+            if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+                return;
+            }
+            
+            if (!currentGameState || !currentGameState.can_act || !currentGameState.available_actions) {
+                return;
+            }
             
             const actions = currentGameState.available_actions.map(a => a.action);
-            if (event.key === 'h' && actions.includes('hit')) playerAction('hit');
-            else if (event.key === 's' && actions.includes('stand')) playerAction('stand');
-            else if (event.key === 'd' && actions.includes('double_down')) playerAction('double_down');
-            else if (event.key === 'p' && actions.includes('split')) playerAction('split');
+            
+            switch(event.key.toLowerCase()) {
+                case 'h':
+                    if (actions.includes('hit')) {
+                        playerAction('hit');
+                        event.preventDefault();
+                    }
+                    break;
+                case 's':
+                    if (actions.includes('stand')) {
+                        playerAction('stand');
+                        event.preventDefault();
+                    }
+                    break;
+                case 'd':
+                    if (actions.includes('double_down')) {
+                        playerAction('double_down');
+                        event.preventDefault();
+                    }
+                    break;
+                case 'p':
+                    if (actions.includes('split')) {
+                        playerAction('split');
+                        event.preventDefault();
+                    }
+                    break;
+                case 'r':
+                    if (actions.includes('surrender')) {
+                        playerAction('surrender');
+                        event.preventDefault();
+                    }
+                    break;
+                case 'enter':
+                    if (document.getElementById('chatInput') === document.activeElement) {
+                        sendChat();
+                        event.preventDefault();
+                    }
+                    break;
+            }
         });
 
-        // Initial Load
+        // Focus management for better UX
+        document.addEventListener('click', function(event) {
+            if (event.target.tagName === 'INPUT' && event.target.type === 'text') {
+                gsap.to(event.target, {
+                    borderColor: '#00ffff',
+                    duration: 0.3,
+                    ease: "power2.out"
+                });
+            }
+        });
+
+        // Visibility change handling (for when user switches tabs)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                consoleLog("Page hidden - pausing non-essential animations");
+            } else {
+                consoleLog("Page visible - resuming animations");
+                // Reconnect if connection was lost while away
+                if (!isConnected && !isLoadingOrReconnecting) {
+                    consoleLog("Attempting to reconnect after page became visible");
+                    connectWebSocket();
+                }
+            }
+        });
+
+        // Enhanced Error Handling
+        window.addEventListener('error', function(event) {
+            consoleError('Global error:', event.error);
+            showNotification('An error occurred. Please refresh if issues persist.', 'error', 5000);
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            consoleError('Unhandled promise rejection:', event.reason);
+            showNotification('Connection error occurred', 'error', 3000);
+        });
+
+        // Initialize Application
         window.addEventListener('load', function() {
-            consoleLog("Window load event triggered");
+            consoleLog("Window load event triggered - Starting initialization");
+            
             const loadingTextElement = document.getElementById('loadingScreen').querySelector('.loading-text');
             
             if (!loadingTextElement) {
                 consoleError("Loading text element not found");
+                showNotification("Initialization error", "error", 5000);
                 return;
             }
             
-            loadingTextElement.textContent = "JavaScript Running...";
-            
             try {
-                if (typeof THREE === 'undefined' || typeof gsap === 'undefined') {
-                    throw new Error("Three.js or GSAP library not loaded");
+                loadingTextElement.textContent = "Checking libraries...";
+                
+                // Verify required libraries
+                if (typeof THREE === 'undefined') {
+                    throw new Error("Three.js library not loaded");
                 }
                 
-                initThreeJS();
-                loadingTextElement.textContent = "3D Scene Initialized...";
+                if (typeof gsap === 'undefined') {
+                    throw new Error("GSAP library not loaded");
+                }
                 
+                loadingTextElement.textContent = "Initializing 3D engine...";
+                
+                // Initialize Three.js
+                if (!initThreeJS()) {
+                    throw new Error("Failed to initialize 3D engine");
+                }
+                
+                loadingTextElement.textContent = "Connecting to server...";
+                
+                // Connect to WebSocket
                 connectWebSocket();
+                
+                consoleLog("Initialization completed successfully");
                 
             } catch (e) {
                 consoleError("Error during initialization:", e);
                 loadingTextElement.textContent = "Error: " + e.message;
-                showNotification("Failed to initialize. Try refreshing.", "error", 10000);
+                showNotification("Failed to initialize. Please refresh the page.", "error", 10000);
+                updateConnectionStatus('disconnected', e.message);
             }
         });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            consoleLog("Page unloading - cleaning up connections");
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.close();
+            }
+        });
+
     </script>
 </body>
 </html>
