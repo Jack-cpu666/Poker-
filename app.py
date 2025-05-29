@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+"""
+Royal Blackjack 3D - Complete Production Server
+A full-featured multiplayer blackjack game with 3D interface
+"""
+
 import asyncio
 import json
 import logging
@@ -5,32 +11,41 @@ import os
 import random
 import time
 import uuid
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Any
 from enum import Enum
 from dataclasses import dataclass, asdict, field
 from collections import defaultdict
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
+import traceback
 
+# FastAPI and WebSocket imports
 import uvicorn
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, status
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ValidationError, Field as PydanticField
 
 # Enhanced logging configuration
+LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s - [%(filename)s:%(lineno)d]'
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s - [%(filename)s:%(lineno)d]',
+    format=LOG_FORMAT,
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler('blackjack_server.log', mode='a')
+        logging.FileHandler('blackjack_server.log', mode='a', encoding='utf-8')
     ]
 )
+
+# Set up logger
 logger = logging.getLogger(__name__)
 
-# Enhanced Game Constants
+# Suppress noisy logs
+logging.getLogger('uvicorn.access').setLevel(logging.WARNING)
+logging.getLogger('uvicorn.error').setLevel(logging.INFO)
+
+# Game Configuration Constants
 STARTING_MONEY = 1000
 MIN_BET = 10
 MAX_BET = 500
@@ -38,16 +53,19 @@ MAX_PLAYERS_PER_ROOM = 6
 RATE_LIMIT_MESSAGES_PER_SECOND = 5
 RATE_LIMIT_ACTIONS_PER_SECOND = 3
 MAX_CHAT_MESSAGES = 50
-MAX_ROOMS = 50
-SESSION_TIMEOUT = 3600
-DEALER_HIT_THRESHOLD = 16
+MAX_ROOMS = 100
+SESSION_TIMEOUT = 3600  # 1 hour
+DEALER_HIT_THRESHOLD = 16  # Dealer hits on 16, stands on 17
 ROOM_CLEANUP_INTERVAL = 300  # 5 minutes
 INACTIVE_ROOM_TIMEOUT = 1800  # 30 minutes
 HEARTBEAT_INTERVAL = 30  # 30 seconds
 MAX_MESSAGE_LENGTH = 200
-BLACKJACK_PAYOUT = 1.5  # 3:2 payout
+BLACKJACK_PAYOUT = 1.5  # 3:2 payout ratio
+AUTO_RESET_DELAY = 8  # seconds to wait before resetting game
 
+# Game State Enums
 class GamePhase(Enum):
+    """Current phase of the game"""
     WAITING = "waiting"
     DEALING = "dealing"
     PLAYER_TURNS = "player_turns"
@@ -56,6 +74,7 @@ class GamePhase(Enum):
     GAME_OVER = "game_over"
 
 class PlayerAction(Enum):
+    """Available player actions"""
     HIT = "hit"
     STAND = "stand"
     DOUBLE_DOWN = "double_down"
@@ -64,6 +83,7 @@ class PlayerAction(Enum):
     PLACE_BET = "place_bet"
 
 class PlayerStatus(Enum):
+    """Player status in current hand"""
     ACTIVE = "active" 
     STANDING = "standing"
     BUST = "bust"
@@ -72,6 +92,7 @@ class PlayerStatus(Enum):
     ELIMINATED = "eliminated"
 
 class HandResult(Enum):
+    """Result of a completed hand"""
     WIN = "win"
     LOSE = "lose" 
     PUSH = "push"
@@ -79,8 +100,10 @@ class HandResult(Enum):
     BUST = "bust"
     SURRENDER = "surrender"
 
+# Data Classes
 @dataclass
 class Card:
+    """Represents a playing card"""
     suit: str  # hearts, diamonds, clubs, spades
     rank: str  # A, 2-10, J, Q, K
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
@@ -88,17 +111,23 @@ class Card:
     def __str__(self):
         return f"{self.rank}{self.suit[0].upper()}"
 
-    def blackjack_value(self, current_total: int = 0) -> int:
+    def get_blackjack_value(self, current_total: int = 0) -> int:
         """Return the blackjack value of this card"""
         if self.rank in ['J', 'Q', 'K']:
             return 10
         elif self.rank == 'A':
+            # Ace is 11 unless it would bust, then it's 1
             return 11 if current_total + 11 <= 21 else 1
         else:
-            return int(self.rank)
+            try:
+                return int(self.rank)
+            except ValueError:
+                logger.error(f"Invalid card rank: {self.rank}")
+                return 0
 
 @dataclass
 class Hand:
+    """Represents a hand of cards"""
     cards: List[Card] = field(default_factory=list)
     bet_amount: int = 0
     is_split: bool = False
@@ -136,19 +165,38 @@ class Hand:
         return total
 
     def is_bust(self) -> bool:
+        """Check if hand is busted (over 21)"""
         return self.get_value() > 21
 
     def is_blackjack(self) -> bool:
+        """Check if hand is a blackjack (21 with 2 cards)"""
         return len(self.cards) == 2 and self.get_value() == 21
 
     def can_split(self) -> bool:
+        """Check if hand can be split"""
         return len(self.cards) == 2 and self.cards[0].rank == self.cards[1].rank
 
     def can_double_down(self) -> bool:
+        """Check if hand can be doubled down"""
         return len(self.cards) == 2 and not self.is_split
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert hand to dictionary for JSON serialization"""
+        return {
+            "cards": [{"suit": c.suit, "rank": c.rank, "id": c.id} for c in self.cards],
+            "value": self.get_value(),
+            "bet_amount": self.bet_amount,
+            "is_bust": self.is_bust(),
+            "is_blackjack": self.is_blackjack(),
+            "is_doubled": self.is_doubled,
+            "is_surrendered": self.is_surrendered,
+            "result": self.result.value if self.result else None,
+            "payout": self.payout
+        }
 
 @dataclass
 class Player:
+    """Represents a player in the game"""
     id: str
     name: str
     money: int = STARTING_MONEY
@@ -167,11 +215,13 @@ class Player:
     join_time: datetime = field(default_factory=datetime.now)
 
     def get_current_hand(self) -> Hand:
-        if self.current_hand_index < len(self.hands):
+        """Get the hand currently being played"""
+        if 0 <= self.current_hand_index < len(self.hands):
             return self.hands[self.current_hand_index]
         return self.hands[0] if self.hands else Hand()
 
     def can_act(self) -> bool:
+        """Check if player can take an action"""
         if self.status != PlayerStatus.ACTIVE:
             return False
             
@@ -181,16 +231,42 @@ class Player:
                 current_hand.get_value() < 21)
 
     def reset_for_new_hand(self):
+        """Reset player for a new hand"""
         self.hands = [Hand()]
         self.current_hand_index = 0
         if self.status not in [PlayerStatus.SITTING_OUT, PlayerStatus.ELIMINATED]:
             self.status = PlayerStatus.ACTIVE
 
     def update_activity(self):
+        """Update last activity timestamp"""
         self.last_activity = datetime.now()
+
+    def to_dict(self, current_player_id: Optional[str] = None) -> Dict[str, Any]:
+        """Convert player to dictionary for JSON serialization"""
+        hands_data = [hand.to_dict() for hand in self.hands]
+        
+        return {
+            "id": self.id,
+            "name": self.name,
+            "money": self.money,
+            "hands": hands_data,
+            "current_hand_index": self.current_hand_index,
+            "status": self.status.value,
+            "avatar": self.avatar,
+            "color": self.color,
+            "is_current_player": current_player_id == self.id,
+            "is_ai": self.is_ai,
+            "stats": {
+                "total_hands_played": self.total_hands_played,
+                "total_hands_won": self.total_hands_won,
+                "total_winnings": self.total_winnings,
+                "win_rate": round((self.total_hands_won / max(self.total_hands_played, 1)) * 100, 1)
+            }
+        }
 
 @dataclass
 class Room:
+    """Represents a game room"""
     code: str
     name: str
     players: Dict[str, Player]
@@ -212,6 +288,7 @@ class Room:
     max_players: int = MAX_PLAYERS_PER_ROOM
 
     def __post_init__(self):
+        """Initialize room after creation"""
         if not self.deck:
             self.deck = self.create_deck()
         if not hasattr(self, 'dealer_hand') or not self.dealer_hand:
@@ -229,14 +306,16 @@ class Room:
                     deck.append(Card(suit, rank))
         
         random.shuffle(deck)
-        logger.info(f"Created and shuffled deck with {len(deck)} cards for room {self.code}")
+        logger.debug(f"Created and shuffled deck with {len(deck)} cards for room {self.code}")
         return deck
 
     def shuffle_deck(self):
+        """Shuffle the deck"""
         self.deck = self.create_deck()
         logger.info(f"Reshuffled deck for room {self.code}")
 
     def deal_card(self) -> Optional[Card]:
+        """Deal a card from the deck"""
         if len(self.deck) < 15:  # Reshuffle if deck is low
             logger.info(f"Deck running low in room {self.code}, reshuffling")
             self.shuffle_deck()
@@ -250,6 +329,7 @@ class Room:
             return None
 
     def get_active_players(self) -> List[Player]:
+        """Get list of active players with money to play"""
         active = [p for p in self.players.values() 
                  if p.status not in [PlayerStatus.SITTING_OUT, PlayerStatus.ELIMINATED] 
                  and p.money >= self.min_bet
@@ -258,6 +338,7 @@ class Room:
         return active
 
     def advance_to_next_player(self):
+        """Move to the next player's turn"""
         if self._current_player_turn_index < len(self._player_turn_order) - 1:
             self._current_player_turn_index += 1
             self.current_player_id = self._player_turn_order[self._current_player_turn_index]
@@ -269,15 +350,21 @@ class Room:
             logger.info(f"All players acted, moving to dealer turn in room {self.code}")
 
     def update_activity(self):
+        """Update last activity timestamp"""
         self.last_activity = datetime.now()
 
     def is_inactive(self) -> bool:
+        """Check if room has been inactive too long"""
         return (datetime.now() - self.last_activity).total_seconds() > INACTIVE_ROOM_TIMEOUT
 
     def get_player_count(self) -> int:
+        """Get count of human players"""
         return len([p for p in self.players.values() if not p.is_ai])
 
-class BlackjackGame:
+# Main Game Logic Class
+class RoyalBlackjackGame:
+    """Main game engine for Royal Blackjack 3D"""
+    
     def __init__(self):
         self.rooms: Dict[str, Room] = {}
         self.connections: Dict[str, WebSocket] = {}
@@ -285,21 +372,34 @@ class BlackjackGame:
         self.rate_limits: Dict[str, List[float]] = defaultdict(list)
         self.action_rate_limits: Dict[str, List[float]] = defaultdict(list)
         self.running = True
+        
+        # Server statistics
         self.stats = {
             'total_rooms_created': 0,
             'total_players_connected': 0,
             'total_hands_played': 0,
-            'server_start_time': datetime.now()
+            'server_start_time': datetime.now(),
+            'peak_concurrent_players': 0,
+            'total_money_wagered': 0
         }
+        
+        logger.info("Royal Blackjack 3D Game Engine initialized")
 
     def generate_room_code(self) -> str:
-        """Generate a unique room code"""
-        while True:
+        """Generate a unique 6-character room code"""
+        attempts = 0
+        while attempts < 100:  # Prevent infinite loop
             code = ''.join(random.choices('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', k=6))
             if code not in self.rooms:
                 return code
+            attempts += 1
+        
+        # Fallback with timestamp if all random codes taken
+        timestamp = str(int(time.time()))[-4:]
+        return f"R{timestamp}X"
 
     def create_room(self, creator_player_id: str, room_name: Optional[str] = None) -> Optional[str]:
+        """Create a new game room"""
         if len(self.rooms) >= MAX_ROOMS:
             logger.warning(f"Maximum number of rooms ({MAX_ROOMS}) reached")
             return None
@@ -307,7 +407,8 @@ class BlackjackGame:
         room_code = self.generate_room_code()
         room_name = room_name or f"Blackjack {room_code}"
         
-        self.rooms[room_code] = Room(
+        # Create the room
+        room = Room(
             code=room_code, 
             name=room_name, 
             players={}, 
@@ -317,11 +418,14 @@ class BlackjackGame:
             owner_id=creator_player_id
         )
         
+        self.rooms[room_code] = room
         self.stats['total_rooms_created'] += 1
+        
         logger.info(f"Room {room_code} ({room_name}) created by player {creator_player_id}")
         return room_code
 
     def join_room(self, room_code: str, player_id: str, player_name: str) -> bool:
+        """Join a player to a room"""
         room = self.rooms.get(room_code)
         if not room:
             logger.warning(f"Attempt to join non-existent room {room_code} by {player_id}")
@@ -332,23 +436,30 @@ class BlackjackGame:
             logger.warning(f"Room {room_code} is full ({room.max_players} players)")
             return False
 
-        # Validate player name
+        # Validate and clean player name
         if not player_name or len(player_name.strip()) == 0:
             logger.warning(f"Invalid player name for {player_id}")
             return False
 
         player_name = player_name.strip()[:20]  # Limit name length
 
-        if player_id in room.players:  # Rejoining player
+        if player_id in room.players:  
+            # Rejoining player
             rejoining_player = room.players[player_id]
             rejoining_player.connection_id = player_id
             rejoining_player.name = player_name
             rejoining_player.update_activity()
             logger.info(f"Player {player_name} ({player_id}) re-joined room {room_code}")
-        else:  # New player
+        else:  
+            # New player
             # Generate unique color for player
-            hue = random.randint(0, 360)
-            color = f"hsl({hue}, 70%, 60%)"
+            colors = [
+                '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', 
+                '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
+                '#FF7675', '#74B9FF', '#00B894', '#FDCB6E'
+            ]
+            color_index = len(room.players) % len(colors)
+            color = colors[color_index]
             
             player = Player(
                 id=player_id, 
@@ -360,6 +471,12 @@ class BlackjackGame:
             )
             room.players[player_id] = player
             self.stats['total_players_connected'] += 1
+            
+            # Update peak concurrent players
+            total_players = sum(len(r.players) for r in self.rooms.values())
+            if total_players > self.stats['peak_concurrent_players']:
+                self.stats['peak_concurrent_players'] = total_players
+            
             logger.info(f"Player {player_name} ({player_id}) joined room {room_code}")
 
         self.player_rooms[player_id] = room_code
@@ -367,6 +484,7 @@ class BlackjackGame:
         return True
 
     def leave_room(self, player_id: str, force: bool = False):
+        """Remove a player from their room"""
         logger.info(f"Player {player_id} attempting to leave room. Force: {force}")
         room_code = self.player_rooms.pop(player_id, None)
         if not room_code:
@@ -384,7 +502,7 @@ class BlackjackGame:
 
         room.spectators.discard(player_id)
 
-        # Handle game state if player was active
+        # Handle game state if player was the current player
         if room.current_player_id == player_id and room.phase == GamePhase.PLAYER_TURNS:
             room.advance_to_next_player()
 
@@ -395,14 +513,16 @@ class BlackjackGame:
             if room_code in self.rooms:
                 del self.rooms[room_code]
         elif room.owner_id == player_id and remaining_players:
+            # Transfer ownership to next player
             new_owner = next((pid for pid, p_obj in room.players.items() if not p_obj.is_ai), None)
             if new_owner:
                 room.owner_id = new_owner
-                logger.info(f"Room {room_code} owner transferred to {new_owner}")
+                logger.info(f"Room {room_code} ownership transferred to {new_owner}")
 
         room.update_activity()
 
     def start_game(self, room_code: str) -> bool:
+        """Start a new game in the room"""
         room = self.rooms.get(room_code)
         if not room:
             logger.error(f"Cannot start game: room {room_code} not found")
@@ -417,13 +537,15 @@ class BlackjackGame:
             logger.warning(f"Game already in progress in room {room_code}")
             return False
 
-        # Check if all players have placed bets
+        # Check if all active players have placed bets
         players_with_bets = [p for p in active_players if p.hands[0].bet_amount > 0]
         if len(players_with_bets) == 0:
             logger.warning(f"Cannot start game in room {room_code}: No bets placed")
             return False
 
         logger.info(f"Starting blackjack game in room {room_code} with {len(players_with_bets)} players")
+        
+        # Initialize game state
         room.phase = GamePhase.DEALING
         room.hand_number += 1
         room.shuffle_deck()
@@ -432,15 +554,18 @@ class BlackjackGame:
 
         # Reset players for new hand
         for player in room.players.values():
+            player.total_hands_played += 1
             player.reset_for_new_hand()
+            
             # Restore bet for players who had placed bets
-            if player in players_with_bets:
-                original_bet = next((p.hands[0].bet_amount for p in active_players if p.id == player.id), 0)
-                player.hands[0].bet_amount = original_bet
+            original_player = next((p for p in players_with_bets if p.id == player.id), None)
+            if original_player:
+                player.hands[0].bet_amount = original_player.hands[0].bet_amount
+                self.stats['total_money_wagered'] += player.hands[0].bet_amount
 
-        # Set up turn order
+        # Set up turn order (randomized for fairness)
         room._player_turn_order = [p.id for p in players_with_bets]
-        random.shuffle(room._player_turn_order)  # Randomize order
+        random.shuffle(room._player_turn_order)
         room._current_player_turn_index = 0
         room.current_player_id = room._player_turn_order[0] if room._player_turn_order else None
 
@@ -448,6 +573,7 @@ class BlackjackGame:
         return True
 
     def deal_initial_cards(self, room_code: str):
+        """Deal initial two cards to each player and dealer"""
         room = self.rooms.get(room_code)
         if not room or room.phase != GamePhase.DEALING:
             return
@@ -470,17 +596,20 @@ class BlackjackGame:
                     room.dealer_hand.cards.append(card)
 
         # Check for blackjacks
+        blackjack_players = []
         for player in active_players:
             if player.hands[0].is_blackjack():
                 player.status = PlayerStatus.BLACKJACK
+                blackjack_players.append(player.name)
                 logger.info(f"Player {player.name} got blackjack in room {room_code}")
 
-        # Move to player turns or handle all blackjacks
+        # Move to appropriate phase
         if all(p.status == PlayerStatus.BLACKJACK for p in active_players):
+            # All players have blackjack, go straight to dealer
             room.phase = GamePhase.DEALER_TURN
         else:
             room.phase = GamePhase.PLAYER_TURNS
-            # Skip blackjack players
+            # Skip blackjack players in turn order
             while (room.current_player_id and 
                    room.players[room.current_player_id].status == PlayerStatus.BLACKJACK):
                 room.advance_to_next_player()
@@ -488,9 +617,10 @@ class BlackjackGame:
                     break
 
         room.update_activity()
-        logger.info(f"Initial cards dealt in room {room_code}")
+        logger.info(f"Initial cards dealt in room {room_code}. Blackjacks: {blackjack_players}")
 
     def player_action(self, room_code: str, player_id: str, action: PlayerAction, amount: int = 0) -> bool:
+        """Process a player action"""
         room = self.rooms.get(room_code)
         if not room:
             logger.error(f"Room {room_code} not found for player action")
@@ -504,25 +634,33 @@ class BlackjackGame:
         logger.info(f"Processing action: {player.name} - {action.value} - Amount: {amount} in room {room_code}")
 
         try:
+            success = False
             if action == PlayerAction.PLACE_BET:
-                return self.process_place_bet(room, player, amount)
+                success = self._process_place_bet(room, player, amount)
             elif action == PlayerAction.HIT:
-                return self.process_hit(room, player)
+                success = self._process_hit(room, player)
             elif action == PlayerAction.STAND:
-                return self.process_stand(room, player)
+                success = self._process_stand(room, player)
             elif action == PlayerAction.DOUBLE_DOWN:
-                return self.process_double_down(room, player)
+                success = self._process_double_down(room, player)
             elif action == PlayerAction.SPLIT:
-                return self.process_split(room, player)
+                success = self._process_split(room, player)
             elif action == PlayerAction.SURRENDER:
-                return self.process_surrender(room, player)
+                success = self._process_surrender(room, player)
+            
+            if success:
+                player.update_activity()
+                room.update_activity()
+            
+            return success
+            
         except Exception as e:
             logger.error(f"Error processing player action: {e}")
+            logger.error(traceback.format_exc())
             return False
 
-        return False
-
-    def process_place_bet(self, room: Room, player: Player, amount: int) -> bool:
+    def _process_place_bet(self, room: Room, player: Player, amount: int) -> bool:
+        """Process a bet placement"""
         if room.phase != GamePhase.WAITING:
             logger.warning(f"Cannot place bet: room {room.code} not in waiting phase")
             return False
@@ -533,13 +671,12 @@ class BlackjackGame:
 
         player.money -= amount
         player.hands[0].bet_amount = amount
-        player.update_activity()
-        room.update_activity()
         
         logger.info(f"Player {player.name} placed bet of ${amount}")
         return True
 
-    def process_hit(self, room: Room, player: Player) -> bool:
+    def _process_hit(self, room: Room, player: Player) -> bool:
+        """Process a hit action"""
         if room.phase != GamePhase.PLAYER_TURNS or room.current_player_id != player.id:
             return False
 
@@ -554,29 +691,26 @@ class BlackjackGame:
 
         if current_hand.is_bust():
             player.status = PlayerStatus.BUST
-            logger.info(f"Player {player.name} busted")
-            self.advance_player_turn(room)
+            logger.info(f"Player {player.name} busted with {current_hand.get_value()}")
+            self._advance_player_turn(room)
         elif current_hand.get_value() == 21:
             logger.info(f"Player {player.name} reached 21")
-            self.advance_player_turn(room)
+            self._advance_player_turn(room)
 
-        player.update_activity()
-        room.update_activity()
         return True
 
-    def process_stand(self, room: Room, player: Player) -> bool:
+    def _process_stand(self, room: Room, player: Player) -> bool:
+        """Process a stand action"""
         if room.phase != GamePhase.PLAYER_TURNS or room.current_player_id != player.id:
             return False
 
         player.status = PlayerStatus.STANDING
-        logger.info(f"Player {player.name} stands")
-        self.advance_player_turn(room)
-        
-        player.update_activity()
-        room.update_activity()
+        logger.info(f"Player {player.name} stands with {player.get_current_hand().get_value()}")
+        self._advance_player_turn(room)
         return True
 
-    def process_double_down(self, room: Room, player: Player) -> bool:
+    def _process_double_down(self, room: Room, player: Player) -> bool:
+        """Process a double down action"""
         if room.phase != GamePhase.PLAYER_TURNS or room.current_player_id != player.id:
             return False
 
@@ -591,7 +725,7 @@ class BlackjackGame:
         current_hand.bet_amount += additional_bet
         current_hand.is_doubled = True
 
-        # Deal one card and stand
+        # Deal exactly one card
         card = room.deal_card()
         if card:
             current_hand.cards.append(card)
@@ -601,12 +735,11 @@ class BlackjackGame:
             player.status = PlayerStatus.BUST
             logger.info(f"Player {player.name} busted after double down")
 
-        self.advance_player_turn(room)
-        player.update_activity()
-        room.update_activity()
+        self._advance_player_turn(room)
         return True
 
-    def process_split(self, room: Room, player: Player) -> bool:
+    def _process_split(self, room: Room, player: Player) -> bool:
+        """Process a split action"""
         if room.phase != GamePhase.PLAYER_TURNS or room.current_player_id != player.id:
             return False
 
@@ -630,11 +763,10 @@ class BlackjackGame:
                     hand.cards.append(card)
 
         logger.info(f"Player {player.name} split their hand")
-        player.update_activity()
-        room.update_activity()
         return True
 
-    def process_surrender(self, room: Room, player: Player) -> bool:
+    def _process_surrender(self, room: Room, player: Player) -> bool:
+        """Process a surrender action"""
         if room.phase != GamePhase.PLAYER_TURNS or room.current_player_id != player.id:
             return False
 
@@ -648,18 +780,16 @@ class BlackjackGame:
         player.money += refund
         
         logger.info(f"Player {player.name} surrendered, refunded ${refund}")
-        self.advance_player_turn(room)
-        
-        player.update_activity()
-        room.update_activity()
+        self._advance_player_turn(room)
         return True
 
-    def advance_player_turn(self, room: Room):
+    def _advance_player_turn(self, room: Room):
+        """Advance to next player or hand"""
         # Check if current player has more hands to play
         current_player = room.players.get(room.current_player_id)
         if current_player and current_player.current_hand_index < len(current_player.hands) - 1:
             current_player.current_hand_index += 1
-            logger.info(f"Player {current_player.name} moving to next hand")
+            logger.info(f"Player {current_player.name} moving to hand {current_player.current_hand_index + 1}")
             return
 
         # Reset hand index for next player
@@ -670,17 +800,19 @@ class BlackjackGame:
         room.advance_to_next_player()
         
         if room.phase == GamePhase.DEALER_TURN:
-            self.play_dealer_hand(room)
+            self._play_dealer_hand(room)
 
-    def play_dealer_hand(self, room: Room):
+    def _play_dealer_hand(self, room: Room):
+        """Play the dealer's hand according to rules"""
         logger.info(f"Dealer playing hand in room {room.code}")
         
-        # Dealer reveals hole card and plays
+        # Dealer plays by standard rules: hit on 16, stand on 17+
         while room.dealer_hand.get_value() <= DEALER_HIT_THRESHOLD:
             card = room.deal_card()
             if card:
                 room.dealer_hand.cards.append(card)
-                logger.info(f"Dealer hit and received {card}, total: {room.dealer_hand.get_value()}")
+                dealer_value = room.dealer_hand.get_value()
+                logger.info(f"Dealer hit and received {card}, total: {dealer_value}")
             else:
                 logger.error("No card available for dealer")
                 break
@@ -692,9 +824,10 @@ class BlackjackGame:
             logger.info(f"Dealer stands with {dealer_final}")
 
         room.phase = GamePhase.PAYOUT
-        self.calculate_payouts(room)
+        self._calculate_payouts(room)
 
-    def calculate_payouts(self, room: Room):
+    def _calculate_payouts(self, room: Room):
+        """Calculate and distribute payouts"""
         logger.info(f"Calculating payouts for room {room.code}")
         dealer_value = room.dealer_hand.get_value()
         dealer_bust = room.dealer_hand.is_bust()
@@ -742,8 +875,7 @@ class BlackjackGame:
                     hand.result = HandResult.LOSE
                     hand.payout = 0
 
-            # Update player stats
-            player.total_hands_played += 1
+            # Update player statistics
             if player_won_any:
                 player.total_hands_won += 1
             
@@ -755,10 +887,11 @@ class BlackjackGame:
         room.phase = GamePhase.GAME_OVER
         room.update_activity()
         
-        # Automatically prepare for next hand after delay
-        asyncio.create_task(self.prepare_next_hand(room.code))
+        # Schedule automatic reset
+        asyncio.create_task(self._prepare_next_hand(room.code))
 
-    async def prepare_next_hand(self, room_code: str, delay: int = 8):
+    async def _prepare_next_hand(self, room_code: str, delay: int = AUTO_RESET_DELAY):
+        """Prepare room for next hand after delay"""
         await asyncio.sleep(delay)
         room = self.rooms.get(room_code)
         if not room:
@@ -781,7 +914,8 @@ class BlackjackGame:
         
         logger.info(f"Room {room_code} prepared for next hand")
 
-    def get_game_state(self, room_code: str, for_player_id: str) -> dict:
+    def get_game_state(self, room_code: str, for_player_id: str) -> Dict[str, Any]:
+        """Get current game state for a player"""
         room = self.rooms.get(room_code)
         if not room:
             return {"error": "Room not found"}
@@ -789,42 +923,10 @@ class BlackjackGame:
         is_player = for_player_id in room.players and not room.players[for_player_id].is_ai
         is_spectator = for_player_id in room.spectators
 
+        # Build players data
         players_data = {}
         for p_id, p_obj in room.players.items():
-            hands_data = []
-            for hand in p_obj.hands:
-                hand_data = {
-                    "cards": [{"suit": c.suit, "rank": c.rank, "id": c.id} for c in hand.cards],
-                    "value": hand.get_value(),
-                    "bet_amount": hand.bet_amount,
-                    "is_bust": hand.is_bust(),
-                    "is_blackjack": hand.is_blackjack(),
-                    "is_doubled": hand.is_doubled,
-                    "is_surrendered": hand.is_surrendered,
-                    "result": hand.result.value if hand.result else None,
-                    "payout": hand.payout
-                }
-                hands_data.append(hand_data)
-
-            player_data = {
-                "id": p_obj.id,
-                "name": p_obj.name,
-                "money": p_obj.money,
-                "hands": hands_data,
-                "current_hand_index": p_obj.current_hand_index,
-                "status": p_obj.status.value,
-                "avatar": p_obj.avatar,
-                "color": p_obj.color,
-                "is_current_player": room.current_player_id == p_id,
-                "is_ai": p_obj.is_ai,
-                "stats": {
-                    "total_hands_played": p_obj.total_hands_played,
-                    "total_hands_won": p_obj.total_hands_won,
-                    "total_winnings": p_obj.total_winnings,
-                    "win_rate": round((p_obj.total_hands_won / max(p_obj.total_hands_played, 1)) * 100, 1)
-                }
-            }
-            players_data[p_id] = player_data
+            players_data[p_id] = p_obj.to_dict(room.current_player_id)
 
         # Dealer hand - hide hole card until dealer turn
         dealer_cards = []
@@ -842,9 +944,9 @@ class BlackjackGame:
         if room.phase in [GamePhase.DEALER_TURN, GamePhase.PAYOUT, GamePhase.GAME_OVER]:
             visible_dealer_value = room.dealer_hand.get_value()
         elif len(dealer_cards) > 0 and dealer_cards[0]["suit"] != "back":
-            # Show value of up card only
+            # Show value of up card only during player turns
             up_card = room.dealer_hand.cards[0]
-            visible_dealer_value = up_card.blackjack_value()
+            visible_dealer_value = up_card.get_blackjack_value()
 
         game_state = {
             "room_code": room.code,
@@ -872,7 +974,8 @@ class BlackjackGame:
         }
         return game_state
 
-    def get_available_actions(self, room: Room, player_id: str) -> List[Dict]:
+    def get_available_actions(self, room: Room, player_id: str) -> List[Dict[str, Any]]:
+        """Get available actions for a player"""
         player = room.players.get(player_id)
         if not player or not player.can_act() or room.current_player_id != player_id:
             return []
@@ -894,7 +997,9 @@ class BlackjackGame:
             if current_hand.can_double_down() and player.money >= current_hand.bet_amount:
                 actions.append({"action": PlayerAction.DOUBLE_DOWN.value, "label": "Double Down"})
             
-            if current_hand.can_split() and player.money >= current_hand.bet_amount and len(player.hands) < 4:
+            if (current_hand.can_split() and 
+                player.money >= current_hand.bet_amount and 
+                len(player.hands) < 4):  # Limit splits
                 actions.append({"action": PlayerAction.SPLIT.value, "label": "Split"})
             
             if len(current_hand.cards) == 2 and not current_hand.is_split:
@@ -902,7 +1007,8 @@ class BlackjackGame:
 
         return actions
 
-    def add_chat_message(self, room_code: str, player_id: str, message_text: str):
+    def add_chat_message(self, room_code: str, player_id: str, message_text: str) -> bool:
+        """Add a chat message to a room"""
         room = self.rooms.get(room_code)
         if not room:
             return False
@@ -915,8 +1021,8 @@ class BlackjackGame:
         if not cleaned_message or len(cleaned_message) > MAX_MESSAGE_LENGTH:
             return False
 
-        # Basic profanity filter (can be expanded)
-        banned_words = ['spam', 'cheat', 'hack']  # Add more as needed
+        # Basic content filtering
+        banned_words = ['cheat', 'hack', 'bot', 'script']  # Expand as needed
         if any(word in cleaned_message.lower() for word in banned_words):
             logger.warning(f"Blocked message from {player_name}: inappropriate content")
             return False
@@ -934,11 +1040,12 @@ class BlackjackGame:
         if len(room.chat_messages) > MAX_CHAT_MESSAGES:
             room.chat_messages = room.chat_messages[-MAX_CHAT_MESSAGES:]
         
-        logger.info(f"Chat in {room_code} by {player_name}: {cleaned_message}")
+        logger.debug(f"Chat in {room_code} by {player_name}: {cleaned_message}")
         room.update_activity()
         return True
 
     def check_rate_limit(self, client_id: str, limit_type: str = "message") -> bool:
+        """Check if client is within rate limits"""
         limit_dict = self.rate_limits if limit_type == "message" else self.action_rate_limits
         max_per_second = RATE_LIMIT_MESSAGES_PER_SECOND if limit_type == "message" else RATE_LIMIT_ACTIONS_PER_SECOND
 
@@ -979,58 +1086,70 @@ class BlackjackGame:
                 del self.rooms[room_code]
                 logger.info(f"Deleted inactive room {room_code}")
 
-    def get_server_stats(self) -> dict:
+    def get_server_stats(self) -> Dict[str, Any]:
+        """Get server statistics"""
         active_players = sum(len([p for p in room.players.values() if not p.is_ai]) 
                            for room in self.rooms.values())
         
+        uptime = (datetime.now() - self.stats['server_start_time']).total_seconds()
+        
         return {
+            "status": "healthy",
             "active_rooms": len(self.rooms),
             "active_players": active_players,
             "total_connections": len(self.connections),
-            "uptime_seconds": (datetime.now() - self.stats['server_start_time']).total_seconds(),
+            "uptime_seconds": uptime,
+            "uptime_hours": round(uptime / 3600, 2),
             **self.stats
         }
 
 # Global game instance
-game = BlackjackGame()
+game = RoyalBlackjackGame()
 
-# WebSocket message models
+# Pydantic Models for Request Validation
 class WSMessage(BaseModel):
+    """WebSocket message structure"""
     action: str
     payload: dict = PydanticField(default_factory=dict)
 
 class CreateRoomPayload(BaseModel):
+    """Create room request payload"""
     player_name: str = PydanticField(min_length=1, max_length=20)
     room_name: Optional[str] = PydanticField(default=None, max_length=30)
 
 class JoinRoomPayload(BaseModel):
+    """Join room request payload"""
     room_code: str = PydanticField(min_length=6, max_length=6)
     player_name: str = PydanticField(min_length=1, max_length=20)
 
 class PlayerActionPayload(BaseModel):
+    """Player action request payload"""
     action_type: str
     amount: Optional[int] = 0
 
 class ChatMessagePayload(BaseModel):
+    """Chat message payload"""
     message: str = PydanticField(min_length=1, max_length=MAX_MESSAGE_LENGTH)
 
-# Game loop for broadcasting game states
+# Game Loop - Handles game state updates and broadcasting
 async def game_loop():
-    logger.info("Game loop started")
+    """Main game loop for processing game states and broadcasting updates"""
+    logger.info("🎮 Game loop started")
     loop_count = 0
     
     while game.running:
         try:
             loop_count += 1
             
-            # Periodic cleanup every 100 loops (~15 seconds at 15fps)
-            if loop_count % 100 == 0:
+            # Periodic cleanup every 300 loops (~30 seconds at 10fps)
+            if loop_count % 300 == 0:
                 game.cleanup_inactive_rooms()
+                logger.debug(f"Cleanup completed. Active rooms: {len(game.rooms)}")
             
-            # Handle rooms in dealing phase
-            for room_code, room in list(game.rooms.items()):
-                if room.phase == GamePhase.DEALING and not room.dealer_hand.cards:
-                    game.deal_initial_cards(room_code)
+            # Handle rooms in dealing phase that need initial cards
+            dealing_rooms = [r for r in game.rooms.values() if r.phase == GamePhase.DEALING and not r.dealer_hand.cards]
+            for room in dealing_rooms:
+                game.deal_initial_cards(room.code)
 
             # Broadcast game state to all connected clients
             broadcast_tasks = []
@@ -1053,6 +1172,7 @@ async def game_loop():
                                 valid_connections.append((user_id, ws_conn, game_state))
                         except Exception as e:
                             logger.error(f"Error preparing game_state for user {user_id}: {e}")
+                            # Clean up failed connection
                             if user_id in game.connections:
                                 del game.connections[user_id]
                             game.leave_room(user_id, force=True)
@@ -1060,37 +1180,36 @@ async def game_loop():
                         # Connection lost, clean up
                         game.leave_room(user_id, force=True)
 
-                # Send broadcasts
-                if valid_connections:
-                    for user_id, ws_conn, game_state in valid_connections:
-                        try:
-                            broadcast_tasks.append(
-                                ws_conn.send_json({"type": "game_state", "data": game_state})
-                            )
-                        except Exception as e:
-                            logger.error(f"Error queueing broadcast for {user_id}: {e}")
+                # Queue broadcasts
+                for user_id, ws_conn, game_state in valid_connections:
+                    try:
+                        broadcast_tasks.append(
+                            ws_conn.send_json({"type": "game_state", "data": game_state})
+                        )
+                    except Exception as e:
+                        logger.error(f"Error queueing broadcast for {user_id}: {e}")
 
-            # Execute all broadcasts
+            # Execute all broadcasts concurrently
             if broadcast_tasks:
                 results = await asyncio.gather(*broadcast_tasks, return_exceptions=True)
-                failed_connections = []
                 
-                for i, result in enumerate(results):
-                    if isinstance(result, Exception):
-                        # Find which connection failed and mark for cleanup
-                        logger.error(f"Broadcast failed: {result}")
-                        failed_connections.append(i)
+                # Log any broadcast failures
+                failed_count = sum(1 for result in results if isinstance(result, Exception))
+                if failed_count > 0:
+                    logger.warning(f"Failed to broadcast to {failed_count}/{len(broadcast_tasks)} connections")
 
-            await asyncio.sleep(1/15)  # 15 FPS update rate
+            # Run at 10 FPS for good responsiveness without overwhelming the system
+            await asyncio.sleep(0.1)
 
         except Exception as e:
-            logger.exception(f"Error in game_loop: {e}")
-            await asyncio.sleep(1.0)
+            logger.exception(f"Critical error in game_loop: {e}")
+            await asyncio.sleep(1.0)  # Longer delay on error
 
-    logger.info("Game loop stopped")
+    logger.info("🎮 Game loop stopped")
 
-# WebSocket message handler
+# WebSocket Message Handler
 async def handle_websocket_message(websocket: WebSocket, player_id: str, message: WSMessage):
+    """Handle incoming WebSocket messages"""
     action = message.action
     payload = message.payload
     
@@ -1217,61 +1336,71 @@ async def handle_websocket_message(websocket: WebSocket, player_id: str, message
             public_rooms.sort(key=lambda x: x["created"], reverse=True)
             await websocket.send_json({"type": "room_list", "data": {"rooms": public_rooms[:20]}})
 
+        elif action == "ping":
+            # Handle heartbeat/ping
+            await websocket.send_json({"type": "pong", "data": {"timestamp": time.time()}})
+
         else:
             await websocket.send_json({"type": "error", "message": f"Unknown action: {action}"})
 
     except WebSocketDisconnect:
-        raise
+        raise  # Re-raise to be handled by the WebSocket endpoint
     except Exception as e:
         logger.exception(f"Error handling message from {player_id}: {e}")
         try:
             await websocket.send_json({"type": "error", "message": "Server error occurred"})
         except Exception:
-            pass
+            pass  # Connection might be closed
 
-# FastAPI lifespan context manager
+# FastAPI Application Setup
 @asynccontextmanager
 async def lifespan(app_instance: FastAPI):
-    logger.info("🎲 Starting Royal Blackjack 3D server...")
+    """Application lifespan handler"""
+    logger.info("🚀 Starting Royal Blackjack 3D server...")
     
     # Start the game loop
     game_task = asyncio.create_task(game_loop())
     
-    yield
-    
-    # Shutdown
-    logger.info("🛑 Shutting down Royal Blackjack 3D server...")
-    game.running = False
-    
-    # Wait for game loop to finish
     try:
-        await asyncio.wait_for(game_task, timeout=5.0)
-    except asyncio.TimeoutError:
-        logger.warning("Game loop did not shut down gracefully")
-        game_task.cancel()
+        yield
+    finally:
+        # Shutdown sequence
+        logger.info("🛑 Shutting down Royal Blackjack 3D server...")
+        game.running = False
+        
+        # Wait for game loop to finish gracefully
+        try:
+            await asyncio.wait_for(game_task, timeout=5.0)
+        except asyncio.TimeoutError:
+            logger.warning("Game loop did not shut down gracefully, forcing termination")
+            game_task.cancel()
+            try:
+                await game_task
+            except asyncio.CancelledError:
+                pass
 
-# Create FastAPI app
+# Create FastAPI application
 app = FastAPI(
     title="Royal Blackjack 3D",
-    description="Professional 3D Blackjack Casino Experience",
+    description="Professional 3D Multiplayer Blackjack Casino Experience",
     version="1.0.0",
     lifespan=lifespan
 )
 
-# Add CORS middleware
+# Add CORS middleware for cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # In production, specify actual origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Serve static files
+# Serve static files if directory exists
 if os.path.exists("static"):
     app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Routes
+# HTTP Routes
 @app.get("/", response_class=HTMLResponse)
 async def get_root():
     """Serve the main game interface"""
@@ -1280,30 +1409,53 @@ async def get_root():
     else:
         return HTMLResponse(
             content="""
+            <!DOCTYPE html>
             <html>
-                <head><title>Royal Blackjack 3D</title></head>
-                <body style="background: #0a2a1f; color: #fff; font-family: Arial; text-align: center; padding: 50px;">
+                <head>
+                    <title>Royal Blackjack 3D</title>
+                    <style>
+                        body { 
+                            background: linear-gradient(135deg, #0a2a1f, #051a11); 
+                            color: #fff; 
+                            font-family: Arial, sans-serif; 
+                            text-align: center; 
+                            padding: 50px;
+                            margin: 0;
+                            min-height: 100vh;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                        }
+                        h1 { color: #ffd700; font-size: 3rem; margin-bottom: 20px; }
+                        p { font-size: 1.2rem; margin: 10px 0; }
+                        .status { color: #4ecdc4; }
+                        .instruction { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin: 20px 0; }
+                    </style>
+                </head>
+                <body>
                     <h1>🃏 Royal Blackjack 3D 🃏</h1>
-                    <p>Server is running, but index.html not found</p>
-                    <p>Make sure to place the HTML file in the same directory as this server</p>
+                    <p class="status">✅ Server is running successfully!</p>
+                    <div class="instruction">
+                        <h3>Setup Instructions:</h3>
+                        <p>1. Save your HTML file as <strong>'index.html'</strong> in the same directory as this server</p>
+                        <p>2. Refresh this page once the file is in place</p>
+                        <p>3. Enjoy your professional blackjack experience!</p>
+                    </div>
+                    <p><strong>WebSocket URL:</strong> ws://localhost:8000/ws</p>
                 </body>
             </html>
             """,
-            status_code=404
+            status_code=200  # Server is working, just missing the HTML file
         )
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
+    """Health check endpoint for monitoring"""
     stats = game.get_server_stats()
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        **stats
-    }
+    return stats
 
 @app.get("/stats")
-async def get_stats():
+async def get_detailed_stats():
     """Get detailed server statistics"""
     stats = game.get_server_stats()
     
@@ -1319,36 +1471,60 @@ async def get_stats():
             "hand_number": room.hand_number,
             "created": room.created_at.isoformat(),
             "last_activity": room.last_activity.isoformat(),
-            "is_public": room.is_public
+            "is_public": room.is_public,
+            "owner_id": room.owner_id[:8] + "..." if room.owner_id else None
         })
     
     return {
         **stats,
-        "rooms": room_details
+        "rooms": room_details,
+        "connection_count": len(game.connections)
     }
 
+@app.get("/api/rooms")
+async def get_public_rooms():
+    """Get list of public rooms (REST endpoint)"""
+    public_rooms = []
+    for r_code, r_obj in game.rooms.items():
+        if r_obj.is_public:
+            public_rooms.append({
+                "code": r_code,
+                "name": r_obj.name,
+                "players": r_obj.get_player_count(),
+                "max_players": r_obj.max_players,
+                "phase": r_obj.phase.value,
+                "created": r_obj.created_at.isoformat()
+            })
+    
+    return {"rooms": public_rooms}
+
+# WebSocket Endpoint
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    """Main WebSocket endpoint for game communication"""
     player_id = str(uuid.uuid4())
-    logger.info(f"🔌 WebSocket connection from {player_id} ({websocket.client.host if websocket.client else 'unknown'})")
+    client_ip = websocket.client.host if websocket.client else "unknown"
+    logger.info(f"🔌 New WebSocket connection: {player_id} from {client_ip}")
     
     try:
         await websocket.accept()
         game.connections[player_id] = websocket
         
-        # Send welcome message
+        # Send welcome message with connection info
         await websocket.send_json({
             "type": "connected",
             "data": {
                 "player_id": player_id,
                 "message": "Welcome to Royal Blackjack 3D!",
-                "server_version": "1.0.0"
+                "server_version": "1.0.0",
+                "timestamp": time.time()
             }
         })
 
-        # Main message loop
+        # Main message handling loop
         while True:
             try:
+                # Receive message from client
                 data = await websocket.receive_text()
                 message_data = json.loads(data)
                 
@@ -1359,9 +1535,12 @@ async def websocket_endpoint(websocket: WebSocket):
                 await handle_websocket_message(websocket, player_id, ws_message)
                 
             except json.JSONDecodeError:
-                await websocket.send_json({"type": "error", "message": "Invalid JSON"})
+                await websocket.send_json({"type": "error", "message": "Invalid JSON format"})
             except ValidationError as e:
-                await websocket.send_json({"type": "error", "message": f"Invalid message format: {e.errors()[0]['msg']}"})
+                await websocket.send_json({
+                    "type": "error", 
+                    "message": f"Invalid message format: {e.errors()[0]['msg']}"
+                })
             except ValueError as e:
                 await websocket.send_json({"type": "error", "message": str(e)})
 
@@ -1370,28 +1549,45 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         logger.exception(f"🔌 WebSocket error for {player_id}: {e}")
     finally:
-        # Cleanup
+        # Cleanup on disconnect
         if player_id in game.connections:
             del game.connections[player_id]
         game.leave_room(player_id, force=True)
         logger.info(f"🔌 Cleaned up connection for {player_id}")
 
+# Development/Production Server Entry Point
 if __name__ == "__main__":
-    # Configuration
+    # Configuration from environment variables
     port = int(os.environ.get("PORT", 8000))
     host = os.environ.get("HOST", "0.0.0.0")
     debug = os.environ.get("DEBUG", "false").lower() == "true"
     
-    logger.info(f"🚀 Starting Royal Blackjack 3D server on {host}:{port}")
+    # Log startup information
+    logger.info("=" * 60)
+    logger.info("🎰 ROYAL BLACKJACK 3D SERVER")
+    logger.info("=" * 60)
+    logger.info(f"🚀 Starting server on {host}:{port}")
     logger.info(f"🎯 Debug mode: {debug}")
     logger.info(f"📁 Working directory: {os.getcwd()}")
+    logger.info(f"🎮 Max rooms: {MAX_ROOMS}")
+    logger.info(f"👥 Max players per room: {MAX_PLAYERS_PER_ROOM}")
+    logger.info(f"💰 Starting money: ${STARTING_MONEY}")
+    logger.info("=" * 60)
     
     # Run the server
-    uvicorn.run(
-        "app:app" if __name__ == "__main__" else app,
-        host=host,
-        port=port,
-        reload=debug,
-        log_level="info" if not debug else "debug",
-        access_log=True
-    )
+    try:
+        uvicorn.run(
+            "app:app" if __name__ == "__main__" else app,
+            host=host,
+            port=port,
+            reload=debug,
+            log_level="info" if not debug else "debug",
+            access_log=True,
+            ws_ping_interval=20,
+            ws_ping_timeout=10
+        )
+    except KeyboardInterrupt:
+        logger.info("🛑 Server stopped by user")
+    except Exception as e:
+        logger.exception(f"💥 Server startup failed: {e}")
+        exit(1)
