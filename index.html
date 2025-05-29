@@ -1310,9 +1310,9 @@
             tableFelt.receiveShadow = true;
             tableGroup.add(tableFelt);
             
+            createPlayerPositions(); // Call this before createTableMarkings if markings depend on positions
             createTableMarkings();
             scene.add(tableGroup);
-            createPlayerPositions();
         }
 
         function createWoodTexture() {
@@ -1382,40 +1382,44 @@
             tableGroup.add(dealerArea);
             
             // Add betting circles for each player position
-            playerPositions.forEach((pos, index) => {
-                const bettingCircle = new THREE.Mesh(
-                    new THREE.RingGeometry(0.4, 0.45, 24),
-                    new THREE.MeshBasicMaterial({ 
-                        color: 0xffd700, 
-                        transparent: true, 
-                        opacity: 0.5 
-                    })
-                );
-                bettingCircle.rotation.x = -Math.PI / 2;
-                bettingCircle.position.set(pos.chipX, 0.05, pos.chipZ);
-                tableGroup.add(bettingCircle);
-            });
+            // Ensure playerPositions is populated before this runs
+            if (playerPositions && playerPositions.length > 0) {
+                playerPositions.forEach((pos, index) => {
+                    const bettingCircle = new THREE.Mesh(
+                        new THREE.RingGeometry(0.4, 0.45, 24),
+                        new THREE.MeshBasicMaterial({ 
+                            color: 0xffd700, 
+                            transparent: true, 
+                            opacity: 0.5 
+                        })
+                    );
+                    bettingCircle.rotation.x = -Math.PI / 2;
+                    bettingCircle.position.set(pos.chipX, 0.051, pos.chipZ); // Slight y offset for visibility
+                    tableGroup.add(bettingCircle);
+                });
+            }
         }
 
         function createPlayerPositions() {
             playerPositions = [];
             const radius = 4.5;
-            const angleStep = Math.PI / 7;
-            const startAngle = Math.PI + angleStep;
+            const angleStep = Math.PI / 7; // For 6 players, leaves a gap
+            const startAngle = Math.PI + angleStep / 2; // Adjust start angle slightly
             
-            for (let i = 0; i < 6; i++) {
+            for (let i = 0; i < 6; i++) { // Max 6 players
                 const angle = startAngle + i * angleStep;
                 playerPositions.push({
                     angle: angle,
                     x: Math.cos(angle) * radius,
                     z: Math.sin(angle) * radius,
-                    cardXOffset: -0.4,
+                    cardXOffset: 0, // Adjust based on actual card placement logic
                     cardSpacing: 0.7,
-                    chipX: Math.cos(angle) * (radius - 1.0),
-                    chipZ: Math.sin(angle) * (radius - 1.0)
+                    chipX: Math.cos(angle) * (radius - 1.2), // Position for chips
+                    chipZ: Math.sin(angle) * (radius - 1.2)
                 });
             }
         }
+
 
         function createCardMaterials() {
             cardMaterials.back = new THREE.MeshPhongMaterial({ 
@@ -1430,20 +1434,31 @@
             canvas.width = 200;
             canvas.height = 280;
             
+            // Rounded corners for the card background
+            ctx.fillStyle = isBack ? '#1E3A8A' : '#FFFFFF';
+            ctx.beginPath();
+            const cornerRadius = 10;
+            ctx.moveTo(cornerRadius, 0);
+            ctx.lineTo(canvas.width - cornerRadius, 0);
+            ctx.quadraticCurveTo(canvas.width, 0, canvas.width, cornerRadius);
+            ctx.lineTo(canvas.width, canvas.height - cornerRadius);
+            ctx.quadraticCurveTo(canvas.width, canvas.height, canvas.width - cornerRadius, canvas.height);
+            ctx.lineTo(cornerRadius, canvas.height);
+            ctx.quadraticCurveTo(0, canvas.height, 0, canvas.height - cornerRadius);
+            ctx.lineTo(0, cornerRadius);
+            ctx.quadraticCurveTo(0, 0, cornerRadius, 0);
+            ctx.closePath();
+            ctx.fill();
+
             if (!isBack) {
                 // Card front
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Card border
+                // Card border (already handled by shape)
+                // Inner border (optional, can be removed if shape is enough)
+                /*
                 ctx.strokeStyle = '#DDDDDD';
                 ctx.lineWidth = 4;
                 ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
-                
-                // Inner border
-                ctx.strokeStyle = '#CCCCCC';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(8, 8, canvas.width - 16, canvas.height - 16);
+                */
                 
                 const suitSymbols = { 'hearts': '♥', 'diamonds': '♦', 'clubs': '♣', 'spades': '♠' };
                 const suitColor = (suitName === 'hearts' || suitName === 'diamonds') ? '#DC143C' : '#000000';
@@ -1470,22 +1485,26 @@
                 // Center symbol
                 ctx.font = 'bold 80px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText(suitSymbols[suitName] || '', canvas.width / 2, canvas.height / 2 + 20);
+                ctx.fillText(suitSymbols[suitName] || '', canvas.width / 2, canvas.height / 2 + 30); // Adjusted y
                 
             } else {
                 // Card back
-                ctx.fillStyle = '#1E3A8A';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
                 // Border
                 ctx.strokeStyle = '#FBBF24';
                 ctx.lineWidth = 6;
-                ctx.strokeRect(3, 3, canvas.width - 6, canvas.height - 6);
-                
-                // Inner decorative border
-                ctx.strokeStyle = '#FDE047';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(12, 12, canvas.width - 24, canvas.height - 24);
+                // Redraw rounded rect for border
+                ctx.beginPath();
+                ctx.moveTo(cornerRadius + 3, 3); // +3 for half lineWidth
+                ctx.lineTo(canvas.width - cornerRadius - 3, 3);
+                ctx.quadraticCurveTo(canvas.width - 3, 3, canvas.width - 3, cornerRadius + 3);
+                ctx.lineTo(canvas.width - 3, canvas.height - cornerRadius - 3);
+                ctx.quadraticCurveTo(canvas.width - 3, canvas.height - 3, canvas.width - cornerRadius - 3, canvas.height - 3);
+                ctx.lineTo(cornerRadius + 3, canvas.height - 3);
+                ctx.quadraticCurveTo(3, canvas.height - 3, 3, canvas.height - cornerRadius - 3);
+                ctx.lineTo(3, cornerRadius + 3);
+                ctx.quadraticCurveTo(3, 3, cornerRadius + 3, 3);
+                ctx.closePath();
+                ctx.stroke();
                 
                 // Center design
                 ctx.fillStyle = 'rgba(251, 191, 36, 0.3)';
@@ -1499,19 +1518,6 @@
                 ctx.fillText('ROYAL', canvas.width/2, canvas.height/2 - 15);
                 ctx.fillText('BLACKJACK', canvas.width/2, canvas.height/2 + 5);
                 ctx.fillText('3D', canvas.width/2, canvas.height/2 + 25);
-                
-                // Corner decorations
-                const corners = [
-                    [30, 30], [canvas.width - 30, 30], 
-                    [30, canvas.height - 30], [canvas.width - 30, canvas.height - 30]
-                ];
-                
-                corners.forEach(([x, y]) => {
-                    ctx.fillStyle = '#FDE047';
-                    ctx.beginPath();
-                    ctx.arc(x, y, 8, 0, Math.PI * 2);
-                    ctx.fill();
-                });
             }
             
             const texture = new THREE.CanvasTexture(canvas);
@@ -1596,29 +1602,63 @@
             const cardGroup = new THREE.Group();
             const cardWidth = 1.0, cardHeight = 1.4, cardDepth = 0.02;
             
-            // Enhanced card geometry with rounded edges
-            const cardGeometry = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
-            
-            // Apply slight rounding to edges
-            const edges = new THREE.EdgesGeometry(cardGeometry);
-            const edgeMaterial = new THREE.LineBasicMaterial({ color: 0xcccccc, opacity: 0.3, transparent: true });
-            const edgeLines = new THREE.LineSegments(edges, edgeMaterial);
-            cardGroup.add(edgeLines);
+            const cardShape = new THREE.Shape();
+            const x = -cardWidth / 2, y = -cardHeight / 2, width = cardWidth, height = cardHeight, radius = 0.05;
+            cardShape.moveTo(x, y + radius);
+            cardShape.lineTo(x, y + height - radius);
+            cardShape.quadraticCurveTo(x, y + height, x + radius, y + height);
+            cardShape.lineTo(x + width - radius, y + height);
+            cardShape.quadraticCurveTo(x + width, y + height, x + width, y + height - radius);
+            cardShape.lineTo(x + width, y + radius);
+            cardShape.quadraticCurveTo(x + width, y, x + width - radius, y);
+            cardShape.lineTo(x + radius, y);
+            cardShape.quadraticCurveTo(x, y, x, y + radius);
+
+            const extrudeSettings = { depth: cardDepth, bevelEnabled: false };
+            const cardGeometry = new THREE.ExtrudeGeometry(cardShape, extrudeSettings);
             
             const frontTexture = faceUp ? createCardTexture(cardData.rank, cardData.suit) : createCardTexture("?", "?", true);
             const backTexture = createCardTexture("?", "?", true);
             const sideMaterial = new THREE.MeshPhongMaterial({color: 0xf0f0f0, shininess: 10});
             
             const materials = [
-                sideMaterial, sideMaterial, sideMaterial, sideMaterial,
-                new THREE.MeshPhongMaterial({ map: frontTexture, shininess: faceUp ? 20 : 40 }),
-                new THREE.MeshPhongMaterial({ map: backTexture, shininess: 40 })
+                new THREE.MeshPhongMaterial({ map: frontTexture, shininess: faceUp ? 20 : 40 }), // Front face
+                new THREE.MeshPhongMaterial({ map: backTexture, shininess: 40 }), // Back face (will be assigned correctly by THREE for extrude)
+                sideMaterial // Side material
             ];
             
             const cardMesh = new THREE.Mesh(cardGeometry, materials);
-            cardMesh.castShadow = true;
-            cardMesh.receiveShadow = true;
-            cardGroup.add(cardMesh);
+             // THREE.js ExtrudeGeometry maps materials differently. 
+            // Material 0 is front, 1 is back, 2 is side.
+            // To make sure front/back are correct:
+            cardMesh.material = [
+                new THREE.MeshPhongMaterial({ map: frontTexture, shininess: faceUp ? 20 : 40 }), // Material for extruded front face
+                sideMaterial // Material for extruded sides
+            ];
+            // Create a separate plane for the back if needed, or adjust material mapping.
+            // For simplicity, let's assume the default mapping works or we adjust UVs.
+            // A common approach is to make the main extrude be one material (e.g. front + sides)
+            // and then add a thin plane for the back.
+            // Or, ensure your texture mapping for ExtrudeGeometry is correct.
+            // The default ExtrudeGeometry puts the front face material (index 0) on the front/back, and side (index 1) on sides.
+            // Let's re-map to be more like BoxGeometry's order for consistency with the original code.
+            const cardMaterialsArray = [
+                sideMaterial, // right
+                sideMaterial, // left
+                sideMaterial, // top
+                sideMaterial, // bottom
+                new THREE.MeshPhongMaterial({ map: frontTexture, shininess: faceUp ? 20 : 40 }), // front
+                new THREE.MeshPhongMaterial({ map: backTexture, shininess: 40 })  // back
+            ];
+            // This remapping for ExtrudeGeometry is non-trivial.
+            // The simplest way with ExtrudeGeometry is using materialIndex in faces or groups.
+            // For now, let's revert to BoxGeometry for simplicity in material assignment and keep rounded look via texture.
+            const simplerCardGeom = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
+            const cardMeshSimple = new THREE.Mesh(simplerCardGeom, cardMaterialsArray);
+
+            cardMeshSimple.castShadow = true;
+            cardMeshSimple.receiveShadow = true;
+            cardGroup.add(cardMeshSimple);
             
             cardGroup.position.copy(position);
             cardGroup.rotation.y = rotationY;
@@ -1632,6 +1672,7 @@
             
             return cardGroup;
         }
+
 
         function createChip3D(value, position, stackCount = 1) {
             const chipGroup = new THREE.Group();
@@ -1811,36 +1852,29 @@
             
             // Enhanced table rotation
             if (tableGroup) {
-                tableGroup.rotation.y += 0.0002;
+                // tableGroup.rotation.y += 0.0002; // Subtle rotation can be distracting
             }
             
             // Enhanced particle animation
             if (particleSystem) {
                 particleSystem.rotation.y += 0.0003;
                 const positions = particleSystem.geometry.attributes.position.array;
-                for (let i = 1; i < positions.length; i += 3) {
-                    positions[i] += Math.sin(currentTime + i) * 0.002;
+                for (let i = 1; i < positions.length; i += 3) { // Start from Y component
+                    positions[i] = (positions[i] + Math.sin(currentTime + i*0.1) * 0.005);
+                    // Keep particles within a vertical range
+                    if (positions[i] < 5) positions[i] = 5 + Math.random()*20;
+                    if (positions[i] > 35) positions[i] = 35 - Math.random()*20;
                 }
                 particleSystem.geometry.attributes.position.needsUpdate = true;
             }
             
-            // Enhanced card animations
-            dealerCardObjects3D.forEach((cardMesh, index) => {
-                if (cardMesh) {
-                    const baseY = cardMesh.userData.originalPosition ? cardMesh.userData.originalPosition.y : 0.05;
-                    cardMesh.position.y = baseY + Math.sin(currentTime * 2 + index * 0.8) * 0.015;
-                    cardMesh.rotation.z = Math.sin(currentTime * 1.5 + index) * 0.02;
+            // Enhanced card animations (gentle bobbing)
+            const allCardObjects = [...dealerCardObjects3D, ...Object.values(playerCardObjects3D).flat()];
+            allCardObjects.forEach((cardMesh, index) => {
+                if (cardMesh && cardMesh.userData && cardMesh.userData.originalPosition) {
+                    const baseY = cardMesh.userData.originalPosition.y;
+                    cardMesh.position.y = baseY + Math.sin(currentTime * 1.5 + index * 0.5) * 0.01;
                 }
-            });
-            
-            Object.values(playerCardObjects3D).forEach(playerCards => {
-                playerCards.forEach((cardMesh, index) => {
-                    if (cardMesh) {
-                        const baseY = cardMesh.userData.originalPosition ? cardMesh.userData.originalPosition.y : 0.05;
-                        cardMesh.position.y = baseY + Math.sin(currentTime * 2 + index * 0.8) * 0.015;
-                        cardMesh.rotation.z = Math.sin(currentTime * 1.5 + index) * 0.02;
-                    }
-                });
             });
             
             renderer.render(scene, camera);
@@ -1851,98 +1885,87 @@
             consoleLog("updateTableVisuals START");
             if (!currentGameState) return;
             
-            const cardBaseY = 0.08;
+            const cardBaseY = 0.08 + 0.01; // Slightly above felt + card depth/2 approx
 
             // Update dealer cards with enhanced animations
             clearDealerCards();
             if (currentGameState.dealer_hand && currentGameState.dealer_hand.cards) {
                 currentGameState.dealer_hand.cards.forEach((cardData, index) => {
-                    const position = new THREE.Vector3(-2.0 + index * 1.0, cardBaseY, -3.8);
+                    const position = new THREE.Vector3(-2.0 + index * 1.1, cardBaseY, -3.8); // Increased spacing
                     const faceUp = cardData.suit !== 'back';
                     const cardObj = createCard3D(cardData, position, 0, faceUp);
                     scene.add(cardObj);
                     dealerCardObjects3D.push(cardObj);
                     
-                    // Enhanced card dealing animation
                     gsap.fromTo(cardObj.position, 
-                        { x: 0, y: cardBaseY + 5, z: 0 },
+                        { x: 0, y: cardBaseY + 2, z: 0 },
                         { 
-                            x: position.x, 
-                            y: position.y, 
-                            z: position.z,
-                            duration: 0.8, 
-                            ease: "back.out(1.2)", 
-                            delay: index * 0.2 
+                            x: position.x, y: position.y, z: position.z,
+                            duration: 0.6, ease: "back.out(1.2)", delay: index * 0.15 
                         }
                     );
-                    
-                    gsap.from(cardObj.rotation, {
-                        x: Math.PI * 2,
-                        duration: 0.8,
-                        ease: "power2.out",
-                        delay: index * 0.2
-                    });
+                    gsap.from(cardObj.rotation, { y: Math.PI, duration: 0.6, ease: "power2.out", delay: index * 0.15 });
                 });
             }
 
-            // Update player cards with enhanced positioning and animations
-            Object.values(currentGameState.players).forEach((player, pIndex) => {
-                if (pIndex >= playerPositions.length) return;
-                
-                clearPlayerCards(player.id);
-                const pos3D = playerPositions[pIndex];
-                
-                if (!playerCardObjects3D[player.id]) {
-                    playerCardObjects3D[player.id] = [];
-                }
+            // Clear old player cards and chips
+            Object.keys(playerCardObjects3D).forEach(pid => clearPlayerCards(pid));
+            Object.values(chipStackObjects).forEach(obj => {
+                if (obj.parent) obj.parent.remove(obj);
+                 // Stop GSAP animations associated with this chip
+                gsap.killTweensOf(obj.position);
+            });
+            chipStackObjects = {};
 
-                let cardIndex = 0;
+
+            // Update player cards and chips
+            Object.values(currentGameState.players).forEach((player, pIndex) => {
+                if (pIndex >= playerPositions.length) {
+                    consoleWarn(`Player index ${pIndex} out of bounds for playerPositions (length ${playerPositions.length})`);
+                    return;
+                }
+                
+                const pos3D = playerPositions[pIndex];
+                if (!playerCardObjects3D[player.id]) playerCardObjects3D[player.id] = [];
+
+                let cardRenderIndex = 0; // Used for animation delays across all hands of a player
                 player.hands.forEach((hand, handIndex) => {
+                    // Calculate base offset for this hand (to center multiple hands)
+                    const handCardCount = hand.cards.length;
+                    const handWidth = (handCardCount -1) * (pos3D.cardSpacing * 0.5); // Adjusted spacing for visual
+                    const handStartX = pos3D.x + pos3D.cardXOffset - handWidth / 2 + (handIndex * 2.0); // Spacing between hands
+
                     hand.cards.forEach((cardData, cardInHandIndex) => {
                         const cardPosition = new THREE.Vector3(
-                            pos3D.x + pos3D.cardXOffset + (handIndex * 2.5 + cardInHandIndex) * pos3D.cardSpacing,
+                            handStartX + cardInHandIndex * (pos3D.cardSpacing * 0.5),
                             cardBaseY,
-                            pos3D.z
+                            pos3D.z // Cards are arranged along player's local X axis (table's X-Z plane)
                         );
-                        const cardRotationY = pos3D.angle + Math.PI/2;
+                        const cardRotationY = pos3D.angle + Math.PI / 2; // Orient cards towards center
                         const cardObj = createCard3D(cardData, cardPosition, cardRotationY, true);
                         scene.add(cardObj);
                         playerCardObjects3D[player.id].push(cardObj);
                         
-                        const totalDelay = pIndex * 0.15 + cardIndex * 0.1;
+                        const totalDelay = pIndex * 0.1 + cardRenderIndex * 0.08;
                         
-                        // Enhanced dealing animation
                         gsap.fromTo(cardObj.position, 
-                            { x: 0, y: cardBaseY + 4, z: 0 },
+                            { x: 0, y: cardBaseY + 2, z: 0 },
                             { 
-                                x: cardPosition.x, 
-                                y: cardPosition.y, 
-                                z: cardPosition.z,
-                                duration: 0.7, 
-                                ease: "power2.out", 
-                                delay: totalDelay 
+                                x: cardPosition.x, y: cardPosition.y, z: cardPosition.z,
+                                duration: 0.5, ease: "power2.out", delay: totalDelay 
                             }
                         );
-                        
                         gsap.fromTo(cardObj.rotation, 
-                            { x: Math.PI, y: cardRotationY },
-                            {
-                                x: 0,
-                                duration: 0.7,
-                                ease: "power2.out",
-                                delay: totalDelay
-                            }
+                            { y: cardRotationY + Math.PI }, // Start from facing away
+                            { y: cardRotationY, duration: 0.5, ease: "power2.out", delay: totalDelay }
                         );
-                        
-                        cardIndex++;
+                        cardRenderIndex++;
                     });
-                });
 
-                // Add enhanced bet chips with better stacking
-                player.hands.forEach((hand, handIndex) => {
+                    // Add bet chips
                     if (hand.bet_amount > 0) {
                         const chipPosition = new THREE.Vector3(
-                            pos3D.chipX + handIndex * 0.8, 
+                            pos3D.chipX + handIndex * 0.6, // Chips slightly offset per hand
                             0.02, 
                             pos3D.chipZ
                         );
@@ -1951,12 +1974,8 @@
                         scene.add(chipStack);
                         chipStackObjects[`player_bet_${player.id}_${handIndex}`] = chipStack;
                         
-                        // Chip placement animation
                         gsap.from(chipStack.scale, {
-                            x: 0, y: 0, z: 0,
-                            duration: 0.5,
-                            ease: "back.out(1.7)",
-                            delay: pIndex * 0.1
+                            x: 0, y: 0, z: 0, duration: 0.4, ease: "back.out(1.7)", delay: pIndex * 0.1
                         });
                     }
                 });
@@ -1965,11 +1984,12 @@
             consoleLog("updateTableVisuals COMPLETE");
         }
 
+
         function clearDealerCards() {
             dealerCardObjects3D.forEach(obj => {
-                if (obj.parent) {
-                    obj.parent.remove(obj);
-                }
+                if (obj.parent) obj.parent.remove(obj);
+                gsap.killTweensOf(obj.position); 
+                gsap.killTweensOf(obj.rotation);
             });
             dealerCardObjects3D = [];
         }
@@ -1977,9 +1997,9 @@
         function clearPlayerCards(playerId) {
             if (playerCardObjects3D[playerId]) {
                 playerCardObjects3D[playerId].forEach(obj => {
-                    if (obj.parent) {
-                        obj.parent.remove(obj);
-                    }
+                    if (obj.parent) obj.parent.remove(obj);
+                    gsap.killTweensOf(obj.position);
+                    gsap.killTweensOf(obj.rotation);
                 });
                 playerCardObjects3D[playerId] = [];
             }
@@ -1989,9 +2009,9 @@
             clearDealerCards();
             Object.keys(playerCardObjects3D).forEach(playerId => clearPlayerCards(playerId));
             Object.values(chipStackObjects).forEach(obj => {
-                if (obj.parent) {
-                    obj.parent.remove(obj);
-                }
+                if (obj.parent) obj.parent.remove(obj);
+                gsap.killTweensOf(obj.position); // Kill chip animations too
+                gsap.killTweensOf(obj.scale);
             });
             chipStackObjects = {};
         }
@@ -2067,7 +2087,8 @@
                 } else if (reconnectAttempts >= maxReconnectAttempts) {
                     updateConnectionStatus('disconnected', 'Max reconnect attempts reached');
                     showNotification('Connection lost. Please refresh the page.', 'error', 10000);
-                    hideLoadingScreen();
+                    // Don't hide loading screen if it was shown for reconnection attempts.
+                    // Let user decide to refresh.
                 }
             };
             
@@ -2075,6 +2096,10 @@
                 consoleError('WebSocket error:', error);
                 updateConnectionStatus('disconnected', 'Connection error');
                 showNotification('Connection error occurred', 'error', 5000);
+                 // If an error occurs, it might prevent onopen, so isLoadingOrReconnecting might be true.
+                // Consider setting isLoadingOrReconnecting = false here to allow reconnection attempts.
+                // However, this could also lead to rapid failed reconnection attempts.
+                // For now, let onclose handle the main reconnection logic.
             };
         }
 
@@ -2104,7 +2129,7 @@
                     case 'connected':
                         myPlayerId = message.data.player_id;
                         consoleLog(`Connected successfully. Player ID: ${myPlayerId}`);
-                        hideLoadingScreen();
+                        hideLoadingScreen(); // Hide initial loading screen
                         showMainMenu();
                         break;
                         
@@ -2112,6 +2137,7 @@
                     case 'room_joined':
                         currentRoomCode = message.data.room_code;
                         isPlayerInGame = true;
+                        hideLoadingScreen(); // ADDED: Hide "Creating/Joining room..." loading screen
                         showGameInterface();
                         showNotification(`Joined room: ${currentRoomCode}`, 'success', 4000);
                         animateCameraToTable();
@@ -2120,13 +2146,15 @@
                     case 'spectating':
                         currentRoomCode = message.data.room_code;
                         isPlayerInGame = false;
+                        hideLoadingScreen(); // ADDED: Hide "Spectating room..." loading screen
                         showGameInterface();
                         showNotification(`Spectating room: ${currentRoomCode}`, 'info', 4000);
                         animateCameraToTable();
                         break;
                         
                     case 'room_left':
-                        handleRoomLeft();
+                        hideLoadingScreen(); // ADDED: Hide "Leaving room..." loading screen
+                        handleRoomLeft(); // This will show main menu
                         break;
                         
                     case 'game_state':
@@ -2141,6 +2169,9 @@
                     case 'error':
                         consoleError('Server error:', message.message);
                         showNotification('Error: ' + message.message, 'error', 5000);
+                        // If an error implies a failed action that showed a loading screen, hide it.
+                        // This is a bit broad, but can help prevent stuck loading screens on server error.
+                        hideLoadingScreen(); 
                         break;
                         
                     default:
@@ -2152,7 +2183,9 @@
             }
         }
 
+
         function handleRoomLeft() {
+            // hideLoadingScreen() is now called in handleServerMessage before this
             showMainMenu();
             showNotification('You have left the room.', 'info', 3000);
             animateCameraToMenu();
@@ -2235,6 +2268,8 @@
                         consoleLog("Loading screen hidden");
                     }
                 });
+            } else {
+                 consoleLog("hideLoadingScreen called, but screen already hidden or not found.");
             }
         }
 
@@ -2244,7 +2279,8 @@
             
             if (textElement) textElement.textContent = text;
             loadingScreen.style.display = 'flex';
-            loadingScreen.style.opacity = '0';
+            // Ensure opacity is reset for GSAP animation if it was previously faded out
+            loadingScreen.style.opacity = '0'; 
             
             gsap.to(loadingScreen, { 
                 duration: 0.5, 
@@ -2254,6 +2290,7 @@
             
             consoleLog("Loading screen shown:", text);
         }
+
 
         function showMainMenu() {
             consoleLog("Showing main menu");
@@ -2308,7 +2345,7 @@
             }
 
             // Show/hide betting controls with animations
-            if (currentGameState.phase === 'waiting' && myPlayerState && isPlayerInGame) {
+            if (currentGameState.phase === 'waiting' && myPlayerState && isPlayerInGame && currentGameState.players[myPlayerId]?.hands[0]?.bet_amount === 0) {
                 showElement('betControls');
                 hideElement('actionsPanel');
             } else if (currentGameState.can_act && currentGameState.available_actions && isPlayerInGame) {
@@ -2319,6 +2356,7 @@
                 hideElement('betControls');
                 hideElement('actionsPanel');
             }
+
 
             // Update dealer display
             updateDealerDisplay();
@@ -2337,7 +2375,7 @@
             const canStartGame = currentGameState.phase === 'waiting' &&
                                  myPlayerState &&
                                  myPlayerState.id === currentGameState.owner_id &&
-                                 Object.values(currentGameState.players).length >= 1;
+                                 Object.values(currentGameState.players).some(p => p.hands[0]?.bet_amount > 0); // At least one bet placed
             
             if (canStartGame) {
                 startBtn.style.display = 'block';
@@ -2373,11 +2411,15 @@
             const dealerValueEl = document.getElementById('dealerValue');
             
             if (!currentGameState.dealer_hand || !currentGameState.dealer_hand.cards) {
+                dealerHandEl.innerHTML = ''; // Clear previous cards
                 dealerValueEl.textContent = 'No cards';
                 return;
             }
 
+
             // Show dealer cards as mini cards with animations
+            // Only rebuild if necessary (e.g., card count changes or value changes significantly)
+            // For simplicity here, always rebuilding, but could be optimized
             dealerHandEl.innerHTML = '';
             currentGameState.dealer_hand.cards.forEach((card, index) => {
                 const cardDiv = document.createElement('div');
@@ -2408,7 +2450,7 @@
                 if (dealerValueEl.textContent !== newValue) {
                     gsap.fromTo(dealerValueEl, 
                         { scale: 1.2, color: '#ffd700' },
-                        { scale: 1, color: '#ffffff', duration: 0.5, ease: "power2.out" }
+                        { scale: 1, color: '#ffffff', duration: 0.5, ease: "power2.out", overwrite: "auto" }
                     );
                 }
                 dealerValueEl.textContent = newValue;
@@ -2423,35 +2465,38 @@
             const actions = currentGameState.available_actions;
             const buttonIds = ['hitBtn', 'standBtn', 'doubleBtn', 'splitBtn', 'surrenderBtn'];
             
-            // Hide all buttons first
+            // Hide all buttons first (or rather, ensure they are correctly enabled/disabled)
             buttonIds.forEach(id => {
                 const btn = document.getElementById(id);
                 if (btn) {
-                    btn.style.display = 'none';
+                    btn.style.display = 'none'; // Start by hiding all
                     btn.disabled = true;
                 }
             });
 
             // Show available actions with staggered animation
-            actions.forEach((action, index) => {
-                const btnId = action.action + 'Btn';
+            actions.forEach((actionData, index) => { // Assuming actionData is {action: "hit", label: "Hit"}
+                const btnId = actionData.action + 'Btn'; // e.g. "hitBtn"
                 const btn = document.getElementById(btnId);
                 if (btn) {
                     btn.style.display = 'inline-block';
                     btn.disabled = false;
+                    // Potentially update label if dynamic: btn.textContent = actionData.label;
                     
-                    // Animate button appearance
                     gsap.fromTo(btn, 
                         { opacity: 0, scale: 0.8, y: 20 },
-                        { opacity: 1, scale: 1, y: 0, duration: 0.4, delay: index * 0.1, ease: "back.out(1.7)" }
+                        { opacity: 1, scale: 1, y: 0, duration: 0.4, delay: index * 0.1, ease: "back.out(1.7)", overwrite: "auto" }
                     );
                 }
             });
         }
 
+
         function updatePlayerHandsUI() {
             const container = document.getElementById('playerHandsDisplay');
-            container.innerHTML = '';
+            // Smart update: only update if player data actually changed to avoid re-creating DOM elements constantly.
+            // For now, simple clear and rebuild.
+            container.innerHTML = ''; 
             
             if (!currentGameState.players) return;
 
@@ -2459,11 +2504,10 @@
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'player-hand';
                 
-                // Add special styling
                 if (player.is_current_player) playerDiv.classList.add('current-player');
                 if (player.status === 'bust') playerDiv.classList.add('bust');
                 if (player.status === 'blackjack') playerDiv.classList.add('blackjack');
-                if (player.id === myPlayerId) playerDiv.style.borderColor = '#00ffff';
+                if (player.id === myPlayerId) playerDiv.style.borderColor = '#00ffff'; // Highlight own player
 
                 let handsHtml = '';
                 player.hands.forEach((hand, handIndex) => {
@@ -2474,40 +2518,41 @@
                     }).join('');
                     
                     handsHtml += `
-                        <div class="hand-info">
+                        <div class="hand-info" style="border-top: ${handIndex > 0 ? '1px solid rgba(255,215,0,0.3)' : 'none'}; margin-top: ${handIndex > 0 ? '10px' : '0'}; padding-top: ${handIndex > 0 ? '10px' : '0'};">
                             <div class="hand-cards">${cardsHtml}</div>
-                            <div>Value: ${hand.value}</div>
-                            <div>Bet: ${hand.bet_amount}</div>
-                            ${hand.result ? `<div style="color: ${getResultColor(hand.result)};">Result: ${hand.result.toUpperCase()}</div>` : ''}
-                            ${hand.payout > 0 ? `<div style="color: #00ff00;">Won: ${hand.payout}</div>` : ''}
+                            <div>Value: ${hand.value !== undefined ? hand.value : 'N/A'}</div>
+                            <div>Bet: $${hand.bet_amount}</div>
+                            ${hand.result ? `<div style="color: ${getResultColor(hand.result)}; font-weight: bold;">${hand.result.toUpperCase()}</div>` : ''}
+                            ${hand.payout > 0 && hand.result !== 'push' ? `<div style="color: #00ffaa;">Won: $${hand.payout - hand.bet_amount}</div>` : ''}
+                            ${hand.payout > 0 && hand.result === 'push' ? `<div style="color: #ffaa00;">Push: $${hand.bet_amount} returned</div>` : ''}
                         </div>
                     `;
                 });
 
                 playerDiv.innerHTML = `
-                    <div class="player-name">${player.name}</div>
-                    <div class="player-money">${player.money.toLocaleString()}</div>
+                    <div class="player-name">${player.name} (ID: ${player.id.substring(0,4)})</div>
+                    <div class="player-money">💰 $${player.money.toLocaleString()}</div>
                     ${handsHtml}
                 `;
                 
                 container.appendChild(playerDiv);
                 
-                // Animate player hand appearance
                 gsap.fromTo(playerDiv, 
-                    { opacity: 0, scale: 0.8, y: 30 },
-                    { opacity: 1, scale: 1, y: 0, duration: 0.5, delay: index * 0.1, ease: "back.out(1.7)" }
+                    { opacity: 0, scale: 0.9, y: 10 },
+                    { opacity: 1, scale: 1, y: 0, duration: 0.4, delay: index * 0.05, ease: "power2.out", overwrite: "auto" }
                 );
             });
         }
 
+
         function getResultColor(result) {
             switch(result) {
                 case 'win':
-                case 'blackjack': return '#00ff00';
+                case 'blackjack': return '#00ff00'; // Bright Green
                 case 'lose':
-                case 'bust': return '#ff4444';
-                case 'push': return '#ffaa00';
-                default: return '#ffffff';
+                case 'bust': return '#ff4444'; // Bright Red
+                case 'push': return '#ffaa00'; // Orange/Yellow
+                default: return '#ffffff'; // White
             }
         }
 
@@ -2515,24 +2560,27 @@
             if (!currentGameState || !currentGameState.chat_messages) return;
             
             const chatMessagesEl = document.getElementById('chatMessages');
-            const shouldScroll = chatMessagesEl.scrollHeight - chatMessagesEl.clientHeight <= chatMessagesEl.scrollTop + 10;
+            const shouldScroll = chatMessagesEl.scrollHeight - chatMessagesEl.clientHeight <= chatMessagesEl.scrollTop + 20; // A bit more leeway
             const currentMessageCount = chatMessagesEl.children.length;
 
-            // Only update if message count changed
-            if (currentMessageCount !== currentGameState.chat_messages.length) {
-                chatMessagesEl.innerHTML = '';
-                currentGameState.chat_messages.forEach((msg, index) => {
+            const newMessages = currentGameState.chat_messages;
+
+            if (currentMessageCount !== newMessages.length || 
+                (newMessages.length > 0 && chatMessagesEl.lastChild?.textContent !== newMessages[newMessages.length-1].message)) { // Basic check if last message changed
+                
+                chatMessagesEl.innerHTML = ''; // Rebuild all for simplicity, can be optimized
+                newMessages.forEach((msg, index) => {
                     const msgDiv = document.createElement('div');
                     msgDiv.className = 'chat-message';
-                    msgDiv.style.borderLeftColor = msg.player_color || '#ffffff';
+                    msgDiv.style.borderLeftColor = msg.player_color || '#ffd700'; // Default to gold
                     
                     const nameSpan = document.createElement('span');
                     nameSpan.className = 'chat-player-name';
-                    nameSpan.style.color = msg.player_color || '#ffffff';
+                    nameSpan.style.color = msg.player_color || '#ffd700';
                     nameSpan.textContent = msg.player_name + ': ';
                     
                     const messageSpan = document.createElement('span');
-                    messageSpan.textContent = msg.message;
+                    messageSpan.textContent = msg.message; // Assume message is already sanitized on server
                     
                     const timeSpan = document.createElement('span');
                     timeSpan.className = 'chat-timestamp';
@@ -2543,20 +2591,21 @@
                     msgDiv.appendChild(timeSpan);
                     chatMessagesEl.appendChild(msgDiv);
                     
-                    // Animate new messages
-                    if (index >= currentMessageCount) {
-                        gsap.fromTo(msgDiv, 
-                            { opacity: 0, x: 50 },
-                            { opacity: 1, x: 0, duration: 0.4, ease: "power2.out" }
-                        );
-                    }
+                    // Animate new messages (if this is a partial update logic)
+                    // With full rebuild, this animation applies to all on each update, which might be too much.
+                    // For now, keeping it.
+                    gsap.fromTo(msgDiv, 
+                        { opacity: 0, x: 20 },
+                        { opacity: 1, x: 0, duration: 0.3, ease: "power2.out", delay: index * 0.02, overwrite: "auto" }
+                    );
                 });
                 
-                if (shouldScroll) {
+                if (shouldScroll || !chatCollapsed) { // Always scroll if chat not collapsed
                     chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
                 }
             }
         }
+
 
         // Enhanced Game Actions
         function createQuickRoom() {
@@ -2627,16 +2676,20 @@
 
         function leaveRoom() {
             if (confirm("Are you sure you want to leave the room?")) {
-                sendMessage('leave_room');
-                showLoadingScreen('Leaving room...');
+                if(sendMessage('leave_room')) {
+                    showLoadingScreen('Leaving room...');
+                }
             }
         }
 
         function startGame() {
             if (sendMessage('start_game')) {
                 showNotification('Starting game...', 'info', 2000);
+                 // The loading screen for "Starting game..." is not explicitly shown here.
+                 // Game state will update, which handles UI changes.
             }
         }
+
 
         function setBetAmount(amount) {
             const input = document.getElementById('betAmountInput');
@@ -2644,16 +2697,16 @@
             
             // Visual feedback
             gsap.fromTo(input, 
-                { scale: 1.1, borderColor: '#ffd700' },
-                { scale: 1, borderColor: '#ffd700', duration: 0.3, ease: "power2.out" }
+                { scale: 1.1, borderColor: '#ffd700' }, // Use the actual gold color
+                { scale: 1, borderColor: 'var(--primary-gold)', duration: 0.3, ease: "power2.out", overwrite: "auto" }
             );
         }
 
         function placeBet() {
             const amount = parseInt(document.getElementById('betAmountInput').value);
             
-            if (isNaN(amount) || amount < 10 || amount > 500) {
-                showNotification("Bet must be between $10 and $500", "warning", 3000);
+            if (isNaN(amount) || amount < MIN_BET_PLACEHOLDER || amount > MAX_BET_PLACEHOLDER) { // Replace with actual min/max if available
+                showNotification(`Bet must be between $${MIN_BET_PLACEHOLDER} and $${MAX_BET_PLACEHOLDER}`, "warning", 3000); // Use dynamic min/max
                 return;
             }
             
@@ -2664,15 +2717,24 @@
             }
             
             if (sendMessage('player_action', { action_type: 'place_bet', amount: amount })) {
-                showNotification(`Bet placed: ${amount}`, 'success', 2000);
+                showNotification(`Bet placed: $${amount}`, 'success', 2000);
+                // Optionally hide bet controls immediately after placing bet, or wait for server state
+                 hideElement('betControls'); 
             }
         }
+        // Placeholder for dynamic min/max bet values, if available from server state
+        const MIN_BET_PLACEHOLDER = currentGameState?.min_bet || 10;
+        const MAX_BET_PLACEHOLDER = currentGameState?.max_bet || 500;
+
 
         function playerAction(actionType) {
             if (sendMessage('player_action', { action_type: actionType })) {
                 showNotification(`Action: ${actionType.replace('_', ' ').toUpperCase()}`, 'info', 1500);
+                // Optionally hide action buttons immediately to prevent double clicks, or wait for server state.
+                // hideElement('actionsPanel'); 
             }
         }
+
 
         // Enhanced Chat Functions
         function sendChat() {
@@ -2693,7 +2755,7 @@
                 // Visual feedback
                 gsap.fromTo(input, 
                     { backgroundColor: 'rgba(0, 255, 0, 0.2)' },
-                    { backgroundColor: 'rgba(255, 255, 255, 0.1)', duration: 0.5 }
+                    { backgroundColor: 'rgba(255, 255, 255, 0.1)', duration: 0.5, overwrite: "auto" }
                 );
             }
         }
@@ -2708,17 +2770,32 @@
         function toggleChat() {
             chatCollapsed = !chatCollapsed;
             const chatMessages = document.getElementById('chatMessages');
+            const chatInputContainer = document.querySelector('.chat-input-container');
+            const chatPanel = document.getElementById('chatPanel');
             const chatToggle = document.getElementById('chatToggle');
             
+            const originalHeight = chatPanel.style.minHeight || '250px'; // Or a sensible default like '250px'
+
             if (chatCollapsed) {
-                gsap.to(chatMessages, { height: 0, opacity: 0, duration: 0.3, ease: "power2.inOut" });
+                gsap.to([chatMessages, chatInputContainer], { height: 0, opacity: 0, duration: 0.3, ease: "power2.inOut", onComplete: () => {
+                    chatMessages.style.display = 'none';
+                    chatInputContainer.style.display = 'none';
+                }});
+                gsap.to(chatPanel, { height: '50px', duration: 0.3, ease: "power2.inOut" }); // Collapse panel to header height
                 chatToggle.textContent = '+';
             } else {
-                chatMessages.style.height = 'auto';
-                const targetHeight = chatMessages.scrollHeight;
-                chatMessages.style.height = '0px';
-                gsap.to(chatMessages, { height: targetHeight, opacity: 1, duration: 0.3, ease: "power2.inOut" });
+                chatMessages.style.display = 'block'; // Make sure it's block before animating height
+                chatInputContainer.style.display = 'flex';
+                
+                gsap.set(chatMessages, { height: 'auto' }); // Calculate auto height
+                const targetMessagesHeight = chatMessages.offsetHeight;
+                gsap.set(chatMessages, { height: 0 }); // Reset for animation
+
+                gsap.to(chatPanel, { height: originalHeight, duration: 0.3, ease: "power2.inOut" });
+                gsap.to(chatMessages, { height: targetMessagesHeight, opacity: 1, duration: 0.3, ease: "power2.inOut" });
+                gsap.to(chatInputContainer, { height: 'auto', opacity: 1, duration: 0.3, ease: "power2.inOut" });
                 chatToggle.textContent = '−';
+                chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight; // Scroll to bottom
             }
         }
 
@@ -2772,10 +2849,11 @@
             rooms.forEach((_, index) => {
                 gsap.fromTo(`#room-${index}`, 
                     { opacity: 0, x: -50 },
-                    { opacity: 1, x: 0, duration: 0.4, delay: index * 0.1, ease: "power2.out" }
+                    { opacity: 1, x: 0, duration: 0.4, delay: index * 0.1, ease: "power2.out", overwrite: "auto" }
                 );
             });
         }
+
 
         function joinRoomByCode(roomCode) {
             const playerName = document.getElementById('playerName').value.trim() || 'Player';
@@ -2800,25 +2878,15 @@
             notification.textContent = message;
             container.appendChild(notification);
             
-            // Enhanced entrance animation
             gsap.fromTo(notification, 
                 { y: -100, opacity: 0, scale: 0.8 },
                 { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }
             );
             
-            // Auto-remove with enhanced exit animation
             setTimeout(() => {
                 gsap.to(notification, {
-                    y: -100, 
-                    opacity: 0, 
-                    scale: 0.8,
-                    duration: 0.4, 
-                    ease: "power2.in",
-                    onComplete: () => {
-                        if (notification.parentNode) {
-                            notification.parentNode.removeChild(notification);
-                        }
-                    }
+                    y: -100, opacity: 0, scale: 0.8, duration: 0.4, ease: "power2.in",
+                    onComplete: () => notification.remove() // Use .remove() modern browsers
                 });
             }, duration);
         }
@@ -2835,7 +2903,6 @@
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(event) {
-            // Don't trigger shortcuts when typing in input fields
             if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
                 return;
             }
@@ -2847,64 +2914,37 @@
             const actions = currentGameState.available_actions.map(a => a.action);
             
             switch(event.key.toLowerCase()) {
-                case 'h':
-                    if (actions.includes('hit')) {
-                        playerAction('hit');
-                        event.preventDefault();
-                    }
-                    break;
-                case 's':
-                    if (actions.includes('stand')) {
-                        playerAction('stand');
-                        event.preventDefault();
-                    }
-                    break;
-                case 'd':
-                    if (actions.includes('double_down')) {
-                        playerAction('double_down');
-                        event.preventDefault();
-                    }
-                    break;
-                case 'p':
-                    if (actions.includes('split')) {
-                        playerAction('split');
-                        event.preventDefault();
-                    }
-                    break;
-                case 'r':
-                    if (actions.includes('surrender')) {
-                        playerAction('surrender');
-                        event.preventDefault();
-                    }
-                    break;
-                case 'enter':
-                    if (document.getElementById('chatInput') === document.activeElement) {
-                        sendChat();
-                        event.preventDefault();
-                    }
-                    break;
+                case 'h': if (actions.includes('hit')) playerAction('hit'); break;
+                case 's': if (actions.includes('stand')) playerAction('stand'); break;
+                case 'd': if (actions.includes('double_down')) playerAction('double_down'); break;
+                case 'p': if (actions.includes('split')) playerAction('split'); break; // Assuming 'p' for split
+                case 'r': if (actions.includes('surrender')) playerAction('surrender'); break; // Assuming 'r' for surrender/retreat
             }
         });
 
+
         // Focus management for better UX
         document.addEventListener('click', function(event) {
-            if (event.target.tagName === 'INPUT' && event.target.type === 'text') {
-                gsap.to(event.target, {
-                    borderColor: '#00ffff',
-                    duration: 0.3,
-                    ease: "power2.out"
-                });
-            }
+            // Simplified, as the original complex logic might not be needed
+            // if (event.target.tagName === 'INPUT' && event.target.type === 'text') {
+            //     gsap.to(event.target, {
+            //         borderColor: '#00ffff', // Example: cyan border on focus
+            //         duration: 0.3,
+            //         ease: "power2.out"
+            //     });
+            // }
         });
+
 
         // Visibility change handling (for when user switches tabs)
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
                 consoleLog("Page hidden - pausing non-essential animations");
+                // Consider pausing GSAP animations if intensive: gsap.globalTimeline.pause();
             } else {
                 consoleLog("Page visible - resuming animations");
-                // Reconnect if connection was lost while away
-                if (!isConnected && !isLoadingOrReconnecting) {
+                // gsap.globalTimeline.resume();
+                if (!isConnected && !isLoadingOrReconnecting) { 
                     consoleLog("Attempting to reconnect after page became visible");
                     connectWebSocket();
                 }
@@ -2913,14 +2953,15 @@
 
         // Enhanced Error Handling
         window.addEventListener('error', function(event) {
-            consoleError('Global error:', event.error);
-            showNotification('An error occurred. Please refresh if issues persist.', 'error', 5000);
+            consoleError('Global error:', event.message, 'at', event.filename, ':', event.lineno);
+            showNotification('A critical error occurred. Please refresh.', 'error', 7000);
         });
 
         window.addEventListener('unhandledrejection', function(event) {
             consoleError('Unhandled promise rejection:', event.reason);
-            showNotification('Connection error occurred', 'error', 3000);
+            showNotification('An unexpected error occurred. Please try again.', 'error', 5000);
         });
+
 
         // Initialize Application
         window.addEventListener('load', function() {
@@ -2930,49 +2971,43 @@
             
             if (!loadingTextElement) {
                 consoleError("Loading text element not found");
-                showNotification("Initialization error", "error", 5000);
+                // Show a basic alert if notifications aren't ready
+                alert("Initialization error: UI components missing.");
                 return;
             }
             
             try {
                 loadingTextElement.textContent = "Checking libraries...";
-                
-                // Verify required libraries
-                if (typeof THREE === 'undefined') {
-                    throw new Error("Three.js library not loaded");
-                }
-                
-                if (typeof gsap === 'undefined') {
-                    throw new Error("GSAP library not loaded");
-                }
+                if (typeof THREE === 'undefined') throw new Error("Three.js library not loaded");
+                if (typeof gsap === 'undefined') throw new Error("GSAP library not loaded");
                 
                 loadingTextElement.textContent = "Initializing 3D engine...";
-                
-                // Initialize Three.js
-                if (!initThreeJS()) {
-                    throw new Error("Failed to initialize 3D engine");
-                }
+                if (!initThreeJS()) throw new Error("Failed to initialize 3D engine");
                 
                 loadingTextElement.textContent = "Connecting to server...";
-                
-                // Connect to WebSocket
                 connectWebSocket();
                 
-                consoleLog("Initialization completed successfully");
+                consoleLog("Initialization sequence started successfully");
                 
             } catch (e) {
                 consoleError("Error during initialization:", e);
                 loadingTextElement.textContent = "Error: " + e.message;
-                showNotification("Failed to initialize. Please refresh the page.", "error", 10000);
+                // Use showNotification if available, else alert
+                if(typeof showNotification === "function") {
+                    showNotification("Failed to initialize. Please refresh. " + e.message, "error", 10000);
+                } else {
+                    alert("Failed to initialize. Please refresh. " + e.message);
+                }
                 updateConnectionStatus('disconnected', e.message);
             }
         });
+
 
         // Cleanup on page unload
         window.addEventListener('beforeunload', function() {
             consoleLog("Page unloading - cleaning up connections");
             if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.close();
+                ws.close(1000, "Page unloading"); // Graceful closure
             }
         });
 
